@@ -1,0 +1,67 @@
+{
+  "theme": "light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) - Soft Utility SaaS Variant",
+  "typography": {
+    "heading_font": "Outfit",
+    "body_font": "Manrope",
+    "scales": {
+      "h1": "text-4xl tracking-tight font-semibold",
+      "h2": "text-2xl tracking-tight font-medium",
+      "h3": "text-lg font-medium",
+      "body": "text-sm text-slate-600 leading-relaxed",
+      "label": "text-xs font-semibold tracking-wider uppercase text-slate-500"
+    }
+  },
+  "colors": {
+    "background": "#FAFAFA",
+    "surface": "#FFFFFF",
+    "border": "#E2E8F0",
+    "primary": "#0F172A",
+    "text_main": "#0F172A",
+    "text_muted": "#64748B",
+    "matrix": {
+      "A": { "bg": "#ECFDF5", "border": "#10B981", "text": "#047857" },
+      "B_light": { "bg": "#FFFBEB", "border": "#F59E0B", "text": "#B45309" },
+      "B_dark": { "bg": "#FFF7ED", "border": "#F97316", "text": "#C2410C" },
+      "C_light": { "bg": "#FEF2F2", "border": "#EF4444", "text": "#B91C1C" },
+      "C_dark": { "bg": "#7F1D1D", "border": "#450A0A", "text": "#FFFFFF" }
+    }
+  },
+  "layout": {
+    "spacing_system": "Generous spacing. p-6 or p-8 inside cards. gap-6 between grid items.",
+    "page_structure": "Sidebar navigation (left, w-64) + Main content area. F-pattern scanning.",
+    "dashboard_grid": "bento grid: 12 columns. Left column (col-span-12 lg:col-span-8) for input sliders and forms. Right column (col-span-12 lg:col-span-4) for sticky 9-Box preview and summary."
+  },
+  "components": {
+    "card": "bg-white border border-slate-200 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] p-6",
+    "button_primary": "bg-slate-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors",
+    "input": "bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900/20",
+    "slider": "Shadcn slider, colored track based on current value. Thumb has shadow-md.",
+    "9_box_grid": "grid grid-cols-3 grid-rows-3 gap-2 aspect-square. Each cell rounded-xl border-2 transition-all duration-300."
+  },
+  "motion": {
+    "hover": "Subtle transform -translate-y-[1px] and shadow-md on interactive cards.",
+    "transitions": "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+  },
+  "media": {
+    "employee_avatar": "https://images.unsplash.com/photo-1733231291455-3c4de1c24e20?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBkaXZlcnNlJTIwZW1wbG95ZWUlMjBwb3J0cmFpdCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzU4NDI0NjB8MA&ixlib=rb-4.1.0&q=85",
+    "cover_banner": "https://images.unsplash.com/photo-1488901512066-cd403111aeb2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjBpbnRlcmlvciUyMGJhY2tncm91bmQlMjBzdWJ0bGV8ZW58MHx8fHwxNzc1ODQyNDYwfDA&ixlib=rb-4.1.0&q=85",
+    "team_members": [
+      "https://images.unsplash.com/photo-1633419798503-0b0c628f267c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjBkaXZlcnNlJTIwZW1wbG95ZWUlMjBwb3J0cmFpdCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzU4NDI0NjB8MA&ixlib=rb-4.1.0&q=85",
+      "https://images.unsplash.com/photo-1649532354755-d6e6ba515703?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHw0fHxwcm9mZXNzaW9uYWwlMjBkaXZlcnNlJTIwZW1wbG95ZWUlMjBwb3J0cmFpdCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzU4NDI0NjB8MA&ixlib=rb-4.1.0&q=85"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Build the dashboard using pure React + Tailwind CSS + Shadcn UI.",
+    "Implement a 2-column bento layout: left column for KPI and 360 evaluation inputs (use Shadcn sliders and numeric inputs), right column for the live 9-Box Grid preview.",
+    "The 9-Box Grid must be a CSS grid (3x3). Y-axis is Potential/360 Eval (0-100), X-axis is Performance/KPI (0-100).",
+    "Map the score to the grid: A (Top-Right, Green), B1-B4 (Adjacent to A, Yellow/Orange), C1-C4 (Bottom-Left, Orange/Red). Highlight the current cell dynamically as sliders move.",
+    "Do not use generic fonts like Inter for headings; use Outfit (add it via Google Fonts if necessary).",
+    "Maintain the 'Linear/Notion' aesthetic: lots of whitespace, rounded-2xl cards, extremely soft shadows, subtle 1px gray borders.",
+    "Include data-testid attributes on all sliders, inputs, and buttons.",
+    "Add a profile banner at the top of the content area using the 'cover_banner' and 'employee_avatar' media URLs.",
+    "Implement manual override toggle for final classification.",
+    "Ensure all sliders have clear labels and current value displays.",
+    "Use Phosphor Icons or Lucide React for UI adornments."
+  ]
+}
