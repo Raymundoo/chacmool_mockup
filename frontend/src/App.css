@@ -1,34 +1,206 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+body {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #FAFAFA;
+  color: #0F172A;
+  margin: 0;
+  padding: 0;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
 }
 
-.App-link {
-    color: #61dafb;
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Custom slider track colors */
+.slider-green .slider-track {
+  background: linear-gradient(to right, #10B981, #34D399);
+}
+
+.slider-yellow .slider-track {
+  background: linear-gradient(to right, #F59E0B, #FBBF24);
+}
+
+.slider-orange .slider-track {
+  background: linear-gradient(to right, #F97316, #FB923C);
+}
+
+.slider-red .slider-track {
+  background: linear-gradient(to right, #EF4444, #F87171);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* 9-Box Matrix cell states */
+.matrix-cell {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.matrix-cell:hover {
+  transform: scale(1.02);
+}
+
+.matrix-cell.active {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.2);
+}
+
+/* Input focus states */
+input[type="number"]:focus,
+input[type="text"]:focus {
+  outline: none;
+  ring: 2px solid rgba(15, 23, 42, 0.2);
+}
+
+/* Toggle switch custom */
+.toggle-switch {
+  transition: background-color 0.2s ease;
+}
+
+/* Progress bar animation */
+.progress-bar {
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0F172A;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Nav link states */
+.nav-link {
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #F1F5F9;
+}
+
+.nav-link.active {
+  background: #F1F5F9;
+  border-right: 3px solid #0F172A;
+}
+
+/* Badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-green {
+  background: #ECFDF5;
+  color: #047857;
+  border: 1px solid #10B981;
+}
+
+.badge-yellow {
+  background: #FFFBEB;
+  color: #B45309;
+  border: 1px solid #F59E0B;
+}
+
+.badge-orange {
+  background: #FFF7ED;
+  color: #C2410C;
+  border: 1px solid #F97316;
+}
+
+.badge-red {
+  background: #FEF2F2;
+  color: #B91C1C;
+  border: 1px solid #EF4444;
 }
