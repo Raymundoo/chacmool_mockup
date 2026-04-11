@@ -11,72 +11,97 @@ Los resultados clasifican empleados en matriz 9-box personalizada con categoría
 - C1–C4 → tonos naranja/rojo (C4 el peor)
 
 ## Fase Actual
-**MOCKUPS/DISEÑO VISUAL** - Pendiente de aprobación
+**MOCKUPS/DISEÑO VISUAL v2** - Pendiente de aprobación
 
-## Vistas Implementadas (Mockups Interactivos)
+## Vistas Implementadas (9 vistas totales)
 
-### 1. Ingreso de Resultados (Vista Principal)
-- Selección de empleado con cards
-- Slider de KPI (0-100) con código de colores
-- Slider de Evaluación 360 (0-100)
+### NUEVAS VISTAS (v2)
+
+#### 1. Dashboard General (/)
+- Estadísticas: Total empleados, Promedio KPI, Top Performers, Requieren Atención
+- Matriz 9-box con conteo de empleados por celda
+- Mini avatares de empleados en cada celda
+- Filtro por departamento
+- Resumen por departamento con barras de progreso
+- Actividad reciente
+
+#### 2. Listado de Empleados (/employees)
+- Tabla completa con foto, nombre, puesto, departamento, KPI, 360, clasificación
+- Búsqueda por nombre, puesto o ID
+- Filtro por departamento (6 departamentos)
+- Filtro por clasificación (A, B1-B4, C1-C4)
+- Botones de acción: Ver perfil, Evaluar
+- Botón "Agregar Empleado"
+
+#### 3. Gestión de Evaluaciones (/evaluations)
+- Lista de plantillas disponibles (360 y KPI)
+- Detalle de plantilla seleccionada
+- **Edición de pesos configurable** para categorías y preguntas
+- Indicador visual de peso total (debe sumar 100%)
+- Estados: Activa/Inactiva
+- Botón "Nueva Evaluación"
+
+### VISTAS ACTUALIZADAS
+
+#### 4. Ingreso de Resultados (/entry)
+- **Selector dropdown de empleado**
+- **Selector dropdown de evaluación a aplicar**
+- Sliders de KPI y 360 con código de colores
 - Override manual de clasificación
 - Vista previa de matriz 9-box en tiempo real
-- Clasificación resultante dinámica
 
-### 2. Perfil de Empleado
-- Banner/cover con foto de perfil
-- Información personal (ID, puesto, departamento, fecha ingreso)
-- Datos de contacto
-- Resultado calculado y override
+### VISTAS EXISTENTES
 
-### 3. Evaluación 360
-- Cuestionario por categorías: Comunicación, Trabajo en Equipo, Liderazgo
-- Botones de rating 1-5 por pregunta
-- Cálculo automático de score por categoría y total
+#### 5. Perfil de Empleado (/profile)
+#### 6. Evaluación 360 (/360)
+#### 7. Evaluación KPI (/kpi)
+#### 8. Autoevaluación (/self)
+#### 9. Matriz 9-Box (/matrix)
 
-### 4. Evaluación KPI
-- Lista de KPIs con pesos porcentuales
-- Sliders con barras de progreso
-- Cálculo ponderado automático
+## Datos Mock
 
-### 5. Autoevaluación
-- Cuestionario corto con 5 preguntas
-- Botones de rating 1-5
-- Opción de override manual del score
+### Empleados (8 total)
+- María García López - Senior Developer - Tecnología
+- Juan Rodríguez Pérez - Product Manager - Producto
+- Laura Sánchez Ruiz - UX Designer - Diseño
+- Carlos Mendoza - Tech Lead - Tecnología
+- Ana Martínez - Head of Product - Producto
+- Roberto Díaz - Sales Manager - Ventas
+- Patricia Luna - Marketing Specialist - Marketing
+- Fernando Torres - HR Coordinator - Recursos Humanos
 
-### 6. Matriz 9-Box
-- Grid visual 3x3 interactivo
-- Descripción detallada al seleccionar celda
-- Leyenda de colores
-- Rangos de KPI y Valores por celda
+### Departamentos (6)
+- Tecnología, Producto, Diseño, Ventas, Marketing, Recursos Humanos
+
+### Plantillas de Evaluación (3)
+1. Evaluación Estándar 2024 (360) - Activa
+2. KPIs Comerciales Q1 2024 (KPI) - Activa
+3. Evaluación Técnica (360) - Inactiva
 
 ## Tech Stack
 - React.js con React Router
 - Tailwind CSS
 - Lucide React (iconos)
-- Diseño tipo SaaS moderno (Linear, Stripe, Notion)
-
-## Decisiones de Diseño
-- Tipografía: Outfit (headings) + Manrope (body)
-- Colores: Slate palette con acentos semánticos
-- Layout: Sidebar fijo + contenido principal scrollable
-- Cards con bordes redondeados y sombras suaves
+- Diseño tipo SaaS moderno
 
 ## What's Implemented ✅
-- [x] Todas las 6 vistas mockup interactivas
-- [x] Lógica de clasificación 9-box
-- [x] Sliders y controles funcionales
+- [x] 9 vistas mockup interactivas
+- [x] Dashboard con distribución en matriz
+- [x] Listado con filtros múltiples
+- [x] Gestión de evaluaciones con pesos editables
+- [x] Selector de empleado y evaluación
+- [x] Relación empleados-departamentos
 - [x] Navegación completa
-- [x] Datos mock de empleados
-- [x] Diseño responsive
+- [x] 100% pruebas pasadas
 
 ## Backlog (Pendiente de Aprobación)
 - [ ] P0: Backend con MongoDB para persistencia
 - [ ] P0: Autenticación (Admin/Empleado)
 - [ ] P1: Carga desde Excel/CSV
 - [ ] P1: Historial de evaluaciones
+- [ ] P1: CRUD completo de empleados y evaluaciones
 - [ ] P2: Reportes y exportación
-- [ ] P2: Dashboard administrativo
+- [ ] P2: Notificaciones
 
 ## Next Steps
 1. Obtener aprobación del diseño visual
@@ -86,4 +111,4 @@ Los resultados clasifican empleados en matriz 9-box personalizada con categoría
 
 ---
 *Última actualización: Enero 2026*
-*Estado: Mockups completados, pendiente revisión*
+*Estado: Mockups v2 completados, pendiente revisión*
