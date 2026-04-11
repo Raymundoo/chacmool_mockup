@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, NavLink, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, NavLink, useLocation, useParams, useNavigate } from "react-router-dom";
 import { 
   Users, 
   Target, 
@@ -13,21 +13,46 @@ import {
   Award,
   BarChart3,
   LayoutDashboard,
-  ListFilter,
-  Settings,
   Plus,
   Trash2,
-  Edit3,
   Search,
   Building2,
   ChevronDown,
   Check,
   X,
   Copy,
-  FileText
+  FileText,
+  Link,
+  ExternalLink,
+  Eye,
+  Settings,
+  Sliders,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertTriangle,
+  ThumbsUp,
+  ThumbsDown,
+  Send,
+  BarChart2,
+  PieChart,
+  Activity,
+  Zap,
+  Flag,
+  Calendar,
+  Edit3,
+  Share2,
+  UserCheck,
+  Briefcase,
+  Users2,
+  Star
 } from "lucide-react";
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 
-// Mock data for departments
+// ============================================
+// MOCK DATA
+// ============================================
+
 const mockDepartments = [
   { id: "dept-1", name: "Tecnología", color: "#3B82F6" },
   { id: "dept-2", name: "Producto", color: "#8B5CF6" },
@@ -37,7 +62,6 @@ const mockDepartments = [
   { id: "dept-6", name: "Recursos Humanos", color: "#EF4444" },
 ];
 
-// Mock data for employees with department relations
 const mockEmployees = [
   { 
     id: "EMP-001", 
@@ -50,13 +74,17 @@ const mockEmployees = [
     supervisorId: "EMP-004",
     email: "maria.garcia@empresa.com",
     phone: "+52 555 123 4567",
-    avatar: "https://images.unsplash.com/photo-1733231291455-3c4de1c24e20?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
     kpiScore: 72,
-    valuesScore: 85
+    valuesScore: 85,
+    autoEvalScore: 80,
+    leaderEvalScore: 82,
+    peerEvalScore: 78,
+    manualOverride: null
   },
   { 
     id: "EMP-002", 
-    name: "Juan Rodríguez Pérez", 
+    name: "Juan Rodríguez", 
     position: "Product Manager", 
     departmentId: "dept-2",
     department: "Producto",
@@ -65,13 +93,17 @@ const mockEmployees = [
     supervisorId: "EMP-005",
     email: "juan.rodriguez@empresa.com",
     phone: "+52 555 987 6543",
-    avatar: "https://images.unsplash.com/photo-1633419798503-0b0c628f267c?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     kpiScore: 85,
-    valuesScore: 78
+    valuesScore: 78,
+    autoEvalScore: 88,
+    leaderEvalScore: 80,
+    peerEvalScore: 75,
+    manualOverride: null
   },
   { 
     id: "EMP-003", 
-    name: "Laura Sánchez Ruiz", 
+    name: "Laura Sánchez", 
     position: "UX Designer", 
     departmentId: "dept-3",
     department: "Diseño",
@@ -80,9 +112,13 @@ const mockEmployees = [
     supervisorId: "EMP-004",
     email: "laura.sanchez@empresa.com",
     phone: "+52 555 456 7890",
-    avatar: "https://images.unsplash.com/photo-1649532354755-d6e6ba515703?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
     kpiScore: 65,
-    valuesScore: 92
+    valuesScore: 92,
+    autoEvalScore: 85,
+    leaderEvalScore: 90,
+    peerEvalScore: 88,
+    manualOverride: null
   },
   { 
     id: "EMP-004", 
@@ -95,9 +131,13 @@ const mockEmployees = [
     supervisorId: null,
     email: "carlos.mendoza@empresa.com",
     phone: "+52 555 111 2222",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     kpiScore: 88,
-    valuesScore: 90
+    valuesScore: 90,
+    autoEvalScore: 92,
+    leaderEvalScore: 88,
+    peerEvalScore: 85,
+    manualOverride: null
   },
   { 
     id: "EMP-005", 
@@ -112,7 +152,11 @@ const mockEmployees = [
     phone: "+52 555 333 4444",
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
     kpiScore: 45,
-    valuesScore: 82
+    valuesScore: 82,
+    autoEvalScore: 75,
+    leaderEvalScore: 70,
+    peerEvalScore: 80,
+    manualOverride: "B2"
   },
   { 
     id: "EMP-006", 
@@ -125,9 +169,13 @@ const mockEmployees = [
     supervisorId: null,
     email: "roberto.diaz@empresa.com",
     phone: "+52 555 555 6666",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
     kpiScore: 92,
-    valuesScore: 55
+    valuesScore: 55,
+    autoEvalScore: 70,
+    leaderEvalScore: 60,
+    peerEvalScore: 50,
+    manualOverride: null
   },
   { 
     id: "EMP-007", 
@@ -140,9 +188,13 @@ const mockEmployees = [
     supervisorId: null,
     email: "patricia.luna@empresa.com",
     phone: "+52 555 777 8888",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
     kpiScore: 30,
-    valuesScore: 40
+    valuesScore: 40,
+    autoEvalScore: 45,
+    leaderEvalScore: 35,
+    peerEvalScore: 42,
+    manualOverride: null
   },
   { 
     id: "EMP-008", 
@@ -155,97 +207,115 @@ const mockEmployees = [
     supervisorId: null,
     email: "fernando.torres@empresa.com",
     phone: "+52 555 999 0000",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
     kpiScore: 58,
-    valuesScore: 62
+    valuesScore: 62,
+    autoEvalScore: 65,
+    leaderEvalScore: 60,
+    peerEvalScore: 68,
+    manualOverride: null
   }
 ];
 
-// Mock evaluation templates
+// Evaluator types
+const evaluatorTypes = [
+  { id: "leader", name: "Líder", icon: UserCheck, color: "#3B82F6" },
+  { id: "peer", name: "Par/Colega", icon: Users2, color: "#8B5CF6" },
+  { id: "client", name: "Cliente", icon: Briefcase, color: "#10B981" },
+  { id: "provider", name: "Proveedor", icon: Building2, color: "#F59E0B" },
+  { id: "self", name: "Autoevaluación", icon: User, color: "#EC4899" },
+];
+
+// Evaluation templates with auto-adjustable weights
 const mockEvaluationTemplates = [
   {
     id: "eval-1",
-    name: "Evaluación Estándar 2024",
-    description: "Evaluación trimestral para todos los empleados",
+    name: "Evaluación 360 Estándar",
+    description: "Evaluación integral de competencias para todos los empleados",
     type: "360",
     isActive: true,
+    assignedTo: ["all"],
     categories: [
       { 
         id: "cat-1", 
         name: "Comunicación", 
-        weight: 30,
+        weight: 25,
+        description: "Habilidad para transmitir ideas de forma clara y efectiva",
         questions: [
-          { id: "q1", text: "Claridad en la comunicación", weight: 40 },
-          { id: "q2", text: "Escucha activa", weight: 35 },
-          { id: "q3", text: "Dar y recibir feedback", weight: 25 }
+          { id: "q1", text: "Expresa sus ideas de manera clara y concisa", weight: 35 },
+          { id: "q2", text: "Escucha activamente a los demás", weight: 35 },
+          { id: "q3", text: "Proporciona y recibe feedback constructivo", weight: 30 }
         ]
       },
       { 
         id: "cat-2", 
         name: "Trabajo en Equipo", 
-        weight: 40,
+        weight: 25,
+        description: "Capacidad de colaborar efectivamente con otros",
         questions: [
-          { id: "q4", text: "Colaboración efectiva", weight: 50 },
-          { id: "q5", text: "Apoyo a compañeros", weight: 30 },
-          { id: "q6", text: "Resolución de conflictos", weight: 20 }
+          { id: "q4", text: "Colabora proactivamente con el equipo", weight: 40 },
+          { id: "q5", text: "Apoya a compañeros cuando lo necesitan", weight: 30 },
+          { id: "q6", text: "Maneja conflictos de manera constructiva", weight: 30 }
         ]
       },
       { 
         id: "cat-3", 
         name: "Liderazgo", 
-        weight: 30,
+        weight: 25,
+        description: "Capacidad de guiar e inspirar a otros",
         questions: [
-          { id: "q7", text: "Motivación del equipo", weight: 40 },
-          { id: "q8", text: "Delegación efectiva", weight: 30 },
-          { id: "q9", text: "Visión estratégica", weight: 30 }
+          { id: "q7", text: "Motiva al equipo hacia los objetivos", weight: 35 },
+          { id: "q8", text: "Delega tareas de forma efectiva", weight: 35 },
+          { id: "q9", text: "Muestra visión estratégica", weight: 30 }
+        ]
+      },
+      { 
+        id: "cat-4", 
+        name: "Orientación a Resultados", 
+        weight: 25,
+        description: "Enfoque en cumplir objetivos y metas",
+        questions: [
+          { id: "q10", text: "Cumple con los plazos establecidos", weight: 35 },
+          { id: "q11", text: "Busca la excelencia en su trabajo", weight: 35 },
+          { id: "q12", text: "Toma iniciativa para mejorar procesos", weight: 30 }
         ]
       }
     ]
   },
   {
     id: "eval-2",
-    name: "KPIs Comerciales Q1 2024",
+    name: "KPIs Comerciales Q1",
     description: "Métricas de desempeño para área comercial",
     type: "kpi",
     isActive: true,
+    assignedTo: ["dept-4"],
     kpis: [
-      { id: "kpi-1", name: "Ventas mensuales", weight: 35, target: 100000 },
-      { id: "kpi-2", name: "Clientes nuevos", weight: 25, target: 20 },
-      { id: "kpi-3", name: "Retención de clientes", weight: 25, target: 95 },
-      { id: "kpi-4", name: "NPS Score", weight: 15, target: 80 }
-    ]
-  },
-  {
-    id: "eval-3",
-    name: "Evaluación Técnica",
-    description: "Evaluación para equipos de desarrollo",
-    type: "360",
-    isActive: false,
-    categories: [
-      { 
-        id: "cat-4", 
-        name: "Habilidades Técnicas", 
-        weight: 50,
-        questions: [
-          { id: "q10", text: "Calidad de código", weight: 40 },
-          { id: "q11", text: "Resolución de problemas", weight: 35 },
-          { id: "q12", text: "Documentación", weight: 25 }
-        ]
-      },
-      { 
-        id: "cat-5", 
-        name: "Colaboración", 
-        weight: 50,
-        questions: [
-          { id: "q13", text: "Code reviews", weight: 50 },
-          { id: "q14", text: "Mentoría", weight: 50 }
-        ]
-      }
+      { id: "kpi-1", name: "Ventas mensuales", weight: 35, target: 100000, unit: "$", thresholds: { red: 50, yellow: 75, green: 90 } },
+      { id: "kpi-2", name: "Clientes nuevos", weight: 25, target: 20, unit: "clientes", thresholds: { red: 40, yellow: 70, green: 90 } },
+      { id: "kpi-3", name: "Retención de clientes", weight: 25, target: 95, unit: "%", thresholds: { red: 70, yellow: 85, green: 95 } },
+      { id: "kpi-4", name: "NPS Score", weight: 15, target: 80, unit: "pts", thresholds: { red: 50, yellow: 70, green: 85 } }
     ]
   }
 ];
 
-// Classification logic for 9-box matrix
+// Mock evaluation links
+const mockEvaluationLinks = [
+  { id: "link-1", templateId: "eval-1", employeeId: "EMP-001", evaluatorType: "leader", token: "abc123", status: "pending", createdAt: "2024-01-15", expiresAt: "2024-02-15" },
+  { id: "link-2", templateId: "eval-1", employeeId: "EMP-001", evaluatorType: "peer", token: "def456", status: "completed", createdAt: "2024-01-15", expiresAt: "2024-02-15", completedAt: "2024-01-20" },
+  { id: "link-3", templateId: "eval-1", employeeId: "EMP-002", evaluatorType: "client", token: "ghi789", status: "pending", createdAt: "2024-01-18", expiresAt: "2024-02-18" },
+];
+
+// Mock KPI entries for employees
+const mockKPIEntries = [
+  { id: "entry-1", employeeId: "EMP-006", kpiId: "kpi-1", value: 85000, target: 100000, status: "approved", period: "2024-Q1", smartGoal: "Incrementar ventas un 15% respecto al trimestre anterior", feedback: "Buen progreso, sigue así" },
+  { id: "entry-2", employeeId: "EMP-006", kpiId: "kpi-2", value: 18, target: 20, status: "pending", period: "2024-Q1", smartGoal: "Conseguir 20 clientes nuevos en el trimestre", feedback: null },
+  { id: "entry-3", employeeId: "EMP-006", kpiId: "kpi-3", value: 92, target: 95, status: "revision", period: "2024-Q1", smartGoal: "Mantener retención por encima del 95%", feedback: "Revisar estrategia de retención" },
+];
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
 const getClassification = (kpi, values) => {
   if (kpi > 66 && values > 66) return { code: "A", label: "Top Performer", color: "green" };
   if (kpi > 66 && values > 33 && values <= 66) return { code: "B1", label: "Alto Potencial", color: "yellow" };
@@ -259,7 +329,6 @@ const getClassification = (kpi, values) => {
   return { code: "B3", label: "Performer Sólido", color: "orange-light" };
 };
 
-// Color mapping for classifications
 const classificationColors = {
   green: { bg: "#ECFDF5", border: "#10B981", text: "#047857" },
   yellow: { bg: "#FFFBEB", border: "#F59E0B", text: "#B45309" },
@@ -269,25 +338,66 @@ const classificationColors = {
   red: { bg: "#FEE2E2", border: "#EF4444", text: "#991B1B" }
 };
 
-// Sidebar Navigation Component
+const getEmployeeClassification = (emp, evalType = "automatic") => {
+  if (emp.manualOverride) {
+    const manualColors = {
+      "A": "green", "B1": "yellow", "B2": "yellow", "B3": "orange-light",
+      "B4": "orange", "C1": "orange", "C2": "red-light", "C3": "red-light", "C4": "red"
+    };
+    return { code: emp.manualOverride, label: "Manual", color: manualColors[emp.manualOverride] };
+  }
+  
+  let kpi = emp.kpiScore;
+  let values = emp.valuesScore;
+  
+  if (evalType === "auto") {
+    values = emp.autoEvalScore || emp.valuesScore;
+  } else if (evalType === "leader") {
+    values = emp.leaderEvalScore || emp.valuesScore;
+  } else if (evalType === "peer") {
+    values = emp.peerEvalScore || emp.valuesScore;
+  }
+  
+  return getClassification(kpi, values);
+};
+
+// Auto-adjust weights when one changes
+const autoAdjustWeights = (items, changedId, newWeight, totalTarget = 100) => {
+  const otherItems = items.filter(i => i.id !== changedId);
+  const remainingWeight = totalTarget - newWeight;
+  const currentOtherTotal = otherItems.reduce((sum, i) => sum + i.weight, 0);
+  
+  if (currentOtherTotal === 0) {
+    const equalWeight = remainingWeight / otherItems.length;
+    return items.map(i => i.id === changedId ? { ...i, weight: newWeight } : { ...i, weight: Math.round(equalWeight) });
+  }
+  
+  const ratio = remainingWeight / currentOtherTotal;
+  return items.map(i => {
+    if (i.id === changedId) return { ...i, weight: newWeight };
+    return { ...i, weight: Math.round(i.weight * ratio) };
+  });
+};
+
+// ============================================
+// SIDEBAR COMPONENT
+// ============================================
+
 const Sidebar = () => {
   const location = useLocation();
   
   const navItems = [
-    { path: "/", icon: LayoutDashboard, label: "Dashboard General", description: "Vista general" },
-    { path: "/employees", icon: Users, label: "Listado Empleados", description: "Gestión de personal" },
-    { path: "/evaluations", icon: FileText, label: "Evaluaciones", description: "Plantillas y config" },
-    { path: "/entry", icon: ClipboardEdit, label: "Ingreso Resultados", description: "Captura manual" },
-    { path: "/profile", icon: User, label: "Perfil Empleado", description: "Información personal" },
-    { path: "/360", icon: MessageSquare, label: "Evaluación 360", description: "Habilidades blandas" },
-    { path: "/kpi", icon: Target, label: "Evaluación KPI", description: "Resultados cuantitativos" },
-    { path: "/self", icon: Award, label: "Autoevaluación", description: "Evaluación propia" },
-    { path: "/matrix", icon: Grid3X3, label: "Matriz 9-Box", description: "Clasificación visual" },
+    { path: "/", icon: LayoutDashboard, label: "Dashboard", description: "Vista general" },
+    { path: "/9box", icon: Grid3X3, label: "Matriz 9-Box", description: "Clasificación visual" },
+    { path: "/employees", icon: Users, label: "Empleados", description: "Gestión de personal" },
+    { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces" },
+    { path: "/kpis", icon: Target, label: "KPIs", description: "Indicadores clave" },
+    { path: "/manual-eval", icon: ClipboardEdit, label: "Evaluación Manual", description: "Asignación directa" },
+    { path: "/results", icon: BarChart2, label: "Resultados", description: "Gráficas y reportes" },
   ];
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col" data-testid="sidebar">
-      {/* Logo */}
       <div className="p-6 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
@@ -300,9 +410,8 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 p-4 overflow-y-auto">
-        <p className="text-xs font-semibold tracking-wider uppercase text-slate-400 mb-3 px-3">Vistas</p>
+        <p className="text-xs font-semibold tracking-wider uppercase text-slate-400 mb-3 px-3">Menú Principal</p>
         <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.path}>
@@ -310,9 +419,7 @@ const Sidebar = () => {
                 to={item.path}
                 className={({ isActive }) =>
                   `nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                    isActive 
-                      ? "bg-slate-100 text-slate-900 font-medium" 
-                      : "text-slate-600 hover:text-slate-900"
+                    isActive ? "bg-slate-100 text-slate-900 font-medium" : "text-slate-600 hover:text-slate-900"
                   }`
                 }
                 data-testid={`nav-${item.path.replace("/", "") || "home"}`}
@@ -322,42 +429,46 @@ const Sidebar = () => {
                   <span className="block">{item.label}</span>
                   <span className="text-xs text-slate-400">{item.description}</span>
                 </div>
-                {location.pathname === item.path && (
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
-                )}
+                {location.pathname === item.path && <ChevronRight className="w-4 h-4 text-slate-400" />}
               </NavLink>
             </li>
           ))}
         </ul>
       </nav>
 
-      {/* Footer */}
       <div className="p-4 border-t border-slate-100">
-        <div className="bg-slate-50 rounded-xl p-4">
-          <p className="text-xs font-semibold text-slate-600 mb-1">Modo Mockup</p>
-          <p className="text-xs text-slate-400">Vista previa del diseño</p>
+        <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-xl p-4 text-white">
+          <p className="text-xs font-semibold mb-1">Modo Mockup</p>
+          <p className="text-xs opacity-70">Vista previa del diseño</p>
         </div>
       </div>
     </aside>
   );
 };
 
-// Dashboard General View (NEW)
-const DashboardGeneral = () => {
+// ============================================
+// DASHBOARD COMPONENT
+// ============================================
+
+const Dashboard = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   
   const filteredEmployees = selectedDepartment === "all" 
     ? mockEmployees 
     : mockEmployees.filter(e => e.departmentId === selectedDepartment);
 
-  // Count employees by classification
   const classificationCounts = {};
   filteredEmployees.forEach(emp => {
-    const classification = getClassification(emp.kpiScore, emp.valuesScore);
+    const classification = getEmployeeClassification(emp);
     classificationCounts[classification.code] = (classificationCounts[classification.code] || 0) + 1;
   });
 
-  // Matrix cells for dashboard
+  const avgKPI = Math.round(filteredEmployees.reduce((a, e) => a + e.kpiScore, 0) / filteredEmployees.length);
+  const avgValues = Math.round(filteredEmployees.reduce((a, e) => a + e.valuesScore, 0) / filteredEmployees.length);
+  const topPerformers = filteredEmployees.filter(e => getEmployeeClassification(e).code === "A").length;
+  const needsAttention = filteredEmployees.filter(e => ["C3", "C4"].includes(getEmployeeClassification(e).code)).length;
+  const pendingEvals = mockEvaluationLinks.filter(l => l.status === "pending").length;
+
   const matrixCells = [
     { row: 0, col: 0, code: "C1", label: "Valores sin Resultados", color: "orange" },
     { row: 0, col: 1, code: "B2", label: "Futuro Líder", color: "yellow" },
@@ -370,12 +481,6 @@ const DashboardGeneral = () => {
     { row: 2, col: 2, code: "B4", label: "Resultados sin Valores", color: "orange" },
   ];
 
-  // Stats
-  const avgKPI = Math.round(filteredEmployees.reduce((a, e) => a + e.kpiScore, 0) / filteredEmployees.length);
-  const avgValues = Math.round(filteredEmployees.reduce((a, e) => a + e.valuesScore, 0) / filteredEmployees.length);
-  const topPerformers = filteredEmployees.filter(e => getClassification(e.kpiScore, e.valuesScore).code === "A").length;
-  const needsAttention = filteredEmployees.filter(e => ["C3", "C4"].includes(getClassification(e.kpiScore, e.valuesScore).code)).length;
-
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-8">
@@ -383,15 +488,14 @@ const DashboardGeneral = () => {
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
             Dashboard General
           </h1>
-          <p className="text-slate-500 mt-1">Vista general del equipo</p>
+          <p className="text-slate-500 mt-1">Resumen del estado de evaluaciones</p>
         </div>
         
-        {/* Department Filter */}
         <div className="relative">
           <select
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}
-            className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 cursor-pointer hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+            className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium cursor-pointer"
             data-testid="department-filter"
           >
             <option value="all">Todos los departamentos</option>
@@ -403,168 +507,120 @@ const DashboardGeneral = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white border border-slate-200 rounded-2xl p-6" data-testid="stat-employees">
-          <p className="text-sm text-slate-500 mb-1">Total Empleados</p>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Users className="w-5 h-5 text-slate-400" />
+            <p className="text-sm text-slate-500">Empleados</p>
+          </div>
           <p className="text-3xl font-bold text-slate-900" style={{ fontFamily: 'Outfit' }}>{filteredEmployees.length}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-6" data-testid="stat-avg-kpi">
-          <p className="text-sm text-slate-500 mb-1">Promedio KPI</p>
-          <p className="text-3xl font-bold text-slate-900" style={{ fontFamily: 'Outfit' }}>{avgKPI}%</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Target className="w-5 h-5 text-blue-500" />
+            <p className="text-sm text-slate-500">Promedio KPI</p>
+          </div>
+          <p className="text-3xl font-bold text-blue-600" style={{ fontFamily: 'Outfit' }}>{avgKPI}%</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-6" data-testid="stat-top">
-          <p className="text-sm text-slate-500 mb-1">Top Performers</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Star className="w-5 h-5 text-green-500" />
+            <p className="text-sm text-slate-500">Top Performers</p>
+          </div>
           <p className="text-3xl font-bold text-green-600" style={{ fontFamily: 'Outfit' }}>{topPerformers}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-6" data-testid="stat-attention">
-          <p className="text-sm text-slate-500 mb-1">Requieren Atención</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+            <p className="text-sm text-slate-500">Requieren Atención</p>
+          </div>
           <p className="text-3xl font-bold text-red-600" style={{ fontFamily: 'Outfit' }}>{needsAttention}</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Clock className="w-5 h-5 text-amber-500" />
+            <p className="text-sm text-slate-500">Evaluaciones Pendientes</p>
+          </div>
+          <p className="text-3xl font-bold text-amber-600" style={{ fontFamily: 'Outfit' }}>{pendingEvals}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 9-Box Matrix with Employee Count */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6" data-testid="dashboard-matrix">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6" style={{ fontFamily: 'Outfit' }}>
-            Distribución en Matriz 9-Box
-          </h2>
+        {/* Mini 9-Box */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>
+              Distribución en Matriz 9-Box
+            </h2>
+            <NavLink to="/9box" className="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-1">
+              Ver completo <ChevronRight className="w-4 h-4" />
+            </NavLink>
+          </div>
           
-          <div className="flex">
-            <div className="flex flex-col justify-center items-center w-10 mr-4">
-              <span 
-                className="text-xs font-semibold text-slate-500 tracking-wider"
-                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-              >
-                VALORES (360)
-              </span>
-            </div>
-            
-            <div className="flex-1">
-              <div className="grid grid-cols-3 gap-3">
-                {matrixCells.map((cell) => {
-                  const count = classificationCounts[cell.code] || 0;
-                  const colors = classificationColors[cell.color];
-                  const employees = filteredEmployees.filter(e => 
-                    getClassification(e.kpiScore, e.valuesScore).code === cell.code
-                  );
-                  
-                  return (
-                    <div
-                      key={`${cell.row}-${cell.col}`}
-                      className="rounded-2xl border-2 p-4 text-center transition-all hover:scale-[1.02] cursor-pointer"
-                      style={{
-                        backgroundColor: colors.bg,
-                        borderColor: colors.border,
-                        minHeight: '120px'
-                      }}
-                      data-testid={`dashboard-cell-${cell.code}`}
-                    >
-                      <span 
-                        className="text-2xl font-bold"
-                        style={{ color: colors.text, fontFamily: 'Outfit' }}
-                      >
-                        {cell.code}
-                      </span>
-                      <p className="text-xs mt-1 mb-2" style={{ color: colors.text }}>{cell.label}</p>
-                      <div 
-                        className="text-3xl font-bold"
-                        style={{ color: colors.text, fontFamily: 'Outfit' }}
-                      >
-                        {count}
-                      </div>
-                      <p className="text-xs mt-1" style={{ color: colors.text }}>
-                        {count === 1 ? 'empleado' : 'empleados'}
-                      </p>
-                      
-                      {/* Mini avatars */}
-                      {employees.length > 0 && (
-                        <div className="flex justify-center -space-x-2 mt-2">
-                          {employees.slice(0, 3).map((emp, idx) => (
-                            <img 
-                              key={emp.id}
-                              src={emp.avatar}
-                              alt={emp.name}
-                              className="w-6 h-6 rounded-full border-2 border-white"
-                              title={emp.name}
-                            />
-                          ))}
-                          {employees.length > 3 && (
-                            <div className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-medium text-slate-600">
-                              +{employees.length - 3}
-                            </div>
-                          )}
-                        </div>
+          <div className="grid grid-cols-3 gap-2">
+            {matrixCells.map((cell) => {
+              const count = classificationCounts[cell.code] || 0;
+              const colors = classificationColors[cell.color];
+              const employees = filteredEmployees.filter(e => getEmployeeClassification(e).code === cell.code);
+              
+              return (
+                <div
+                  key={cell.code}
+                  className="rounded-xl border-2 p-3 text-center"
+                  style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+                >
+                  <span className="text-lg font-bold" style={{ color: colors.text }}>{cell.code}</span>
+                  <p className="text-xs" style={{ color: colors.text }}>{cell.label}</p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: colors.text }}>{count}</p>
+                  {employees.length > 0 && (
+                    <div className="flex justify-center -space-x-1 mt-2">
+                      {employees.slice(0, 3).map((emp) => (
+                        <img key={emp.id} src={emp.avatar} alt="" className="w-5 h-5 rounded-full border border-white" />
+                      ))}
+                      {employees.length > 3 && (
+                        <span className="w-5 h-5 rounded-full bg-slate-200 border border-white flex items-center justify-center text-xs">+{employees.length - 3}</span>
                       )}
                     </div>
-                  );
-                })}
-              </div>
-              
-              <div className="text-center mt-4">
-                <span className="text-xs font-semibold text-slate-500 tracking-wider">
-                  RESULTADOS (KPI)
-                </span>
-              </div>
-            </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Department Summary */}
+        {/* Quick Actions */}
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6" data-testid="department-summary">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Por Departamento
-            </h2>
-            <div className="space-y-3">
-              {mockDepartments.map(dept => {
-                const deptEmployees = mockEmployees.filter(e => e.departmentId === dept.id);
-                const deptAvgKPI = deptEmployees.length > 0 
-                  ? Math.round(deptEmployees.reduce((a, e) => a + e.kpiScore, 0) / deptEmployees.length)
-                  : 0;
-                
-                return (
-                  <div key={dept.id} className="flex items-center gap-3">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: dept.color }}
-                    />
-                    <span className="flex-1 text-sm text-slate-600">{dept.name}</span>
-                    <span className="text-sm font-medium text-slate-900">{deptEmployees.length}</span>
-                    <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full"
-                        style={{ 
-                          width: `${deptAvgKPI}%`,
-                          backgroundColor: dept.color
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6" data-testid="recent-activity">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Actividad Reciente
-            </h2>
-            <div className="space-y-3">
-              {[
-                { action: "Evaluación completada", user: "María García", time: "Hace 2h" },
-                { action: "KPI actualizado", user: "Juan Rodríguez", time: "Hace 5h" },
-                { action: "Override aplicado", user: "Carlos Mendoza", time: "Ayer" },
-              ].map((activity, idx) => (
-                <div key={idx} className="flex items-start gap-3 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-slate-300 mt-1.5" />
-                  <div className="flex-1">
-                    <p className="text-slate-900">{activity.action}</p>
-                    <p className="text-slate-400">{activity.user} · {activity.time}</p>
-                  </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Acciones Rápidas</h2>
+            <div className="space-y-2">
+              <NavLink to="/evaluations" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Link className="w-5 h-5 text-purple-600" />
                 </div>
-              ))}
+                <div>
+                  <p className="font-medium text-slate-900">Generar Enlace</p>
+                  <p className="text-xs text-slate-500">Crear evaluación</p>
+                </div>
+              </NavLink>
+              <NavLink to="/kpis" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Target className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">Revisar KPIs</p>
+                  <p className="text-xs text-slate-500">Pendientes de aprobación</p>
+                </div>
+              </NavLink>
+              <NavLink to="/manual-eval" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <ClipboardEdit className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">Evaluación Manual</p>
+                  <p className="text-xs text-slate-500">Asignar cuadrante</p>
+                </div>
+              </NavLink>
             </div>
           </div>
         </div>
@@ -573,127 +629,1362 @@ const DashboardGeneral = () => {
   );
 };
 
-// Employee List View (NEW)
-const EmployeeList = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+// ============================================
+// 9-BOX GRID ENHANCED COMPONENT
+// ============================================
+
+const NineBoxGridView = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
-  const [selectedClassification, setSelectedClassification] = useState("all");
+  const [evalType, setEvalType] = useState("automatic");
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const navigate = useNavigate();
 
-  const filteredEmployees = mockEmployees.filter(emp => {
-    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         emp.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         emp.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDept = selectedDepartment === "all" || emp.departmentId === selectedDepartment;
-    const classification = getClassification(emp.kpiScore, emp.valuesScore);
-    const matchesClass = selectedClassification === "all" || classification.code === selectedClassification;
-    return matchesSearch && matchesDept && matchesClass;
-  });
+  const filteredEmployees = selectedDepartment === "all" 
+    ? mockEmployees 
+    : mockEmployees.filter(e => e.departmentId === selectedDepartment);
 
-  const allClassifications = ["A", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4"];
+  const matrixCells = [
+    { row: 0, col: 0, code: "C1", label: "Valores sin Resultados", color: "orange", desc: "Alto en valores pero bajo en resultados. Necesita enfoque en productividad." },
+    { row: 0, col: 1, code: "B2", label: "Futuro Líder", color: "yellow", desc: "Buen balance, potencial de liderazgo. Candidato a desarrollo." },
+    { row: 0, col: 2, code: "A", label: "Top Performer", color: "green", desc: "Excelente en todo. Modelo a seguir, candidato a promoción." },
+    { row: 1, col: 0, code: "C3", label: "Necesita Desarrollo", color: "red-light", desc: "Rendimiento medio-bajo. Requiere plan de mejora integral." },
+    { row: 1, col: 1, code: "B3", label: "Performer Sólido", color: "orange-light", desc: "Desempeño consistente y confiable. Pilar del equipo." },
+    { row: 1, col: 2, code: "B1", label: "Alto Potencial", color: "yellow", desc: "Excelentes resultados. Mentoring en valores recomendado." },
+    { row: 2, col: 0, code: "C4", label: "Acción Urgente", color: "red", desc: "Bajo rendimiento crítico. Intervención inmediata necesaria." },
+    { row: 2, col: 1, code: "C2", label: "Bajo Rendimiento", color: "red-light", desc: "Resultados insuficientes. Plan de mejora con seguimiento." },
+    { row: 2, col: 2, code: "B4", label: "Resultados sin Valores", color: "orange", desc: "Buenos números pero problemas de cultura. Coaching necesario." },
+  ];
 
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Listado de Empleados
+            Matriz 9-Box
           </h1>
-          <p className="text-slate-500 mt-1">Gestión y filtrado de personal</p>
+          <p className="text-slate-500 mt-1">Visualización y clasificación de empleados</p>
+        </div>
+        
+        <div className="flex gap-3">
+          <select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
+            data-testid="dept-filter"
+          >
+            <option value="all">Todos los departamentos</option>
+            {mockDepartments.map(dept => (
+              <option key={dept.id} value={dept.id}>{dept.name}</option>
+            ))}
+          </select>
+          
+          <select
+            value={evalType}
+            onChange={(e) => setEvalType(e.target.value)}
+            className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
+            data-testid="eval-type-filter"
+          >
+            <option value="automatic">Automático (Promedio)</option>
+            <option value="auto">Autoevaluación</option>
+            <option value="leader">Evaluación Líder</option>
+            <option value="peer">Evaluación Pares</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Matrix Grid */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex">
+            <div className="flex flex-col justify-center items-center w-10 mr-4">
+              <span className="text-xs font-semibold text-slate-500 tracking-wider" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                VALORES / POTENCIAL
+              </span>
+            </div>
+            
+            <div className="flex-1">
+              <div className="grid grid-cols-3 gap-3">
+                {matrixCells.map((cell) => {
+                  const colors = classificationColors[cell.color];
+                  const cellEmployees = filteredEmployees.filter(e => getEmployeeClassification(e, evalType).code === cell.code);
+                  
+                  return (
+                    <div
+                      key={cell.code}
+                      className={`rounded-2xl border-2 p-4 min-h-[140px] transition-all cursor-pointer hover:scale-[1.02] ${
+                        selectedEmployee && getEmployeeClassification(selectedEmployee, evalType).code === cell.code ? 'ring-2 ring-slate-900 ring-offset-2' : ''
+                      }`}
+                      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+                      data-testid={`cell-${cell.code}`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xl font-bold" style={{ color: colors.text }}>{cell.code}</span>
+                        <span className="text-sm font-semibold px-2 py-0.5 rounded-full bg-white/50" style={{ color: colors.text }}>
+                          {cellEmployees.length}
+                        </span>
+                      </div>
+                      <p className="text-xs font-medium mb-3" style={{ color: colors.text }}>{cell.label}</p>
+                      
+                      {/* Employee names */}
+                      <div className="space-y-1">
+                        {cellEmployees.slice(0, 4).map((emp) => (
+                          <button
+                            key={emp.id}
+                            onClick={() => setSelectedEmployee(emp)}
+                            className={`w-full flex items-center gap-2 p-1.5 rounded-lg transition-all text-left ${
+                              selectedEmployee?.id === emp.id ? 'bg-white shadow-sm' : 'hover:bg-white/50'
+                            }`}
+                          >
+                            <img src={emp.avatar} alt="" className="w-6 h-6 rounded-full" />
+                            <span className="text-xs font-medium truncate" style={{ color: colors.text }}>
+                              {emp.name.split(' ')[0]} {emp.name.split(' ')[1]?.[0]}.
+                            </span>
+                          </button>
+                        ))}
+                        {cellEmployees.length > 4 && (
+                          <p className="text-xs text-center" style={{ color: colors.text }}>+{cellEmployees.length - 4} más</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="text-center mt-4">
+                <span className="text-xs font-semibold text-slate-500 tracking-wider">RESULTADOS / DESEMPEÑO (KPI)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Employee Detail Panel */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
+            Detalle del Empleado
+          </h2>
+          
+          {selectedEmployee ? (
+            <div className="animate-fade-in">
+              <div className="flex items-center gap-4 mb-6">
+                <img src={selectedEmployee.avatar} alt="" className="w-16 h-16 rounded-xl object-cover" />
+                <div>
+                  <h3 className="font-semibold text-slate-900">{selectedEmployee.name}</h3>
+                  <p className="text-sm text-slate-500">{selectedEmployee.position}</p>
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 mt-1">
+                    {selectedEmployee.department}
+                  </span>
+                </div>
+              </div>
+
+              {/* Classification */}
+              {(() => {
+                const classification = getEmployeeClassification(selectedEmployee, evalType);
+                const colors = classificationColors[classification.color];
+                const cellInfo = matrixCells.find(c => c.code === classification.code);
+                return (
+                  <div className="rounded-xl p-4 mb-4" style={{ backgroundColor: colors.bg, border: `2px solid ${colors.border}` }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-2xl font-bold" style={{ color: colors.text }}>{classification.code}</span>
+                      <span className="text-sm font-medium" style={{ color: colors.text }}>{classification.label}</span>
+                    </div>
+                    <p className="text-xs" style={{ color: colors.text }}>{cellInfo?.desc}</p>
+                  </div>
+                );
+              })()}
+
+              {/* Scores */}
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">KPI</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${selectedEmployee.kpiScore}%` }} />
+                    </div>
+                    <span className="text-sm font-semibold w-8">{selectedEmployee.kpiScore}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">Valores 360</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-purple-500 rounded-full" style={{ width: `${selectedEmployee.valuesScore}%` }} />
+                    </div>
+                    <span className="text-sm font-semibold w-8">{selectedEmployee.valuesScore}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">Autoevaluación</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-pink-500 rounded-full" style={{ width: `${selectedEmployee.autoEvalScore}%` }} />
+                    </div>
+                    <span className="text-sm font-semibold w-8">{selectedEmployee.autoEvalScore}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => navigate('/results')}
+                  className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-slate-800"
+                >
+                  Ver Resultados
+                </button>
+                <button 
+                  onClick={() => navigate('/manual-eval')}
+                  className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50"
+                >
+                  Editar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-slate-400">
+              <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Selecciona un empleado de la matriz para ver sus detalles</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// EVALUATIONS MANAGEMENT COMPONENT
+// ============================================
+
+const EvaluationsView = () => {
+  const [templates, setTemplates] = useState(mockEvaluationTemplates);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkConfig, setLinkConfig] = useState({ employeeId: '', evaluatorType: 'leader' });
+  const [generatedLink, setGeneratedLink] = useState(null);
+
+  const handleWeightChange = (categoryId, newWeight) => {
+    if (!selectedTemplate || selectedTemplate.type !== '360') return;
+    const newWeight_ = Math.max(0, Math.min(100, parseInt(newWeight) || 0));
+    const newCategories = autoAdjustWeights(selectedTemplate.categories, categoryId, newWeight_);
+    const updatedTemplate = { ...selectedTemplate, categories: newCategories };
+    setSelectedTemplate(updatedTemplate);
+    setTemplates(prev => prev.map(t => t.id === updatedTemplate.id ? updatedTemplate : t));
+  };
+
+  const handleQuestionWeightChange = (categoryId, questionId, newWeight) => {
+    if (!selectedTemplate || selectedTemplate.type !== '360') return;
+    const newWeight_ = Math.max(0, Math.min(100, parseInt(newWeight) || 0));
+    const updatedTemplate = {
+      ...selectedTemplate,
+      categories: selectedTemplate.categories.map(cat => {
+        if (cat.id !== categoryId) return cat;
+        const newQuestions = autoAdjustWeights(cat.questions, questionId, newWeight_);
+        return { ...cat, questions: newQuestions };
+      })
+    };
+    setSelectedTemplate(updatedTemplate);
+    setTemplates(prev => prev.map(t => t.id === updatedTemplate.id ? updatedTemplate : t));
+  };
+
+  const generateLink = () => {
+    const token = Math.random().toString(36).substring(2, 10);
+    const link = `${window.location.origin}/evaluate/${token}`;
+    setGeneratedLink(link);
+  };
+
+  const totalWeight = selectedTemplate?.type === '360' 
+    ? selectedTemplate.categories.reduce((sum, c) => sum + c.weight, 0) 
+    : selectedTemplate?.kpis?.reduce((sum, k) => sum + k.weight, 0) || 0;
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+            Evaluaciones 360
+          </h1>
+          <p className="text-slate-500 mt-1">Gestiona plantillas y genera enlaces de evaluación</p>
         </div>
         <button 
-          className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 transition-colors flex items-center gap-2"
-          data-testid="add-employee-btn"
+          className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2"
+          data-testid="new-template-btn"
         >
+          <Plus className="w-4 h-4" />
+          Nueva Plantilla
+        </button>
+      </div>
+
+      {/* Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
+          <MessageSquare className="w-8 h-8 mb-3 opacity-80" />
+          <h3 className="font-semibold mb-1">Evaluación 360°</h3>
+          <p className="text-sm opacity-80">Evalúa competencias desde múltiples perspectivas: líder, pares, clientes y autoevaluación.</p>
+        </div>
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
+          <Link className="w-8 h-8 mb-3 opacity-80" />
+          <h3 className="font-semibold mb-1">Enlaces Públicos</h3>
+          <p className="text-sm opacity-80">Genera enlaces únicos para que evaluadores externos completen las evaluaciones sin necesidad de cuenta.</p>
+        </div>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
+          <Sliders className="w-8 h-8 mb-3 opacity-80" />
+          <h3 className="font-semibold mb-1">Pesos Automáticos</h3>
+          <p className="text-sm opacity-80">Al modificar un peso, los demás se ajustan automáticamente para mantener el 100%.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Templates List */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Plantillas</h2>
+          {templates.map((template) => (
+            <div
+              key={template.id}
+              onClick={() => { setSelectedTemplate(template); setEditMode(false); }}
+              className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
+                selectedTemplate?.id === template.id ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
+              }`}
+              data-testid={`template-${template.id}`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  template.type === '360' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {template.type === '360' ? 'Eval 360' : 'KPI'}
+                </span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  template.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {template.isActive ? 'Activa' : 'Inactiva'}
+                </span>
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
+              <p className="text-sm text-slate-500 line-clamp-2">{template.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Template Detail */}
+        <div className="lg:col-span-2">
+          {selectedTemplate ? (
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">{selectedTemplate.name}</h2>
+                  <p className="text-sm text-slate-500">{selectedTemplate.description}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditMode(!editMode)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 ${
+                      editMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                    data-testid="edit-weights-btn"
+                  >
+                    <Sliders className="w-4 h-4" />
+                    {editMode ? 'Editando Pesos' : 'Editar Pesos'}
+                  </button>
+                  <button
+                    onClick={() => setShowLinkModal(true)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 flex items-center gap-2"
+                    data-testid="generate-link-btn"
+                  >
+                    <Link className="w-4 h-4" />
+                    Generar Enlace
+                  </button>
+                </div>
+              </div>
+
+              {/* Weight Indicator */}
+              <div className={`mb-6 p-4 rounded-xl ${totalWeight === 100 ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-sm font-medium ${totalWeight === 100 ? 'text-green-700' : 'text-amber-700'}`}>
+                    Peso total: {totalWeight}%
+                  </span>
+                  {totalWeight === 100 ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                  )}
+                </div>
+                <div className="h-2 bg-white rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all ${totalWeight === 100 ? 'bg-green-500' : 'bg-amber-500'}`}
+                    style={{ width: `${Math.min(totalWeight, 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Categories/KPIs */}
+              {selectedTemplate.type === '360' ? (
+                <div className="space-y-4">
+                  {selectedTemplate.categories.map((category) => (
+                    <div key={category.id} className="border border-slate-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold text-slate-900">{category.name}</h3>
+                          <p className="text-xs text-slate-500">{category.description}</p>
+                        </div>
+                        {editMode ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={category.weight}
+                              onChange={(e) => handleWeightChange(category.id, e.target.value)}
+                              className="w-16 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold"
+                            />
+                            <span className="text-sm text-slate-400">%</span>
+                          </div>
+                        ) : (
+                          <span className="text-lg font-bold text-slate-900">{category.weight}%</span>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2 mt-3 pl-4 border-l-2 border-slate-100">
+                        {category.questions.map((q) => (
+                          <div key={q.id} className="flex items-center justify-between py-1">
+                            <span className="text-sm text-slate-600 flex-1">{q.text}</span>
+                            {editMode ? (
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={q.weight}
+                                onChange={(e) => handleQuestionWeightChange(category.id, q.id, e.target.value)}
+                                className="w-14 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded text-xs"
+                              />
+                            ) : (
+                              <span className="text-xs font-medium text-slate-400 ml-2">{q.weight}%</span>
+                            )}
+                          </div>
+                        ))}
+                        {editMode && (
+                          <p className="text-xs text-slate-400 mt-2">
+                            Subtotal: {category.questions.reduce((s, q) => s + q.weight, 0)}%
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedTemplate.kpis?.map((kpi) => (
+                    <div key={kpi.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
+                      <div>
+                        <h3 className="font-medium text-slate-900">{kpi.name}</h3>
+                        <p className="text-sm text-slate-500">Meta: {kpi.target} {kpi.unit}</p>
+                        <div className="flex gap-2 mt-1">
+                          <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700">{"<"}{kpi.thresholds.red}%</span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-700">{kpi.thresholds.red}-{kpi.thresholds.yellow}%</span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">{">"}{kpi.thresholds.green}%</span>
+                        </div>
+                      </div>
+                      <span className="text-lg font-bold text-slate-900">{kpi.weight}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500">Selecciona una plantilla para ver y editar</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Generate Link Modal */}
+      {showLinkModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-slate-900">Generar Enlace de Evaluación</h3>
+              <button onClick={() => { setShowLinkModal(false); setGeneratedLink(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!generatedLink ? (
+              <>
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Empleado a evaluar</label>
+                    <select 
+                      value={linkConfig.employeeId}
+                      onChange={(e) => setLinkConfig(prev => ({ ...prev, employeeId: e.target.value }))}
+                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
+                    >
+                      <option value="">Seleccionar empleado...</option>
+                      {mockEmployees.map(emp => (
+                        <option key={emp.id} value={emp.id}>{emp.name} - {emp.position}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Tipo de evaluador</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {evaluatorTypes.map((type) => (
+                        <button
+                          key={type.id}
+                          onClick={() => setLinkConfig(prev => ({ ...prev, evaluatorType: type.id }))}
+                          className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                            linkConfig.evaluatorType === type.id 
+                              ? 'border-slate-900 bg-slate-50' 
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <type.icon className="w-4 h-4" style={{ color: type.color }} />
+                          <span className="text-sm font-medium">{type.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={generateLink}
+                  disabled={!linkConfig.employeeId}
+                  className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Generar Enlace
+                </button>
+              </>
+            ) : (
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-green-600" />
+                </div>
+                <p className="text-sm text-slate-600 mb-4">Enlace generado exitosamente</p>
+                <div className="bg-slate-50 rounded-xl p-4 mb-4">
+                  <p className="text-sm font-mono text-slate-700 break-all">{generatedLink}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(generatedLink)}
+                    className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copiar Enlace
+                  </button>
+                  <button
+                    onClick={() => { setShowLinkModal(false); setGeneratedLink(null); }}
+                    className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
+// KPIs MANAGEMENT COMPONENT
+// ============================================
+
+const KPIsView = () => {
+  const [activeTab, setActiveTab] = useState('create');
+  const [kpis, setKpis] = useState([
+    { id: 'kpi-new-1', name: 'Productividad', type: 'numeric', unit: '%', thresholds: { red: 50, yellow: 75, green: 90 } },
+    { id: 'kpi-new-2', name: 'Satisfacción del Cliente', type: 'scale', unit: 'pts', thresholds: { red: 60, yellow: 80, green: 90 } },
+  ]);
+  const [selectedKPI, setSelectedKPI] = useState(null);
+  const [myEntries, setMyEntries] = useState(mockKPIEntries);
+  const [showSmartModal, setShowSmartModal] = useState(false);
+
+  const tabs = [
+    { id: 'create', label: 'Crear KPIs', icon: Plus },
+    { id: 'fill', label: 'Mis KPIs', icon: ClipboardEdit },
+    { id: 'review', label: 'Revisión', icon: CheckCircle2 },
+    { id: 'compare', label: 'Comparativa', icon: BarChart2 },
+  ];
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+            Gestión de KPIs
+          </h1>
+          <p className="text-slate-500 mt-1">Crea, gestiona y revisa indicadores clave de desempeño</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-8 bg-slate-100 p-1 rounded-xl w-fit">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Create KPIs Tab */}
+      {activeTab === 'create' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-slate-900">Definir Nuevo KPI</h2>
+              <button className="bg-slate-900 text-white rounded-xl px-4 py-2 text-sm font-medium hover:bg-slate-800 flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Guardar KPI
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Nombre del KPI</label>
+                  <input type="text" placeholder="Ej: Ventas mensuales" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Tipo</label>
+                  <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5">
+                    <option value="numeric">Numérico</option>
+                    <option value="percentage">Porcentaje</option>
+                    <option value="currency">Monetario</option>
+                    <option value="scale">Escala</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Unidad de medida</label>
+                <input type="text" placeholder="Ej: %, $, pts, unidades" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-4">Umbrales de Color</label>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500" />
+                      <span className="text-sm font-medium text-red-700">Rojo (Bajo)</span>
+                    </div>
+                    <input type="number" placeholder="< 50%" className="w-full border border-red-200 rounded-lg px-3 py-2 text-sm bg-white" />
+                  </div>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                      <span className="text-sm font-medium text-yellow-700">Amarillo (Medio)</span>
+                    </div>
+                    <input type="number" placeholder="50-75%" className="w-full border border-yellow-200 rounded-lg px-3 py-2 text-sm bg-white" />
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                      <span className="text-sm font-medium text-green-700">Verde (Alto)</span>
+                    </div>
+                    <input type="number" placeholder="> 90%" className="w-full border border-green-200 rounded-lg px-3 py-2 text-sm bg-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">KPIs Existentes</h2>
+            <div className="space-y-3">
+              {kpis.map((kpi) => (
+                <div key={kpi.id} className="p-4 border border-slate-200 rounded-xl hover:border-slate-300 cursor-pointer">
+                  <h3 className="font-medium text-slate-900">{kpi.name}</h3>
+                  <p className="text-sm text-slate-500">Tipo: {kpi.type} | Unidad: {kpi.unit}</p>
+                  <div className="flex gap-1 mt-2">
+                    <span className="w-4 h-2 rounded-full bg-red-400" />
+                    <span className="w-4 h-2 rounded-full bg-yellow-400" />
+                    <span className="w-4 h-2 rounded-full bg-green-400" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fill My KPIs Tab */}
+      {activeTab === 'fill' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-6">Mis Indicadores - Q1 2024</h2>
+              
+              <div className="space-y-4">
+                {mockKPIEntries.map((entry) => {
+                  const kpiDef = mockEvaluationTemplates[1].kpis.find(k => k.id === entry.kpiId);
+                  const percentage = Math.round((entry.value / entry.target) * 100);
+                  const color = percentage >= kpiDef?.thresholds.green ? 'green' : percentage >= kpiDef?.thresholds.yellow ? 'yellow' : 'red';
+                  
+                  return (
+                    <div key={entry.id} className="border border-slate-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold text-slate-900">{kpiDef?.name}</h3>
+                          <p className="text-sm text-slate-500">{entry.smartGoal}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          entry.status === 'approved' ? 'bg-green-100 text-green-700' :
+                          entry.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {entry.status === 'approved' ? 'Aprobado' : entry.status === 'pending' ? 'Pendiente' : 'En Revisión'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-slate-600">Progreso</span>
+                            <span className="font-medium">{entry.value.toLocaleString()} / {entry.target.toLocaleString()}</span>
+                          </div>
+                          <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${color === 'green' ? 'bg-green-500' : color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'}`}
+                              style={{ width: `${Math.min(percentage, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className={`text-2xl font-bold ${color === 'green' ? 'text-green-600' : color === 'yellow' ? 'text-yellow-600' : 'text-red-600'}`}>
+                          {percentage}%
+                        </span>
+                      </div>
+                      
+                      {entry.feedback && (
+                        <div className="mt-3 p-3 bg-slate-50 rounded-lg">
+                          <p className="text-xs text-slate-500 mb-1">Feedback del líder:</p>
+                          <p className="text-sm text-slate-700">{entry.feedback}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Agregar Meta SMART</h2>
+              <button 
+                onClick={() => setShowSmartModal(true)}
+                className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
+              >
+                <Flag className="w-4 h-4" />
+                Nueva Meta SMART
+              </button>
+              
+              <div className="mt-4 p-4 bg-blue-50 rounded-xl">
+                <p className="text-xs font-semibold text-blue-700 mb-2">¿Qué es SMART?</p>
+                <ul className="text-xs text-blue-600 space-y-1">
+                  <li><strong>S</strong>pecific - Específico</li>
+                  <li><strong>M</strong>easurable - Medible</li>
+                  <li><strong>A</strong>chievable - Alcanzable</li>
+                  <li><strong>R</strong>elevant - Relevante</li>
+                  <li><strong>T</strong>ime-bound - Temporal</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Tab */}
+      {activeTab === 'review' && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">KPIs Pendientes de Revisión</h2>
+          
+          <div className="space-y-4">
+            {myEntries.filter(e => e.status !== 'approved').map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
+                <div className="flex items-center gap-4">
+                  <img src={mockEmployees.find(e => e.id === entry.employeeId)?.avatar} alt="" className="w-10 h-10 rounded-full" />
+                  <div>
+                    <p className="font-medium text-slate-900">{mockEmployees.find(e => e.id === entry.employeeId)?.name}</p>
+                    <p className="text-sm text-slate-500">{mockEvaluationTemplates[1].kpis.find(k => k.id === entry.kpiId)?.name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-semibold">{Math.round((entry.value / entry.target) * 100)}%</span>
+                  <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg" title="Aprobar">
+                    <ThumbsUp className="w-5 h-5" />
+                  </button>
+                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Rechazar">
+                    <ThumbsDown className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Compare Tab */}
+      {activeTab === 'compare' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-6">Rendimiento por Equipo</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={mockDepartments.map(d => ({
+                name: d.name.substring(0, 8),
+                kpi: Math.round(mockEmployees.filter(e => e.departmentId === d.id).reduce((a, e) => a + e.kpiScore, 0) / Math.max(mockEmployees.filter(e => e.departmentId === d.id).length, 1))
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Bar dataKey="kpi" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-6">Evolución Temporal</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={[
+                { month: 'Ene', promedio: 65 },
+                { month: 'Feb', promedio: 68 },
+                { month: 'Mar', promedio: 72 },
+                { month: 'Abr', promedio: 70 },
+                { month: 'May', promedio: 75 },
+                { month: 'Jun', promedio: 78 },
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="promedio" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
+// MANUAL EVALUATION COMPONENT
+// ============================================
+
+const ManualEvaluation = () => {
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedClassification, setSelectedClassification] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const matrixCells = [
+    { code: "C1", label: "Valores sin Resultados", color: "orange" },
+    { code: "B2", label: "Futuro Líder", color: "yellow" },
+    { code: "A", label: "Top Performer", color: "green" },
+    { code: "C3", label: "Necesita Desarrollo", color: "red-light" },
+    { code: "B3", label: "Performer Sólido", color: "orange-light" },
+    { code: "B1", label: "Alto Potencial", color: "yellow" },
+    { code: "C4", label: "Acción Urgente", color: "red" },
+    { code: "C2", label: "Bajo Rendimiento", color: "red-light" },
+    { code: "B4", label: "Resultados sin Valores", color: "orange" },
+  ];
+
+  return (
+    <div className="animate-fade-in">
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+          Evaluación Manual
+        </h1>
+        <p className="text-slate-500 mt-1">Asigna directamente un cuadrante del 9-Box a un empleado</p>
+      </div>
+
+      {/* Info */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+          <div>
+            <p className="font-medium text-amber-800">Evaluación por Override</p>
+            <p className="text-sm text-amber-700">Esta clasificación sobrescribirá el resultado calculado automáticamente. Usa esta opción cuando tengas información adicional que justifique un cambio.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Employee Selection */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">1. Seleccionar Empleado</h2>
+          
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {mockEmployees.map((emp) => {
+              const classification = getEmployeeClassification(emp);
+              const colors = classificationColors[classification.color];
+              
+              return (
+                <button
+                  key={emp.id}
+                  onClick={() => setSelectedEmployee(emp)}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                    selectedEmployee?.id === emp.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <img src={emp.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">{emp.name}</p>
+                    <p className="text-sm text-slate-500">{emp.position} · {emp.department}</p>
+                  </div>
+                  <div className="text-right">
+                    <span 
+                      className="inline-flex px-3 py-1 rounded-lg text-sm font-bold"
+                      style={{ backgroundColor: colors.bg, color: colors.text }}
+                    >
+                      {classification.code}
+                    </span>
+                    {emp.manualOverride && (
+                      <p className="text-xs text-amber-600 mt-1">Override activo</p>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Classification Selection */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">2. Seleccionar Clasificación</h2>
+          
+          {selectedEmployee ? (
+            <>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {matrixCells.map((cell) => {
+                  const colors = classificationColors[cell.color];
+                  const isSelected = selectedClassification === cell.code;
+                  
+                  return (
+                    <button
+                      key={cell.code}
+                      onClick={() => setSelectedClassification(cell.code)}
+                      className={`rounded-xl border-2 p-4 text-center transition-all ${
+                        isSelected ? 'ring-2 ring-slate-900 ring-offset-2' : ''
+                      }`}
+                      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+                    >
+                      <span className="text-2xl font-bold" style={{ color: colors.text }}>{cell.code}</span>
+                      <p className="text-xs mt-1" style={{ color: colors.text }}>{cell.label}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedClassification && (
+                <div className="animate-fade-in">
+                  <div className="bg-slate-50 rounded-xl p-4 mb-4">
+                    <p className="text-sm text-slate-600">
+                      <strong>{selectedEmployee.name}</strong> será clasificado como <strong>{selectedClassification}</strong>
+                    </p>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Justificación (opcional)</label>
+                    <textarea 
+                      rows={3}
+                      placeholder="Explica el motivo del override..."
+                      className="w-full border border-slate-200 rounded-xl px-4 py-3 resize-none"
+                    />
+                  </div>
+
+                  <button 
+                    onClick={() => setShowConfirm(true)}
+                    className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800"
+                  >
+                    Aplicar Clasificación
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12 text-slate-400">
+              <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Selecciona un empleado primero</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm animate-fade-in text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">¡Clasificación Aplicada!</h3>
+            <p className="text-sm text-slate-500 mb-6">
+              {selectedEmployee?.name} ha sido clasificado como {selectedClassification}
+            </p>
+            <button
+              onClick={() => { setShowConfirm(false); setSelectedClassification(null); }}
+              className="w-full bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
+// RESULTS VIEW COMPONENT
+// ============================================
+
+const ResultsView = () => {
+  const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
+
+  const radarData = [
+    { subject: 'Comunicación', score: 85, fullMark: 100 },
+    { subject: 'Trabajo en Equipo', score: 78, fullMark: 100 },
+    { subject: 'Liderazgo', score: 72, fullMark: 100 },
+    { subject: 'Orientación a Resultados', score: 88, fullMark: 100 },
+  ];
+
+  const pieData = [
+    { name: 'Líder', value: 30, color: '#3B82F6' },
+    { name: 'Pares', value: 25, color: '#8B5CF6' },
+    { name: 'Clientes', value: 25, color: '#10B981' },
+    { name: 'Autoevaluación', value: 20, color: '#EC4899' },
+  ];
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+            Resultados de Evaluación
+          </h1>
+          <p className="text-slate-500 mt-1">Visualiza el desempeño detallado por empleado</p>
+        </div>
+        
+        <div className="relative">
+          <select
+            value={selectedEmployee?.id || ''}
+            onChange={(e) => setSelectedEmployee(mockEmployees.find(emp => emp.id === e.target.value))}
+            className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
+          >
+            {mockEmployees.map(emp => (
+              <option key={emp.id} value={emp.id}>{emp.name}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        </div>
+      </div>
+
+      {/* Employee Header */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+        <div className="flex items-center gap-6">
+          <img src={selectedEmployee?.avatar} alt="" className="w-20 h-20 rounded-xl object-cover" />
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold text-slate-900">{selectedEmployee?.name}</h2>
+            <p className="text-slate-500">{selectedEmployee?.position} · {selectedEmployee?.department}</p>
+          </div>
+          {(() => {
+            const classification = getEmployeeClassification(selectedEmployee);
+            const colors = classificationColors[classification.color];
+            return (
+              <div className="text-center">
+                <div 
+                  className="inline-flex items-center justify-center w-20 h-20 rounded-2xl text-3xl font-bold"
+                  style={{ backgroundColor: colors.bg, color: colors.text, border: `2px solid ${colors.border}` }}
+                >
+                  {classification.code}
+                </div>
+                <p className="text-sm text-slate-500 mt-2">{classification.label}</p>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Radar Chart */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">Gráfica de Araña - Competencias</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <RadarChart data={radarData}>
+              <PolarGrid stroke="#E2E8F0" />
+              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+              <Radar name="Score" dataKey="score" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} strokeWidth={2} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Score Breakdown */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">Desglose por Evaluador</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <RechartsPie>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                innerRadius={50}
+                outerRadius={80}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </RechartsPie>
+          </ResponsiveContainer>
+          <div className="flex flex-wrap justify-center gap-4 mt-4">
+            {pieData.map((item) => (
+              <div key={item.name} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                <span className="text-sm text-slate-600">{item.name}: {item.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Detailed Scores */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">Puntuaciones Detalladas</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'KPI', value: selectedEmployee?.kpiScore, color: '#3B82F6' },
+              { label: 'Valores 360', value: selectedEmployee?.valuesScore, color: '#8B5CF6' },
+              { label: 'Autoevaluación', value: selectedEmployee?.autoEvalScore, color: '#EC4899' },
+              { label: 'Líder', value: selectedEmployee?.leaderEvalScore, color: '#10B981' },
+            ].map((item) => (
+              <div key={item.label} className="bg-slate-50 rounded-xl p-4 text-center">
+                <p className="text-sm text-slate-500 mb-2">{item.label}</p>
+                <p className="text-4xl font-bold" style={{ color: item.color }}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// PUBLIC EVALUATION FORM (for links)
+// ============================================
+
+const PublicEvaluationForm = () => {
+  const { token } = useParams();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const template = mockEvaluationTemplates[0];
+  const employee = mockEmployees[0];
+  const categories = template.categories;
+
+  const handleAnswer = (questionId, value) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+
+  const currentCategory = categories[currentStep];
+  const isLastStep = currentStep === categories.length - 1;
+  const categoryAnswered = currentCategory?.questions.every(q => answers[q.id]);
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">¡Gracias por tu evaluación!</h1>
+          <p className="text-slate-500 mb-6">Tu feedback ha sido registrado exitosamente y ayudará en el desarrollo profesional de {employee.name}.</p>
+          <div className="bg-slate-50 rounded-xl p-4">
+            <p className="text-sm text-slate-600">Esta ventana se puede cerrar.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+          <div className="flex items-center gap-4 mb-4">
+            <img src={employee.avatar} alt="" className="w-16 h-16 rounded-xl object-cover" />
+            <div>
+              <p className="text-sm text-slate-500">Evaluación para:</p>
+              <h2 className="text-xl font-semibold text-slate-900">{employee.name}</h2>
+              <p className="text-sm text-slate-500">{employee.position}</p>
+            </div>
+          </div>
+          
+          {/* Progress */}
+          <div className="flex gap-2">
+            {categories.map((_, idx) => (
+              <div 
+                key={idx}
+                className={`flex-1 h-2 rounded-full transition-all ${
+                  idx < currentStep ? 'bg-green-500' : idx === currentStep ? 'bg-slate-900' : 'bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-sm text-slate-500 mt-2">Paso {currentStep + 1} de {categories.length}</p>
+        </div>
+
+        {/* Form */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-slate-900">{currentCategory?.name}</h3>
+            <p className="text-sm text-slate-500">{currentCategory?.description}</p>
+          </div>
+
+          <div className="space-y-6">
+            {currentCategory?.questions.map((q) => (
+              <div key={q.id}>
+                <p className="text-slate-700 mb-3">{q.text}</p>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => handleAnswer(q.id, val)}
+                      className={`flex-1 h-12 rounded-xl border-2 font-semibold transition-all ${
+                        answers[q.id] === val
+                          ? 'bg-slate-900 border-slate-900 text-white'
+                          : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-between text-xs text-slate-400 mt-1">
+                  <span>Muy bajo</span>
+                  <span>Excelente</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-3 mt-8">
+            {currentStep > 0 && (
+              <button
+                onClick={() => setCurrentStep(prev => prev - 1)}
+                className="px-6 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50"
+              >
+                Anterior
+              </button>
+            )}
+            <button
+              onClick={() => isLastStep ? setSubmitted(true) : setCurrentStep(prev => prev + 1)}
+              disabled={!categoryAnswered}
+              className="flex-1 bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLastStep ? 'Enviar Evaluación' : 'Siguiente'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// EMPLOYEES LIST COMPONENT
+// ============================================
+
+const EmployeeList = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
+
+  const filteredEmployees = mockEmployees.filter(emp => {
+    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         emp.position.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDept = selectedDepartment === "all" || emp.departmentId === selectedDepartment;
+    return matchesSearch && matchesDept;
+  });
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+            Empleados
+          </h1>
+          <p className="text-slate-500 mt-1">Gestión del personal</p>
+        </div>
+        <button className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Agregar Empleado
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6" data-testid="employee-filters">
-        <div className="flex flex-wrap gap-4">
-          {/* Search */}
-          <div className="flex-1 min-w-[200px] relative">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6">
+        <div className="flex gap-4">
+          <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Buscar por nombre, puesto o ID..."
+              placeholder="Buscar empleado..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-              data-testid="search-input"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
             />
           </div>
-          
-          {/* Department Filter */}
-          <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <select
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-              data-testid="dept-filter"
-            >
-              <option value="all">Todos los departamentos</option>
-              {mockDepartments.map(dept => (
-                <option key={dept.id} value={dept.id}>{dept.name}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          </div>
-
-          {/* Classification Filter */}
-          <div className="relative">
-            <Grid3X3 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <select
-              value={selectedClassification}
-              onChange={(e) => setSelectedClassification(e.target.value)}
-              className="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-              data-testid="class-filter"
-            >
-              <option value="all">Todas las clasificaciones</option>
-              {allClassifications.map(code => (
-                <option key={code} value={code}>{code}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          </div>
+          <select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm"
+          >
+            <option value="all">Todos los departamentos</option>
+            {mockDepartments.map(dept => (
+              <option key={dept.id} value={dept.id}>{dept.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Results count */}
-      <p className="text-sm text-slate-500 mb-4">
-        Mostrando {filteredEmployees.length} de {mockEmployees.length} empleados
-      </p>
-
-      {/* Employee Table/List */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden" data-testid="employee-list">
+      {/* Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-4">Empleado</th>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-4">Departamento</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-4">KPI</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-4">360</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-4">Clasificación</th>
-              <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-4">Acciones</th>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Empleado</th>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Departamento</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">KPI</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">360</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Clasificación</th>
+              <th className="text-right text-xs font-semibold text-slate-500 uppercase px-6 py-4">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredEmployees.map((emp) => {
-              const classification = getClassification(emp.kpiScore, emp.valuesScore);
+              const classification = getEmployeeClassification(emp);
               const colors = classificationColors[classification.color];
-              const dept = mockDepartments.find(d => d.id === emp.departmentId);
               
               return (
-                <tr key={emp.id} className="hover:bg-slate-50 transition-colors" data-testid={`employee-row-${emp.id}`}>
+                <tr key={emp.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <img 
-                        src={emp.avatar}
-                        alt={emp.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
+                      <img src={emp.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
                       <div>
                         <p className="font-medium text-slate-900">{emp.name}</p>
                         <p className="text-sm text-slate-500">{emp.position}</p>
@@ -701,59 +1992,30 @@ const EmployeeList = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span 
-                      className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm"
-                      style={{ backgroundColor: `${dept?.color}15`, color: dept?.color }}
-                    >
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dept?.color }} />
-                      {emp.department}
-                    </span>
+                    <span className="text-sm text-slate-600">{emp.department}</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className={`font-semibold ${
-                      emp.kpiScore > 66 ? 'text-green-600' :
-                      emp.kpiScore > 33 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
+                    <span className={`font-semibold ${emp.kpiScore > 66 ? 'text-green-600' : emp.kpiScore > 33 ? 'text-yellow-600' : 'text-red-600'}`}>
                       {emp.kpiScore}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className={`font-semibold ${
-                      emp.valuesScore > 66 ? 'text-green-600' :
-                      emp.valuesScore > 33 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
+                    <span className={`font-semibold ${emp.valuesScore > 66 ? 'text-green-600' : emp.valuesScore > 33 ? 'text-yellow-600' : 'text-red-600'}`}>
                       {emp.valuesScore}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span 
-                      className="inline-flex items-center px-3 py-1 rounded-lg font-bold text-sm"
-                      style={{ 
-                        backgroundColor: colors.bg, 
-                        color: colors.text,
-                        border: `1px solid ${colors.border}`
-                      }}
+                      className="inline-flex px-3 py-1 rounded-lg font-bold text-sm"
+                      style={{ backgroundColor: colors.bg, color: colors.text }}
                     >
                       {classification.code}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                        title="Ver perfil"
-                        data-testid={`view-${emp.id}`}
-                      >
-                        <User className="w-4 h-4" />
-                      </button>
-                      <button 
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                        title="Evaluar"
-                        data-testid={`evaluate-${emp.id}`}
-                      >
-                        <ClipboardEdit className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
+                      <Eye className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               );
@@ -765,1567 +2027,41 @@ const EmployeeList = () => {
   );
 };
 
-// Evaluation Templates Management View (NEW)
-const EvaluationTemplates = () => {
-  const [templates, setTemplates] = useState(mockEvaluationTemplates);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [editingWeights, setEditingWeights] = useState(false);
+// ============================================
+// MAIN LAYOUT & APP
+// ============================================
+
+const Layout = ({ children }) => (
+  <div className="flex min-h-screen bg-[#FAFAFA]">
+    <Sidebar />
+    <main className="flex-1 p-8 overflow-auto">
+      <div className="max-w-6xl mx-auto">{children}</div>
+    </main>
+  </div>
+);
 
-  const updateWeight = (categoryId, newWeight) => {
-    if (!selectedTemplate) return;
-    setTemplates(prev => prev.map(t => {
-      if (t.id !== selectedTemplate.id) return t;
-      if (t.type === '360') {
-        return {
-          ...t,
-          categories: t.categories.map(c => 
-            c.id === categoryId ? { ...c, weight: parseInt(newWeight) || 0 } : c
-          )
-        };
-      } else {
-        return {
-          ...t,
-          kpis: t.kpis.map(k => 
-            k.id === categoryId ? { ...k, weight: parseInt(newWeight) || 0 } : k
-          )
-        };
-      }
-    }));
-    setSelectedTemplate(prev => {
-      if (prev.type === '360') {
-        return {
-          ...prev,
-          categories: prev.categories.map(c => 
-            c.id === categoryId ? { ...c, weight: parseInt(newWeight) || 0 } : c
-          )
-        };
-      } else {
-        return {
-          ...prev,
-          kpis: prev.kpis.map(k => 
-            k.id === categoryId ? { ...k, weight: parseInt(newWeight) || 0 } : k
-          )
-        };
-      }
-    });
-  };
-
-  const updateQuestionWeight = (categoryId, questionId, newWeight) => {
-    if (!selectedTemplate || selectedTemplate.type !== '360') return;
-    setTemplates(prev => prev.map(t => {
-      if (t.id !== selectedTemplate.id) return t;
-      return {
-        ...t,
-        categories: t.categories.map(c => {
-          if (c.id !== categoryId) return c;
-          return {
-            ...c,
-            questions: c.questions.map(q =>
-              q.id === questionId ? { ...q, weight: parseInt(newWeight) || 0 } : q
-            )
-          };
-        })
-      };
-    }));
-    setSelectedTemplate(prev => ({
-      ...prev,
-      categories: prev.categories.map(c => {
-        if (c.id !== categoryId) return c;
-        return {
-          ...c,
-          questions: c.questions.map(q =>
-            q.id === questionId ? { ...q, weight: parseInt(newWeight) || 0 } : q
-          )
-        };
-      })
-    }));
-  };
-
-  const getTotalWeight = () => {
-    if (!selectedTemplate) return 0;
-    if (selectedTemplate.type === '360') {
-      return selectedTemplate.categories.reduce((a, c) => a + c.weight, 0);
-    }
-    return selectedTemplate.kpis.reduce((a, k) => a + k.weight, 0);
-  };
-
-  return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Gestión de Evaluaciones
-          </h1>
-          <p className="text-slate-500 mt-1">Crea y configura plantillas de evaluación</p>
-        </div>
-        <button 
-          className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 transition-colors flex items-center gap-2"
-          data-testid="create-template-btn"
-        >
-          <Plus className="w-4 h-4" />
-          Nueva Evaluación
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Templates List */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-            Plantillas Disponibles
-          </h2>
-          {templates.map((template) => (
-            <div
-              key={template.id}
-              onClick={() => { setSelectedTemplate(template); setEditingWeights(false); }}
-              className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
-                selectedTemplate?.id === template.id 
-                  ? 'border-slate-900 ring-2 ring-slate-900/10' 
-                  : 'border-slate-200 hover:border-slate-300'
-              }`}
-              data-testid={`template-${template.id}`}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  {template.type === '360' ? (
-                    <MessageSquare className="w-4 h-4 text-purple-500" />
-                  ) : (
-                    <Target className="w-4 h-4 text-blue-500" />
-                  )}
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    template.type === '360' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {template.type === '360' ? 'Eval 360' : 'KPI'}
-                  </span>
-                </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  template.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-                }`}>
-                  {template.isActive ? 'Activa' : 'Inactiva'}
-                </span>
-              </div>
-              <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
-              <p className="text-sm text-slate-500">{template.description}</p>
-              <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
-                <span>
-                  {template.type === '360' 
-                    ? `${template.categories.length} categorías`
-                    : `${template.kpis.length} KPIs`
-                  }
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Template Detail */}
-        <div className="lg:col-span-2">
-          {selectedTemplate ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6" data-testid="template-detail">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                    {selectedTemplate.name}
-                  </h2>
-                  <p className="text-sm text-slate-500">{selectedTemplate.description}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setEditingWeights(!editingWeights)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
-                      editingWeights 
-                        ? 'bg-slate-900 text-white' 
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                    data-testid="edit-weights-btn"
-                  >
-                    <Settings className="w-4 h-4" />
-                    {editingWeights ? 'Guardando...' : 'Editar Pesos'}
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-                    <Copy className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Weight indicator */}
-              <div className={`mb-6 p-4 rounded-xl ${
-                getTotalWeight() === 100 ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm font-medium ${
-                    getTotalWeight() === 100 ? 'text-green-700' : 'text-amber-700'
-                  }`}>
-                    Peso total: {getTotalWeight()}%
-                  </span>
-                  {getTotalWeight() !== 100 && (
-                    <span className="text-xs text-amber-600">
-                      Debe sumar 100%
-                    </span>
-                  )}
-                </div>
-                <div className="h-2 bg-white rounded-full mt-2 overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all ${
-                      getTotalWeight() === 100 ? 'bg-green-500' : 'bg-amber-500'
-                    }`}
-                    style={{ width: `${Math.min(getTotalWeight(), 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Categories/KPIs */}
-              <div className="space-y-4">
-                {selectedTemplate.type === '360' ? (
-                  selectedTemplate.categories.map((category) => (
-                    <div key={category.id} className="border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-slate-900">{category.name}</h3>
-                        <div className="flex items-center gap-2">
-                          {editingWeights ? (
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={category.weight}
-                              onChange={(e) => updateWeight(category.id, e.target.value)}
-                              className="w-16 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold"
-                              data-testid={`weight-input-${category.id}`}
-                            />
-                          ) : (
-                            <span className="text-lg font-bold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                              {category.weight}%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Questions */}
-                      <div className="space-y-2 pl-4 border-l-2 border-slate-100">
-                        {category.questions.map((q) => (
-                          <div key={q.id} className="flex items-center justify-between py-1">
-                            <span className="text-sm text-slate-600">{q.text}</span>
-                            {editingWeights ? (
-                              <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={q.weight}
-                                onChange={(e) => updateQuestionWeight(category.id, q.id, e.target.value)}
-                                className="w-14 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded text-xs"
-                                data-testid={`q-weight-${q.id}`}
-                              />
-                            ) : (
-                              <span className="text-xs font-medium text-slate-400">{q.weight}%</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  selectedTemplate.kpis.map((kpi) => (
-                    <div key={kpi.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
-                      <div>
-                        <h3 className="font-medium text-slate-900">{kpi.name}</h3>
-                        <p className="text-sm text-slate-500">Meta: {kpi.target.toLocaleString()}</p>
-                      </div>
-                      {editingWeights ? (
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={kpi.weight}
-                          onChange={(e) => updateWeight(kpi.id, e.target.value)}
-                          className="w-16 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold"
-                          data-testid={`kpi-weight-${kpi.id}`}
-                        />
-                      ) : (
-                        <span className="text-lg font-bold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                          {kpi.weight}%
-                        </span>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500">Selecciona una plantilla para ver y editar sus detalles</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// 9-Box Matrix Component
-const NineBoxGrid = ({ kpiScore, valuesScore, compact = false }) => {
-  const classification = getClassification(kpiScore, valuesScore);
-  
-  const matrixCells = [
-    { row: 0, col: 0, code: "C1", label: "Valores sin Resultados", color: "orange" },
-    { row: 0, col: 1, code: "B2", label: "Futuro Líder", color: "yellow" },
-    { row: 0, col: 2, code: "A", label: "Top Performer", color: "green" },
-    { row: 1, col: 0, code: "C3", label: "Necesita Desarrollo", color: "red-light" },
-    { row: 1, col: 1, code: "B3", label: "Performer Sólido", color: "orange-light" },
-    { row: 1, col: 2, code: "B1", label: "Alto Potencial", color: "yellow" },
-    { row: 2, col: 0, code: "C4", label: "Acción Urgente", color: "red" },
-    { row: 2, col: 1, code: "C2", label: "Bajo Rendimiento", color: "red-light" },
-    { row: 2, col: 2, code: "B4", label: "Resultados sin Valores", color: "orange" },
-  ];
-
-  return (
-    <div className={compact ? "" : "p-4"} data-testid="nine-box-grid">
-      <div className="flex">
-        <div className={`flex flex-col justify-center items-center ${compact ? 'w-6' : 'w-8'} mr-2`}>
-          <span 
-            className="text-xs font-semibold text-slate-500 tracking-wider"
-            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-          >
-            VALORES (360)
-          </span>
-        </div>
-        
-        <div className="flex-1">
-          <div className={`grid grid-cols-3 ${compact ? 'gap-1' : 'gap-2'} aspect-square`}>
-            {matrixCells.map((cell) => {
-              const isActive = cell.code === classification.code;
-              const colors = classificationColors[cell.color];
-              
-              return (
-                <div
-                  key={`${cell.row}-${cell.col}`}
-                  className={`matrix-cell rounded-xl border-2 flex flex-col items-center justify-center text-center ${compact ? 'p-1' : 'p-2'} ${isActive ? 'active' : ''}`}
-                  style={{
-                    backgroundColor: colors.bg,
-                    borderColor: isActive ? colors.text : colors.border,
-                    boxShadow: isActive ? `0 0 0 3px ${colors.border}40` : 'none'
-                  }}
-                  data-testid={`matrix-cell-${cell.code}`}
-                >
-                  <span 
-                    className={`font-bold ${compact ? 'text-sm' : 'text-lg'}`}
-                    style={{ color: colors.text, fontFamily: 'Outfit' }}
-                  >
-                    {cell.code}
-                  </span>
-                  {!compact && (
-                    <span className="text-xs mt-1" style={{ color: colors.text }}>
-                      {cell.label}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          
-          <div className={`text-center ${compact ? 'mt-2' : 'mt-3'}`}>
-            <span className="text-xs font-semibold text-slate-500 tracking-wider">
-              RESULTADOS (KPI)
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Slider Component
-const ScoreSlider = ({ label, value, onChange, min = 0, max = 100, testId }) => {
-  const getTrackColor = (val) => {
-    if (val > 66) return "#10B981";
-    if (val > 33) return "#F59E0B";
-    return "#EF4444";
-  };
-
-  return (
-    <div className="mb-6" data-testid={testId}>
-      <div className="flex justify-between items-center mb-2">
-        <label className="text-sm font-medium text-slate-700">{label}</label>
-        <span 
-          className="text-lg font-bold px-3 py-1 rounded-lg"
-          style={{ 
-            backgroundColor: `${getTrackColor(value)}15`,
-            color: getTrackColor(value),
-            fontFamily: 'Outfit'
-          }}
-        >
-          {value}
-        </span>
-      </div>
-      <div className="relative">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          value={value}
-          onChange={(e) => onChange(parseInt(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer"
-          style={{
-            background: `linear-gradient(to right, ${getTrackColor(value)} 0%, ${getTrackColor(value)} ${value}%, #E2E8F0 ${value}%, #E2E8F0 100%)`
-          }}
-          data-testid={`${testId}-input`}
-        />
-      </div>
-      <div className="flex justify-between mt-1">
-        <span className="text-xs text-slate-400">{min}</span>
-        <span className="text-xs text-slate-400">{max}</span>
-      </div>
-    </div>
-  );
-};
-
-// Manual Results Entry View (UPDATED with evaluation selection)
-const ManualResultsEntry = () => {
-  const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
-  const [selectedEvaluation, setSelectedEvaluation] = useState(mockEvaluationTemplates[0]);
-  const [kpiScore, setKpiScore] = useState(72);
-  const [valuesScore, setValuesScore] = useState(85);
-  const [manualOverride, setManualOverride] = useState(false);
-  const [overrideClassification, setOverrideClassification] = useState("");
-  const [showEmployeeDropdown, setShowEmployeeDropdown] = useState(false);
-  const [showEvalDropdown, setShowEvalDropdown] = useState(false);
-  
-  const classification = getClassification(kpiScore, valuesScore);
-  const colors = classificationColors[classification.color];
-  
-  const allClassifications = ["A", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4"];
-  
-  const activeEvaluations = mockEvaluationTemplates.filter(e => e.isActive);
-
-  return (
-    <div className="animate-fade-in">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-          Ingreso de Resultados
-        </h1>
-        <p className="text-slate-500 mt-1">Captura manual de KPI y evaluación 360</p>
-      </div>
-
-      {/* Selection Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Employee Selection */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4" data-testid="employee-selector">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Empleado</p>
-          <div className="relative">
-            <button
-              onClick={() => setShowEmployeeDropdown(!showEmployeeDropdown)}
-              className="w-full flex items-center gap-3 p-3 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors text-left"
-              data-testid="employee-dropdown-btn"
-            >
-              <img src={selectedEmployee.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
-              <div className="flex-1">
-                <p className="font-medium text-slate-900">{selectedEmployee.name}</p>
-                <p className="text-sm text-slate-500">{selectedEmployee.position}</p>
-              </div>
-              <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${showEmployeeDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {showEmployeeDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-10 max-h-64 overflow-y-auto">
-                {mockEmployees.map((emp) => (
-                  <button
-                    key={emp.id}
-                    onClick={() => { setSelectedEmployee(emp); setShowEmployeeDropdown(false); }}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 text-left"
-                    data-testid={`emp-option-${emp.id}`}
-                  >
-                    <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-900 text-sm">{emp.name}</p>
-                      <p className="text-xs text-slate-500">{emp.department}</p>
-                    </div>
-                    {selectedEmployee.id === emp.id && <Check className="w-4 h-4 text-green-500" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Evaluation Selection */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4" data-testid="evaluation-selector">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Evaluación a Aplicar</p>
-          <div className="relative">
-            <button
-              onClick={() => setShowEvalDropdown(!showEvalDropdown)}
-              className="w-full flex items-center gap-3 p-3 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors text-left"
-              data-testid="eval-dropdown-btn"
-            >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                selectedEvaluation.type === '360' ? 'bg-purple-100' : 'bg-blue-100'
-              }`}>
-                {selectedEvaluation.type === '360' ? (
-                  <MessageSquare className="w-5 h-5 text-purple-600" />
-                ) : (
-                  <Target className="w-5 h-5 text-blue-600" />
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-slate-900">{selectedEvaluation.name}</p>
-                <p className="text-sm text-slate-500">{selectedEvaluation.type === '360' ? 'Evaluación 360' : 'KPI'}</p>
-              </div>
-              <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${showEvalDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {showEvalDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-10">
-                {activeEvaluations.map((ev) => (
-                  <button
-                    key={ev.id}
-                    onClick={() => { setSelectedEvaluation(ev); setShowEvalDropdown(false); }}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 text-left"
-                    data-testid={`eval-option-${ev.id}`}
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      ev.type === '360' ? 'bg-purple-100' : 'bg-blue-100'
-                    }`}>
-                      {ev.type === '360' ? (
-                        <MessageSquare className="w-4 h-4 text-purple-600" />
-                      ) : (
-                        <Target className="w-4 h-4 text-blue-600" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-900 text-sm">{ev.name}</p>
-                      <p className="text-xs text-slate-500">{ev.description}</p>
-                    </div>
-                    {selectedEvaluation.id === ev.id && <Check className="w-4 h-4 text-green-500" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Inputs */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* KPI Score Card */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 card-hover" data-testid="kpi-score-card">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                <Target className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                  Resultado KPI
-                </h2>
-                <p className="text-sm text-slate-500">Resultados cuantitativos del período</p>
-              </div>
-            </div>
-            <ScoreSlider
-              label="Puntuación KPI (0-100)"
-              value={kpiScore}
-              onChange={setKpiScore}
-              testId="kpi-slider"
-            />
-            <div className="bg-slate-50 rounded-xl p-4 mt-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Nivel de desempeño:</span>
-                <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
-                  kpiScore > 66 ? 'bg-green-100 text-green-700' :
-                  kpiScore > 33 ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {kpiScore > 66 ? 'Alto' : kpiScore > 33 ? 'Medio' : 'Bajo'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Values Score Card */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 card-hover" data-testid="values-score-card">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
-                <Award className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                  Evaluación 360
-                </h2>
-                <p className="text-sm text-slate-500">Valores y habilidades blandas</p>
-              </div>
-            </div>
-            <ScoreSlider
-              label="Puntuación 360 (0-100)"
-              value={valuesScore}
-              onChange={setValuesScore}
-              testId="values-slider"
-            />
-            <div className="bg-slate-50 rounded-xl p-4 mt-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Nivel de valores:</span>
-                <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
-                  valuesScore > 66 ? 'bg-green-100 text-green-700' :
-                  valuesScore > 33 ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {valuesScore > 66 ? 'Alto' : valuesScore > 33 ? 'Medio' : 'Bajo'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Manual Override */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="manual-override-card">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                  <ClipboardEdit className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                    Override Manual
-                  </h2>
-                  <p className="text-sm text-slate-500">Ajuste de clasificación por el líder</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setManualOverride(!manualOverride)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${
-                  manualOverride ? 'bg-slate-900' : 'bg-slate-200'
-                }`}
-                data-testid="override-toggle"
-              >
-                <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                  manualOverride ? 'translate-x-6' : ''
-                }`} />
-              </button>
-            </div>
-            
-            {manualOverride && (
-              <div className="animate-fade-in mt-4">
-                <label className="text-sm font-medium text-slate-700 mb-2 block">
-                  Seleccionar clasificación manual:
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {allClassifications.map((code) => {
-                    const cellData = [
-                      { code: "A", color: "green" },
-                      { code: "B1", color: "yellow" },
-                      { code: "B2", color: "yellow" },
-                      { code: "B3", color: "orange-light" },
-                      { code: "B4", color: "orange" },
-                      { code: "C1", color: "orange" },
-                      { code: "C2", color: "red-light" },
-                      { code: "C3", color: "red-light" },
-                      { code: "C4", color: "red" },
-                    ].find(c => c.code === code);
-                    const cellColors = classificationColors[cellData.color];
-                    
-                    return (
-                      <button
-                        key={code}
-                        onClick={() => setOverrideClassification(code)}
-                        className={`p-3 rounded-xl border-2 font-bold transition-all ${
-                          overrideClassification === code ? 'ring-2 ring-slate-900 ring-offset-2' : ''
-                        }`}
-                        style={{
-                          backgroundColor: cellColors.bg,
-                          borderColor: cellColors.border,
-                          color: cellColors.text
-                        }}
-                        data-testid={`override-btn-${code}`}
-                      >
-                        {code}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Column - Preview */}
-        <div className="space-y-6">
-          {/* Classification Result */}
-          <div 
-            className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 card-hover"
-            data-testid="classification-result-card"
-          >
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Clasificación Resultante
-            </h2>
-            <div 
-              className="rounded-2xl p-6 text-center mb-4"
-              style={{ backgroundColor: colors.bg, border: `2px solid ${colors.border}` }}
-            >
-              <span 
-                className="text-5xl font-bold"
-                style={{ color: colors.text, fontFamily: 'Outfit' }}
-              >
-                {manualOverride && overrideClassification ? overrideClassification : classification.code}
-              </span>
-              <p className="text-sm mt-2" style={{ color: colors.text }}>
-                {manualOverride && overrideClassification 
-                  ? `Override: ${overrideClassification}`
-                  : classification.label
-                }
-              </p>
-            </div>
-            
-            {manualOverride && overrideClassification && overrideClassification !== classification.code && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-700">
-                <strong>Nota:</strong> La clasificación ha sido modificada manualmente.
-                El resultado calculado era <strong>{classification.code}</strong>.
-              </div>
-            )}
-          </div>
-
-          {/* 9-Box Preview */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="nine-box-preview-card">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Vista Previa Matriz 9-Box
-            </h2>
-            <NineBoxGrid kpiScore={kpiScore} valuesScore={valuesScore} compact />
-          </div>
-
-          {/* Employee Summary */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="employee-summary-card">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Resumen del Empleado
-            </h2>
-            <div className="flex items-center gap-4 mb-4">
-              <img 
-                src={selectedEmployee.avatar}
-                alt={selectedEmployee.name}
-                className="w-14 h-14 rounded-full object-cover border-2 border-slate-100"
-              />
-              <div>
-                <p className="font-semibold text-slate-900">{selectedEmployee.name}</p>
-                <p className="text-sm text-slate-500">{selectedEmployee.position}</p>
-              </div>
-            </div>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Departamento:</span>
-                <span className="text-slate-900">{selectedEmployee.department}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">ID:</span>
-                <span className="text-slate-900 font-mono">{selectedEmployee.id}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Supervisor:</span>
-                <span className="text-slate-900">{selectedEmployee.supervisor}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Save Button */}
-          <button 
-            className="w-full bg-slate-900 text-white rounded-xl px-6 py-4 font-medium hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
-            data-testid="save-results-btn"
-          >
-            <TrendingUp className="w-5 h-5" />
-            Guardar Resultados
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Employee Profile View
-const EmployeeProfile = () => {
-  const employee = mockEmployees[0];
-  const classification = getClassification(72, 85);
-  const colors = classificationColors[classification.color];
-
-  return (
-    <div className="animate-fade-in">
-      {/* Cover Banner */}
-      <div className="relative h-48 rounded-2xl overflow-hidden mb-6" data-testid="profile-banner">
-        <img 
-          src="https://images.unsplash.com/photo-1488901512066-cd403111aeb2?w=1200&h=400&fit=crop"
-          alt="Cover"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-      </div>
-
-      {/* Profile Header */}
-      <div className="flex flex-col md:flex-row items-start gap-6 mb-8 -mt-16 relative z-10 px-6">
-        <img 
-          src={employee.avatar}
-          alt={employee.name}
-          className="w-32 h-32 rounded-2xl object-cover border-4 border-white shadow-lg"
-          data-testid="profile-avatar"
-        />
-        <div className="flex-1">
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            {employee.name}
-          </h1>
-          <p className="text-lg text-slate-500 mt-1">{employee.position}</p>
-          <div className="flex items-center gap-4 mt-3">
-            <span className="px-3 py-1 bg-slate-100 rounded-full text-sm text-slate-600">
-              {employee.department}
-            </span>
-            <span 
-              className="px-3 py-1 rounded-full text-sm font-semibold"
-              style={{ backgroundColor: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
-            >
-              Clasificación: {classification.code}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Personal Info */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="personal-info-card">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-            Información Personal
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-slate-400 mb-1">ID Empleado</p>
-              <p className="font-mono text-slate-900">{employee.id}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Fecha de Ingreso</p>
-              <p className="text-slate-900">{new Date(employee.hireDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Supervisor</p>
-              <p className="text-slate-900">{employee.supervisor}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Info */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="contact-info-card">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-            Contacto
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Email</p>
-              <p className="text-slate-900">{employee.email}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Teléfono</p>
-              <p className="text-slate-900">{employee.phone}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Results Summary */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="results-summary-card">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-            Resultados
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Resultado Calculado</p>
-              <span 
-                className="inline-flex items-center px-4 py-2 rounded-xl font-bold text-xl"
-                style={{ backgroundColor: colors.bg, color: colors.text, border: `2px solid ${colors.border}` }}
-              >
-                {classification.code}
-              </span>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Resultado Seleccionado (Override)</p>
-              <span className="text-slate-900 font-medium">Sin modificación</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// 360 Evaluation View
-const Evaluation360 = () => {
-  const [scores, setScores] = useState({
-    comunicacion: { claridad: 4, escucha: 5, feedback: 4 },
-    trabajo_equipo: { colaboracion: 5, apoyo: 4, conflictos: 3 },
-    liderazgo: { motivacion: 4, delegacion: 3, vision: 4 }
-  });
-
-  const calculateCategoryScore = (category) => {
-    const values = Object.values(scores[category]);
-    return Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 20);
-  };
-
-  const totalScore = Math.round(
-    (calculateCategoryScore('comunicacion') + 
-     calculateCategoryScore('trabajo_equipo') + 
-     calculateCategoryScore('liderazgo')) / 3
-  );
-
-  const updateScore = (category, item, value) => {
-    setScores(prev => ({
-      ...prev,
-      [category]: { ...prev[category], [item]: value }
-    }));
-  };
-
-  const categories = [
-    { 
-      key: 'comunicacion', 
-      label: 'Comunicación', 
-      icon: MessageSquare,
-      items: [
-        { key: 'claridad', label: 'Claridad en la comunicación' },
-        { key: 'escucha', label: 'Escucha activa' },
-        { key: 'feedback', label: 'Dar y recibir feedback' }
-      ]
-    },
-    { 
-      key: 'trabajo_equipo', 
-      label: 'Trabajo en Equipo', 
-      icon: Users,
-      items: [
-        { key: 'colaboracion', label: 'Colaboración efectiva' },
-        { key: 'apoyo', label: 'Apoyo a compañeros' },
-        { key: 'conflictos', label: 'Resolución de conflictos' }
-      ]
-    },
-    { 
-      key: 'liderazgo', 
-      label: 'Liderazgo', 
-      icon: Award,
-      items: [
-        { key: 'motivacion', label: 'Motivación del equipo' },
-        { key: 'delegacion', label: 'Delegación efectiva' },
-        { key: 'vision', label: 'Visión estratégica' }
-      ]
-    }
-  ];
-
-  return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-          Evaluación 360°
-        </h1>
-        <p className="text-slate-500 mt-1">Evaluación de valores y habilidades blandas</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {categories.map((category, idx) => (
-            <div 
-              key={category.key}
-              className={`bg-white border border-slate-200 rounded-2xl shadow-sm p-6 animate-fade-in stagger-${idx + 1}`}
-              data-testid={`category-${category.key}`}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                    <category.icon className="w-5 h-5 text-slate-600" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                    {category.label}
-                  </h2>
-                </div>
-                <span className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-                  {calculateCategoryScore(category.key)}
-                </span>
-              </div>
-
-              <div className="space-y-6">
-                {category.items.map((item) => (
-                  <div key={item.key} data-testid={`item-${category.key}-${item.key}`}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-slate-600">{item.label}</span>
-                      <span className="text-sm font-semibold text-slate-900">
-                        {scores[category.key][item.key]}/5
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((val) => (
-                        <button
-                          key={val}
-                          onClick={() => updateScore(category.key, item.key, val)}
-                          className={`flex-1 h-10 rounded-lg border-2 transition-all font-medium ${
-                            scores[category.key][item.key] >= val
-                              ? 'bg-slate-900 border-slate-900 text-white'
-                              : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
-                          }`}
-                          data-testid={`score-${category.key}-${item.key}-${val}`}
-                        >
-                          {val}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Score Summary */}
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sticky top-6" data-testid="total-score-card">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Puntuación Total
-            </h2>
-            <div className="text-center mb-6">
-              <span 
-                className="text-6xl font-bold"
-                style={{ 
-                  fontFamily: 'Outfit',
-                  color: totalScore > 66 ? '#10B981' : totalScore > 33 ? '#F59E0B' : '#EF4444'
-                }}
-              >
-                {totalScore}
-              </span>
-              <p className="text-slate-500 mt-2">de 100 puntos</p>
-            </div>
-
-            <div className="space-y-3">
-              {categories.map((cat) => (
-                <div key={cat.key} className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">{cat.label}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all"
-                        style={{ 
-                          width: `${calculateCategoryScore(cat.key)}%`,
-                          backgroundColor: calculateCategoryScore(cat.key) > 66 ? '#10B981' : 
-                                          calculateCategoryScore(cat.key) > 33 ? '#F59E0B' : '#EF4444'
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-900 w-8">
-                      {calculateCategoryScore(cat.key)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button 
-              className="w-full mt-6 bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800 transition-colors"
-              data-testid="submit-360-btn"
-            >
-              Enviar Evaluación
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// KPI Evaluation View
-const KPIEvaluation = () => {
-  const [kpis, setKpis] = useState([
-    { id: 1, name: "Ventas mensuales", weight: 30, value: 85, target: 100 },
-    { id: 2, name: "Satisfacción del cliente", weight: 25, value: 92, target: 100 },
-    { id: 3, name: "Proyectos completados", weight: 25, value: 78, target: 100 },
-    { id: 4, name: "Tiempo de respuesta", weight: 20, value: 70, target: 100 },
-  ]);
-
-  const updateKPI = (id, field, value) => {
-    setKpis(prev => prev.map(kpi => 
-      kpi.id === id ? { ...kpi, [field]: parseInt(value) || 0 } : kpi
-    ));
-  };
-
-  const weightedScore = Math.round(
-    kpis.reduce((acc, kpi) => acc + (kpi.value * kpi.weight / 100), 0)
-  );
-
-  return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-          Evaluación KPI
-        </h1>
-        <p className="text-slate-500 mt-1">Resultados cuantitativos del período</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          {kpis.map((kpi, idx) => (
-            <div 
-              key={kpi.id}
-              className={`bg-white border border-slate-200 rounded-2xl shadow-sm p-6 animate-fade-in stagger-${idx + 1}`}
-              data-testid={`kpi-card-${kpi.id}`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-slate-900">{kpi.name}</h3>
-                  <p className="text-sm text-slate-500">Peso: {kpi.weight}%</p>
-                </div>
-                <div className="text-right">
-                  <span 
-                    className="text-2xl font-bold"
-                    style={{ 
-                      fontFamily: 'Outfit',
-                      color: kpi.value > 66 ? '#10B981' : kpi.value > 33 ? '#F59E0B' : '#EF4444'
-                    }}
-                  >
-                    {kpi.value}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mb-4">
-                <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ 
-                      width: `${kpi.value}%`,
-                      backgroundColor: kpi.value > 66 ? '#10B981' : kpi.value > 33 ? '#F59E0B' : '#EF4444'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Slider */}
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={kpi.value}
-                onChange={(e) => updateKPI(kpi.id, 'value', e.target.value)}
-                className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, ${
-                    kpi.value > 66 ? '#10B981' : kpi.value > 33 ? '#F59E0B' : '#EF4444'
-                  } 0%, ${
-                    kpi.value > 66 ? '#10B981' : kpi.value > 33 ? '#F59E0B' : '#EF4444'
-                  } ${kpi.value}%, #E2E8F0 ${kpi.value}%, #E2E8F0 100%)`
-                }}
-                data-testid={`kpi-slider-${kpi.id}`}
-              />
-
-              <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
-                <span className="text-sm text-slate-500">Contribución al total:</span>
-                <span className="text-sm font-semibold text-slate-900">
-                  {Math.round(kpi.value * kpi.weight / 100)} pts
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Summary */}
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sticky top-6" data-testid="kpi-summary-card">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Resultado Ponderado
-            </h2>
-            <div className="text-center mb-6">
-              <span 
-                className="text-6xl font-bold"
-                style={{ 
-                  fontFamily: 'Outfit',
-                  color: weightedScore > 66 ? '#10B981' : weightedScore > 33 ? '#F59E0B' : '#EF4444'
-                }}
-              >
-                {weightedScore}
-              </span>
-              <p className="text-slate-500 mt-2">Puntuación KPI Final</p>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              {kpis.map((kpi) => (
-                <div key={kpi.id} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 truncate flex-1 mr-2">{kpi.name}</span>
-                  <span className="font-semibold text-slate-900">{kpi.weight}%</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-slate-50 rounded-xl p-4 mb-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Total pesos:</span>
-                <span className="text-sm font-semibold text-slate-900">
-                  {kpis.reduce((acc, kpi) => acc + kpi.weight, 0)}%
-                </span>
-              </div>
-            </div>
-
-            <button 
-              className="w-full bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800 transition-colors"
-              data-testid="save-kpi-btn"
-            >
-              Guardar KPIs
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Self Evaluation View
-const SelfEvaluation = () => {
-  const [answers, setAnswers] = useState({
-    logros: 4,
-    desafios: 3,
-    crecimiento: 4,
-    colaboracion: 5,
-    objetivos: 4
-  });
-  const [useOverride, setUseOverride] = useState(false);
-  const [overrideScore, setOverrideScore] = useState(80);
-
-  const questions = [
-    { key: 'logros', label: '¿Cómo calificarías tus logros este período?' },
-    { key: 'desafios', label: '¿Qué tan bien manejaste los desafíos?' },
-    { key: 'crecimiento', label: '¿Cuánto has crecido profesionalmente?' },
-    { key: 'colaboracion', label: '¿Cómo fue tu colaboración con el equipo?' },
-    { key: 'objetivos', label: '¿Cumpliste con tus objetivos establecidos?' }
-  ];
-
-  const calculatedScore = Math.round(
-    (Object.values(answers).reduce((a, b) => a + b, 0) / (questions.length * 5)) * 100
-  );
-
-  const finalScore = useOverride ? overrideScore : calculatedScore;
-
-  return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-          Autoevaluación
-        </h1>
-        <p className="text-slate-500 mt-1">Reflexiona sobre tu desempeño</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="self-eval-form">
-            <div className="space-y-8">
-              {questions.map((q, idx) => (
-                <div 
-                  key={q.key} 
-                  className={`animate-fade-in stagger-${idx + 1}`}
-                  data-testid={`question-${q.key}`}
-                >
-                  <p className="text-slate-900 font-medium mb-3">{q.label}</p>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((val) => (
-                      <button
-                        key={val}
-                        onClick={() => setAnswers(prev => ({ ...prev, [q.key]: val }))}
-                        className={`flex-1 h-12 rounded-xl border-2 transition-all font-semibold ${
-                          answers[q.key] >= val
-                            ? 'bg-slate-900 border-slate-900 text-white'
-                            : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
-                        }`}
-                        data-testid={`answer-${q.key}-${val}`}
-                      >
-                        {val}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex justify-between mt-2 text-xs text-slate-400">
-                    <span>Bajo</span>
-                    <span>Alto</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Score Summary */}
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sticky top-6" data-testid="self-eval-summary">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Tu Puntuación
-            </h2>
-            <div className="text-center mb-6">
-              <span 
-                className="text-6xl font-bold"
-                style={{ 
-                  fontFamily: 'Outfit',
-                  color: finalScore > 66 ? '#10B981' : finalScore > 33 ? '#F59E0B' : '#EF4444'
-                }}
-              >
-                {finalScore}
-              </span>
-              <p className="text-slate-500 mt-2">
-                {useOverride ? 'Puntuación modificada' : 'Puntuación calculada'}
-              </p>
-            </div>
-
-            {/* Override Section */}
-            <div className="border-t border-slate-100 pt-4 mt-4">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium text-slate-700">Modificar puntuación</span>
-                <button
-                  onClick={() => setUseOverride(!useOverride)}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${
-                    useOverride ? 'bg-slate-900' : 'bg-slate-200'
-                  }`}
-                  data-testid="self-override-toggle"
-                >
-                  <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                    useOverride ? 'translate-x-6' : ''
-                  }`} />
-                </button>
-              </div>
-
-              {useOverride && (
-                <div className="animate-fade-in">
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={overrideScore}
-                    onChange={(e) => setOverrideScore(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-2xl font-bold focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900"
-                    data-testid="override-score-input"
-                  />
-                  <p className="text-xs text-slate-400 mt-2 text-center">
-                    Puntuación calculada: {calculatedScore}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <button 
-              className="w-full mt-6 bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800 transition-colors"
-              data-testid="submit-self-eval-btn"
-            >
-              Enviar Autoevaluación
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// 9-Box Matrix Full View
-const NineBoxMatrixView = () => {
-  const [selectedCell, setSelectedCell] = useState(null);
-
-  const matrixCells = [
-    { row: 0, col: 0, code: "C1", label: "Valores sin Resultados", color: "orange", description: "Alto potencial de valores pero bajo rendimiento. Necesita enfoque en resultados." },
-    { row: 0, col: 1, code: "B2", label: "Futuro Líder", color: "yellow", description: "Buen balance con potencial de crecimiento. Candidato a desarrollo de liderazgo." },
-    { row: 0, col: 2, code: "A", label: "Top Performer", color: "green", description: "Excelente en resultados y valores. Modelo a seguir, candidato a promoción." },
-    { row: 1, col: 0, code: "C3", label: "Necesita Desarrollo", color: "red-light", description: "Rendimiento y valores medios-bajos. Requiere plan de desarrollo integral." },
-    { row: 1, col: 1, code: "B3", label: "Performer Sólido", color: "orange-light", description: "Desempeño consistente y confiable. Pilar del equipo." },
-    { row: 1, col: 2, code: "B1", label: "Alto Potencial", color: "yellow", description: "Excelentes resultados con valores en desarrollo. Mentoring recomendado." },
-    { row: 2, col: 0, code: "C4", label: "Acción Urgente", color: "red", description: "Bajo rendimiento crítico. Requiere intervención inmediata o plan de salida." },
-    { row: 2, col: 1, code: "C2", label: "Bajo Rendimiento", color: "red-light", description: "Resultados insuficientes. Necesita plan de mejora con seguimiento cercano." },
-    { row: 2, col: 2, code: "B4", label: "Resultados sin Valores", color: "orange", description: "Buenos números pero problemas de cultura. Coaching en soft skills." },
-  ];
-
-  return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-          Matriz 9-Box
-        </h1>
-        <p className="text-slate-500 mt-1">Visualización de clasificación de empleados</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Matrix Grid */}
-        <div className="lg:col-span-2">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="full-matrix">
-            <div className="flex">
-              {/* Y-axis label */}
-              <div className="flex flex-col justify-center items-center w-12 mr-4">
-                <span 
-                  className="text-xs font-semibold text-slate-500 tracking-wider"
-                  style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-                >
-                  VALORES / POTENCIAL (360)
-                </span>
-              </div>
-
-              <div className="flex-1">
-                {/* Y-axis indicators */}
-                <div className="flex mb-2">
-                  <div className="w-12" />
-                  <div className="flex-1 grid grid-cols-3 gap-2 text-center">
-                    <span className="text-xs text-slate-400">Bajo (0-33)</span>
-                    <span className="text-xs text-slate-400">Medio (34-66)</span>
-                    <span className="text-xs text-slate-400">Alto (67-100)</span>
-                  </div>
-                </div>
-
-                {/* Grid */}
-                <div className="grid grid-cols-3 gap-3">
-                  {matrixCells.map((cell) => {
-                    const colors = classificationColors[cell.color];
-                    const isSelected = selectedCell?.code === cell.code;
-                    
-                    return (
-                      <button
-                        key={`${cell.row}-${cell.col}`}
-                        onClick={() => setSelectedCell(cell)}
-                        className={`matrix-cell aspect-square rounded-2xl border-2 flex flex-col items-center justify-center text-center p-4 ${isSelected ? 'active' : ''}`}
-                        style={{
-                          backgroundColor: colors.bg,
-                          borderColor: isSelected ? colors.text : colors.border,
-                          boxShadow: isSelected ? `0 0 0 3px ${colors.border}40` : 'none'
-                        }}
-                        data-testid={`matrix-btn-${cell.code}`}
-                      >
-                        <span 
-                          className="text-3xl font-bold"
-                          style={{ color: colors.text, fontFamily: 'Outfit' }}
-                        >
-                          {cell.code}
-                        </span>
-                        <span className="text-xs mt-2 leading-tight" style={{ color: colors.text }}>
-                          {cell.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* X-axis label */}
-                <div className="text-center mt-4">
-                  <span className="text-xs font-semibold text-slate-500 tracking-wider">
-                    RESULTADOS / DESEMPEÑO (KPI)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Cell Details */}
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sticky top-6" data-testid="cell-details">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Detalle de Clasificación
-            </h2>
-            
-            {selectedCell ? (
-              <div className="animate-fade-in">
-                <div 
-                  className="rounded-2xl p-6 text-center mb-4"
-                  style={{ 
-                    backgroundColor: classificationColors[selectedCell.color].bg,
-                    border: `2px solid ${classificationColors[selectedCell.color].border}`
-                  }}
-                >
-                  <span 
-                    className="text-5xl font-bold"
-                    style={{ color: classificationColors[selectedCell.color].text, fontFamily: 'Outfit' }}
-                  >
-                    {selectedCell.code}
-                  </span>
-                  <p 
-                    className="text-sm mt-2 font-medium"
-                    style={{ color: classificationColors[selectedCell.color].text }}
-                  >
-                    {selectedCell.label}
-                  </p>
-                </div>
-                
-                <div className="bg-slate-50 rounded-xl p-4">
-                  <h3 className="text-sm font-semibold text-slate-900 mb-2">Descripción</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {selectedCell.description}
-                  </p>
-                </div>
-
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Rango KPI:</span>
-                    <span className="text-slate-900 font-medium">
-                      {selectedCell.col === 0 ? '0-33' : selectedCell.col === 1 ? '34-66' : '67-100'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Rango Valores:</span>
-                    <span className="text-slate-900 font-medium">
-                      {selectedCell.row === 2 ? '0-33' : selectedCell.row === 1 ? '34-66' : '67-100'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-slate-400">
-                <Grid3X3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>Selecciona una celda para ver detalles</p>
-              </div>
-            )}
-          </div>
-
-          {/* Legend */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" data-testid="matrix-legend">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-              Leyenda de Colores
-            </h2>
-            <div className="space-y-2">
-              {[
-                { code: "A", color: "green", label: "Top Performer" },
-                { code: "B1-B4", color: "yellow", label: "Alto Potencial / Desarrollo" },
-                { code: "C1-C2", color: "orange", label: "Atención Requerida" },
-                { code: "C3-C4", color: "red", label: "Acción Urgente" },
-              ].map((item) => (
-                <div key={item.code} className="flex items-center gap-3">
-                  <div 
-                    className="w-4 h-4 rounded"
-                    style={{ backgroundColor: classificationColors[item.color]?.bg || classificationColors['red-light'].bg }}
-                  />
-                  <span className="text-sm text-slate-600">
-                    <strong>{item.code}:</strong> {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Main Layout Component
-const Layout = ({ children }) => {
-  return (
-    <div className="flex min-h-screen bg-[#FAFAFA]">
-      <Sidebar />
-      <main className="flex-1 p-8 overflow-auto">
-        <div className="max-w-6xl mx-auto">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
-};
-
-// App Component
 function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<DashboardGeneral />} />
-          <Route path="/employees" element={<EmployeeList />} />
-          <Route path="/evaluations" element={<EvaluationTemplates />} />
-          <Route path="/entry" element={<ManualResultsEntry />} />
-          <Route path="/profile" element={<EmployeeProfile />} />
-          <Route path="/360" element={<Evaluation360 />} />
-          <Route path="/kpi" element={<KPIEvaluation />} />
-          <Route path="/self" element={<SelfEvaluation />} />
-          <Route path="/matrix" element={<NineBoxMatrixView />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        {/* Public evaluation route (no sidebar) */}
+        <Route path="/evaluate/:token" element={<PublicEvaluationForm />} />
+        
+        {/* Main app routes */}
+        <Route path="*" element={
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/9box" element={<NineBoxGridView />} />
+              <Route path="/employees" element={<EmployeeList />} />
+              <Route path="/evaluations" element={<EvaluationsView />} />
+              <Route path="/kpis" element={<KPIsView />} />
+              <Route path="/manual-eval" element={<ManualEvaluation />} />
+              <Route path="/results" element={<ResultsView />} />
+            </Routes>
+          </Layout>
+        } />
+      </Routes>
     </BrowserRouter>
   );
 }
