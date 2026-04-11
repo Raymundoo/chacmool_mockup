@@ -1,114 +1,105 @@
-# EvalPro - Sistema de Evaluación de Empleados
+# EvalPro - Sistema de Evaluación de Empleados v3
 
-## Problem Statement Original
-Sistema web de evaluación de empleados que combina:
+## Problem Statement
+Sistema web completo de evaluación de empleados que combina:
 - KPIs (resultados cuantitativos, 0-100)
 - Evaluación 360 (valores/habilidades blandas, 0-100)
+- Matriz 9-box personalizada (A, B1-B4, C1-C4)
 
-Los resultados clasifican empleados en matriz 9-box personalizada con categorías:
-- A → verde (top performer)
-- B1–B4 → tonos amarillo/naranja
-- C1–C4 → tonos naranja/rojo (C4 el peor)
+## Estado Actual
+**MOCKUPS VISUALES v3 COMPLETOS** - Pendiente aprobación
 
-## Fase Actual
-**MOCKUPS/DISEÑO VISUAL v2** - Pendiente de aprobación
+## Vistas Implementadas (7 principales + 1 pública)
 
-## Vistas Implementadas (9 vistas totales)
-
-### NUEVAS VISTAS (v2)
-
-#### 1. Dashboard General (/)
-- Estadísticas: Total empleados, Promedio KPI, Top Performers, Requieren Atención
-- Matriz 9-box con conteo de empleados por celda
-- Mini avatares de empleados en cada celda
+### 1. Dashboard General (/)
+- Estadísticas: Empleados, Promedio KPI, Top Performers, Requieren Atención, Pendientes
+- Mini matriz 9-box con conteo y avatares
 - Filtro por departamento
-- Resumen por departamento con barras de progreso
-- Actividad reciente
+- Acciones rápidas
 
-#### 2. Listado de Empleados (/employees)
-- Tabla completa con foto, nombre, puesto, departamento, KPI, 360, clasificación
-- Búsqueda por nombre, puesto o ID
-- Filtro por departamento (6 departamentos)
-- Filtro por clasificación (A, B1-B4, C1-C4)
-- Botones de acción: Ver perfil, Evaluar
-- Botón "Agregar Empleado"
+### 2. Matriz 9-Box Mejorada (/9box)
+- **Nombres de empleados visibles en cada celda**
+- Filtros por departamento y tipo de evaluación (Automático, Autoevaluación, Líder, Pares)
+- Panel de detalle al seleccionar empleado
+- Barras de progreso de scores
 
-#### 3. Gestión de Evaluaciones (/evaluations)
-- Lista de plantillas disponibles (360 y KPI)
-- Detalle de plantilla seleccionada
-- **Edición de pesos configurable** para categorías y preguntas
-- Indicador visual de peso total (debe sumar 100%)
-- Estados: Activa/Inactiva
-- Botón "Nueva Evaluación"
+### 3. Evaluaciones 360 (/evaluations)
+- Lista de plantillas (360 y KPI)
+- Detalle con categorías y preguntas
+- **Pesos auto-ajustables** (al modificar uno, los demás se ajustan para mantener 100%)
+- Indicador visual de peso total
+- **Generar enlaces públicos** con tipos de evaluador:
+  - Líder
+  - Par/Colega
+  - Cliente
+  - Proveedor
+  - Autoevaluación
 
-### VISTAS ACTUALIZADAS
+### 4. Gestión de KPIs (/kpis)
+**4 pestañas:**
+- **Crear KPIs**: Nombre, tipo, unidad, umbrales de color (rojo/amarillo/verde)
+- **Mis KPIs**: Indicadores con progreso, metas SMART, estados (Aprobado/Pendiente/En Revisión)
+- **Revisión**: KPIs pendientes de aprobación con botones aprobar/rechazar
+- **Comparativa**: Gráficas de rendimiento por equipo y evolución temporal
 
-#### 4. Ingreso de Resultados (/entry)
-- **Selector dropdown de empleado**
-- **Selector dropdown de evaluación a aplicar**
-- Sliders de KPI y 360 con código de colores
-- Override manual de clasificación
-- Vista previa de matriz 9-box en tiempo real
+### 5. Evaluación Manual (/manual-eval)
+- Lista de empleados con clasificación actual
+- **Grid 3x3 para seleccionar cuadrante directamente**
+- Campo de justificación
+- Override de clasificación
 
-### VISTAS EXISTENTES
+### 6. Resultados (/results)
+- Selector de empleado
+- **Gráfica de Araña** (Spider/Radar) por competencias
+- **Gráfica de Pie** - Desglose por tipo de evaluador
+- Puntuaciones detalladas
 
-#### 5. Perfil de Empleado (/profile)
-#### 6. Evaluación 360 (/360)
-#### 7. Evaluación KPI (/kpi)
-#### 8. Autoevaluación (/self)
-#### 9. Matriz 9-Box (/matrix)
+### 7. Empleados (/employees)
+- Tabla con búsqueda y filtros
+- KPI, 360 y clasificación por empleado
+
+### 8. Formulario Público (/evaluate/:token)
+- Sin autenticación (acceso por link)
+- Multi-step con progress bar
+- Preguntas con escala 1-5
+- Pantalla de agradecimiento al finalizar
 
 ## Datos Mock
+- 8 empleados en 6 departamentos
+- 2 plantillas de evaluación (360 y KPI)
+- 5 tipos de evaluadores
+- KPIs con estados y feedback
 
-### Empleados (8 total)
-- María García López - Senior Developer - Tecnología
-- Juan Rodríguez Pérez - Product Manager - Producto
-- Laura Sánchez Ruiz - UX Designer - Diseño
-- Carlos Mendoza - Tech Lead - Tecnología
-- Ana Martínez - Head of Product - Producto
-- Roberto Díaz - Sales Manager - Ventas
-- Patricia Luna - Marketing Specialist - Marketing
-- Fernando Torres - HR Coordinator - Recursos Humanos
-
-### Departamentos (6)
-- Tecnología, Producto, Diseño, Ventas, Marketing, Recursos Humanos
-
-### Plantillas de Evaluación (3)
-1. Evaluación Estándar 2024 (360) - Activa
-2. KPIs Comerciales Q1 2024 (KPI) - Activa
-3. Evaluación Técnica (360) - Inactiva
+## Funcionalidades Clave Implementadas ✅
+- [x] Pesos auto-ajustables (suma siempre 100%)
+- [x] Nombres visibles en matriz 9-box
+- [x] Filtros por departamento y tipo evaluación
+- [x] Generación de enlaces públicos
+- [x] KPIs con umbrales de color
+- [x] Metas SMART
+- [x] Flujo de revisión/aprobación
+- [x] Gráficas de araña y pie
+- [x] Evaluación manual (override directo)
+- [x] Formulario público multi-step
 
 ## Tech Stack
-- React.js con React Router
+- React.js + React Router
+- Recharts (gráficas)
 - Tailwind CSS
 - Lucide React (iconos)
-- Diseño tipo SaaS moderno
 
-## What's Implemented ✅
-- [x] 9 vistas mockup interactivas
-- [x] Dashboard con distribución en matriz
-- [x] Listado con filtros múltiples
-- [x] Gestión de evaluaciones con pesos editables
-- [x] Selector de empleado y evaluación
-- [x] Relación empleados-departamentos
-- [x] Navegación completa
-- [x] 100% pruebas pasadas
+## Testing
+- 100% pruebas pasadas
+- 23 tests de funcionalidad verificados
 
-## Backlog (Pendiente de Aprobación)
-- [ ] P0: Backend con MongoDB para persistencia
+## Backlog (Cuando aprueben diseño)
+- [ ] P0: Backend con MongoDB
 - [ ] P0: Autenticación (Admin/Empleado)
 - [ ] P1: Carga desde Excel/CSV
 - [ ] P1: Historial de evaluaciones
-- [ ] P1: CRUD completo de empleados y evaluaciones
-- [ ] P2: Reportes y exportación
-- [ ] P2: Notificaciones
-
-## Next Steps
-1. Obtener aprobación del diseño visual
-2. Si aprobado: implementar backend funcional
-3. Definir roles y permisos exactos
-4. Integrar carga de datos desde Excel
+- [ ] P1: Notificaciones por email
+- [ ] P2: Reportes exportables
 
 ---
 *Última actualización: Enero 2026*
-*Estado: Mockups v2 completados, pendiente revisión*
+*Estado: Mockups v3 completos - Pendiente aprobación*
