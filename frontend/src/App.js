@@ -45,331 +45,255 @@ import {
   UserCheck,
   Briefcase,
   Users2,
-  Star
+  Star,
+  Info,
+  ArrowUp,
+  ArrowRight
 } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 
 // ============================================
-// MOCK DATA
+// CLASSIFICATION SYSTEM - BASED ON CLIENT'S LOGIC
+// ============================================
+
+// 9-Box Matrix Structure based on client's document:
+// VALORES (Y-axis): 40%, 80%, 100%
+// RESULTADOS (X-axis): 40%, 80%, 100%
+
+const classificationMatrix = {
+  "A": { 
+    valores: { min: 81, max: 100 }, 
+    resultados: { min: 81, max: 100 },
+    label: "Jugador A", 
+    description: "Espectaculares. Da resultados. Independientes. Les das qué hacer y traen los resultados. Aspiran a gerentes o supervisores.",
+    color: "green",
+    action: "Retener y desarrollar para roles de liderazgo"
+  },
+  "B2": { 
+    valores: { min: 81, max: 100 }, 
+    resultados: { min: 61, max: 80 },
+    label: "Futuro A", 
+    description: "Tiene valores y está cerca de dar resultados completos. Con coaching puede llegar a A.",
+    color: "yellow",
+    action: "Coaching intensivo en resultados"
+  },
+  "B3": { 
+    valores: { min: 81, max: 100 }, 
+    resultados: { min: 0, max: 60 },
+    label: "Quiere ser A", 
+    description: "Tiene los valores, pero no da resultados. Está en el puesto incorrecto (principalmente problemas de liderazgo). La estrategia de entrenamiento no es correcta.",
+    color: "orange",
+    action: "Reubicar o ajustar estrategia de entrenamiento"
+  },
+  "B1": { 
+    valores: { min: 61, max: 80 }, 
+    resultados: { min: 61, max: 80 },
+    label: "Performer Sólido", 
+    description: "Tiene valores y da resultados de forma consistente. Pilar del equipo.",
+    color: "yellow",
+    action: "Desarrollar valores para alcanzar nivel A"
+  },
+  "B4": { 
+    valores: { min: 61, max: 80 }, 
+    resultados: { min: 81, max: 100 },
+    label: "Alto Potencial", 
+    description: "Quieren ser jugadores A. Tiene valores y da resultados. Muy cerca de ser A.",
+    color: "yellow-light",
+    action: "Reforzar valores para promoción"
+  },
+  "C4": { 
+    valores: { min: 61, max: 80 }, 
+    resultados: { min: 0, max: 60 },
+    label: "En Desarrollo", 
+    description: "Valores aceptables pero resultados bajos. Requiere plan de mejora.",
+    color: "orange",
+    action: "Plan de mejora con seguimiento cercano"
+  },
+  "C3": { 
+    valores: { min: 0, max: 60 }, 
+    resultados: { min: 81, max: 100 },
+    label: "Difícil de Sacar", 
+    description: "Genera muchos resultados, pero no tiene valores (cáncer). Persona que se cree Dios. Tóxico para el equipo.",
+    color: "red",
+    action: "Coaching urgente en valores o desvincular"
+  },
+  "C2": { 
+    valores: { min: 0, max: 60 }, 
+    resultados: { min: 61, max: 80 },
+    label: "Bajo Rendimiento", 
+    description: "Esperando a que los corran. Ni valores ni resultados destacables.",
+    color: "red-light",
+    action: "Plan de mejora o desvincular"
+  },
+  "C1": { 
+    valores: { min: 0, max: 60 }, 
+    resultados: { min: 0, max: 60 },
+    label: "Acción Urgente", 
+    description: "Esperando a que los corran. Sin valores ni resultados.",
+    color: "red",
+    action: "Desvincular"
+  }
+};
+
+const classificationColors = {
+  green: { bg: "#ECFDF5", border: "#10B981", text: "#047857", gradient: "from-green-500 to-emerald-600" },
+  "yellow-light": { bg: "#FEF9C3", border: "#FACC15", text: "#A16207", gradient: "from-yellow-400 to-amber-500" },
+  yellow: { bg: "#FFFBEB", border: "#F59E0B", text: "#B45309", gradient: "from-amber-400 to-orange-500" },
+  orange: { bg: "#FFEDD5", border: "#F97316", text: "#C2410C", gradient: "from-orange-400 to-red-500" },
+  "red-light": { bg: "#FEF2F2", border: "#F87171", text: "#B91C1C", gradient: "from-red-400 to-rose-500" },
+  red: { bg: "#FEE2E2", border: "#EF4444", text: "#991B1B", gradient: "from-red-500 to-red-700" }
+};
+
+// Get classification based on scores
+const getClassification = (valores, resultados) => {
+  for (const [code, config] of Object.entries(classificationMatrix)) {
+    if (valores >= config.valores.min && valores <= config.valores.max &&
+        resultados >= config.resultados.min && resultados <= config.resultados.max) {
+      return { code, ...config };
+    }
+  }
+  return { code: "C1", ...classificationMatrix["C1"] };
+};
+
+// ============================================
+// MOCK DATA - BASED ON CLIENT'S EVALUATION STRUCTURE
 // ============================================
 
 const mockDepartments = [
   { id: "dept-1", name: "Tecnología", color: "#3B82F6" },
-  { id: "dept-2", name: "Producto", color: "#8B5CF6" },
-  { id: "dept-3", name: "Diseño", color: "#EC4899" },
-  { id: "dept-4", name: "Ventas", color: "#10B981" },
-  { id: "dept-5", name: "Marketing", color: "#F59E0B" },
-  { id: "dept-6", name: "Recursos Humanos", color: "#EF4444" },
+  { id: "dept-2", name: "Operaciones", color: "#8B5CF6" },
+  { id: "dept-3", name: "Ventas", color: "#10B981" },
+  { id: "dept-4", name: "Soporte", color: "#F59E0B" },
+  { id: "dept-5", name: "Administración", color: "#EC4899" },
+];
+
+// Evaluator types based on client's document
+const evaluatorTypes = [
+  { id: "superior", name: "Superior", icon: UserCheck, color: "#3B82F6", weight: 30 },
+  { id: "subordinados", name: "Subordinados", icon: Users, color: "#8B5CF6", weight: 20 },
+  { id: "companeros", name: "Compañeros", icon: Users2, color: "#10B981", weight: 20 },
+  { id: "clientes", name: "Clientes", icon: Briefcase, color: "#F59E0B", weight: 15 },
+  { id: "autoevaluacion", name: "Autoevaluación", icon: User, color: "#EC4899", weight: 15 },
+];
+
+// Competencies based on client's CSV
+const competencias = [
+  { id: "liderazgo", name: "Liderazgo", description: "Capacidad de guiar e inspirar a otros hacia los objetivos" },
+  { id: "trabajo_equipo", name: "Trabajo en equipo", description: "Colaboración efectiva con compañeros" },
+  { id: "resolucion_problemas", name: "Resolución de problemas", description: "Capacidad de analizar y resolver situaciones complejas" },
+  { id: "aprendizaje_continuo", name: "Aprendizaje continuo", description: "Disposición para adquirir nuevos conocimientos" },
+];
+
+// Values based on client's CSV
+const valores = [
+  { id: "hazlo_ahora", name: "Hazlo Ahora", description: "Actitud proactiva y de acción inmediata" },
+  { id: "mejora_continua", name: "Mejora continua (Ley Boy Scout)", description: "Dejar todo mejor de como lo encontraste" },
+  { id: "autoaprendizaje", name: "Autoaprendizaje", description: "Iniciativa para aprender por cuenta propia" },
+  { id: "alertidad", name: "Alertidad", description: "Estar atento a oportunidades y problemas" },
+  { id: "amabilidad", name: "Amabilidad", description: "Trato cordial y respetuoso" },
+  { id: "valor_agregado", name: "Valor Agregado", description: "Aportar más de lo esperado" },
+  { id: "comunicacion_asertiva", name: "Comunicación Asertiva", description: "Expresar ideas de forma clara y respetuosa" },
 ];
 
 const mockEmployees = [
   { 
-    id: "EMP-001", 
-    name: "María García López", 
-    position: "Senior Developer", 
-    departmentId: "dept-1",
-    department: "Tecnología",
-    hireDate: "2021-03-15",
-    supervisor: "Carlos Mendoza",
-    supervisorId: "EMP-004",
-    email: "maria.garcia@empresa.com",
-    phone: "+52 555 123 4567",
+    id: "EMP-001", name: "María García López", position: "Tech Lead", departmentId: "dept-1", department: "Tecnología",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 72,
-    valuesScore: 85,
-    autoEvalScore: 80,
-    leaderEvalScore: 82,
-    peerEvalScore: 78,
+    valoresScore: 92, resultadosScore: 88, // Clasificación: A
+    evaluations: { superior: 90, subordinados: 88, companeros: 85, clientes: 80, autoevaluacion: 95 },
     manualOverride: null
   },
   { 
-    id: "EMP-002", 
-    name: "Juan Rodríguez", 
-    position: "Product Manager", 
-    departmentId: "dept-2",
-    department: "Producto",
-    hireDate: "2020-08-22",
-    supervisor: "Ana Martínez",
-    supervisorId: "EMP-005",
-    email: "juan.rodriguez@empresa.com",
-    phone: "+52 555 987 6543",
+    id: "EMP-002", name: "Juan Rodríguez", position: "Desarrollador Sr", departmentId: "dept-1", department: "Tecnología",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 85,
-    valuesScore: 78,
-    autoEvalScore: 88,
-    leaderEvalScore: 80,
-    peerEvalScore: 75,
+    valoresScore: 85, resultadosScore: 75, // Clasificación: B2
+    evaluations: { superior: 82, subordinados: 78, companeros: 80, clientes: 75, autoevaluacion: 88 },
     manualOverride: null
   },
   { 
-    id: "EMP-003", 
-    name: "Laura Sánchez", 
-    position: "UX Designer", 
-    departmentId: "dept-3",
-    department: "Diseño",
-    hireDate: "2022-01-10",
-    supervisor: "Carlos Mendoza",
-    supervisorId: "EMP-004",
-    email: "laura.sanchez@empresa.com",
-    phone: "+52 555 456 7890",
+    id: "EMP-003", name: "Laura Sánchez", position: "Gerente de Operaciones", departmentId: "dept-2", department: "Operaciones",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 65,
-    valuesScore: 92,
-    autoEvalScore: 85,
-    leaderEvalScore: 90,
-    peerEvalScore: 88,
+    valoresScore: 95, resultadosScore: 55, // Clasificación: B3
+    evaluations: { superior: 70, subordinados: 92, companeros: 88, clientes: 65, autoevaluacion: 90 },
     manualOverride: null
   },
   { 
-    id: "EMP-004", 
-    name: "Carlos Mendoza", 
-    position: "Tech Lead", 
-    departmentId: "dept-1",
-    department: "Tecnología",
-    hireDate: "2019-05-01",
-    supervisor: "Director General",
-    supervisorId: null,
-    email: "carlos.mendoza@empresa.com",
-    phone: "+52 555 111 2222",
+    id: "EMP-004", name: "Carlos Mendoza", position: "Ejecutivo de Ventas", departmentId: "dept-3", department: "Ventas",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 88,
-    valuesScore: 90,
-    autoEvalScore: 92,
-    leaderEvalScore: 88,
-    peerEvalScore: 85,
+    valoresScore: 45, resultadosScore: 92, // Clasificación: C3 (Difícil de sacar)
+    evaluations: { superior: 85, subordinados: 40, companeros: 35, clientes: 90, autoevaluacion: 75 },
     manualOverride: null
   },
   { 
-    id: "EMP-005", 
-    name: "Ana Martínez", 
-    position: "Head of Product", 
-    departmentId: "dept-2",
-    department: "Producto",
-    hireDate: "2018-11-15",
-    supervisor: "Director General",
-    supervisorId: null,
-    email: "ana.martinez@empresa.com",
-    phone: "+52 555 333 4444",
+    id: "EMP-005", name: "Ana Martínez", position: "Coordinadora de Soporte", departmentId: "dept-4", department: "Soporte",
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 45,
-    valuesScore: 82,
-    autoEvalScore: 75,
-    leaderEvalScore: 70,
-    peerEvalScore: 80,
-    manualOverride: "B2"
+    valoresScore: 72, resultadosScore: 78, // Clasificación: B1
+    evaluations: { superior: 75, subordinados: 72, companeros: 78, clientes: 80, autoevaluacion: 70 },
+    manualOverride: null
   },
   { 
-    id: "EMP-006", 
-    name: "Roberto Díaz", 
-    position: "Sales Manager", 
-    departmentId: "dept-4",
-    department: "Ventas",
-    hireDate: "2020-02-28",
-    supervisor: "Director Comercial",
-    supervisorId: null,
-    email: "roberto.diaz@empresa.com",
-    phone: "+52 555 555 6666",
+    id: "EMP-006", name: "Roberto Díaz", position: "Vendedor", departmentId: "dept-3", department: "Ventas",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 92,
-    valuesScore: 55,
-    autoEvalScore: 70,
-    leaderEvalScore: 60,
-    peerEvalScore: 50,
+    valoresScore: 78, resultadosScore: 85, // Clasificación: B4
+    evaluations: { superior: 88, subordinados: 70, companeros: 75, clientes: 85, autoevaluacion: 80 },
     manualOverride: null
   },
   { 
-    id: "EMP-007", 
-    name: "Patricia Luna", 
-    position: "Marketing Specialist", 
-    departmentId: "dept-5",
-    department: "Marketing",
-    hireDate: "2021-07-12",
-    supervisor: "Director Marketing",
-    supervisorId: null,
-    email: "patricia.luna@empresa.com",
-    phone: "+52 555 777 8888",
+    id: "EMP-007", name: "Patricia Luna", position: "Asistente Admin", departmentId: "dept-5", department: "Administración",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 30,
-    valuesScore: 40,
-    autoEvalScore: 45,
-    leaderEvalScore: 35,
-    peerEvalScore: 42,
+    valoresScore: 35, resultadosScore: 42, // Clasificación: C1
+    evaluations: { superior: 40, subordinados: 35, companeros: 38, clientes: 45, autoevaluacion: 55 },
     manualOverride: null
   },
   { 
-    id: "EMP-008", 
-    name: "Fernando Torres", 
-    position: "HR Coordinator", 
-    departmentId: "dept-6",
-    department: "Recursos Humanos",
-    hireDate: "2022-04-05",
-    supervisor: "Director RRHH",
-    supervisorId: null,
-    email: "fernando.torres@empresa.com",
-    phone: "+52 555 999 0000",
+    id: "EMP-008", name: "Fernando Torres", position: "Técnico de Soporte", departmentId: "dept-4", department: "Soporte",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
-    kpiScore: 58,
-    valuesScore: 62,
-    autoEvalScore: 65,
-    leaderEvalScore: 60,
-    peerEvalScore: 68,
+    valoresScore: 50, resultadosScore: 70, // Clasificación: C2
+    evaluations: { superior: 65, subordinados: 55, companeros: 60, clientes: 72, autoevaluacion: 68 },
     manualOverride: null
   }
 ];
 
-// Evaluator types
-const evaluatorTypes = [
-  { id: "leader", name: "Líder", icon: UserCheck, color: "#3B82F6" },
-  { id: "peer", name: "Par/Colega", icon: Users2, color: "#8B5CF6" },
-  { id: "client", name: "Cliente", icon: Briefcase, color: "#10B981" },
-  { id: "provider", name: "Proveedor", icon: Building2, color: "#F59E0B" },
-  { id: "self", name: "Autoevaluación", icon: User, color: "#EC4899" },
-];
-
-// Evaluation templates with auto-adjustable weights
+// Evaluation templates based on client's structure
 const mockEvaluationTemplates = [
   {
     id: "eval-1",
-    name: "Evaluación 360 Estándar",
-    description: "Evaluación integral de competencias para todos los empleados",
+    name: "Evaluación 360° Estándar",
+    description: "Evaluación integral de competencias y valores para todos los empleados",
     type: "360",
     isActive: true,
-    assignedTo: ["all"],
-    categories: [
-      { 
-        id: "cat-1", 
-        name: "Comunicación", 
-        weight: 25,
-        description: "Habilidad para transmitir ideas de forma clara y efectiva",
-        questions: [
-          { id: "q1", text: "Expresa sus ideas de manera clara y concisa", weight: 35 },
-          { id: "q2", text: "Escucha activamente a los demás", weight: 35 },
-          { id: "q3", text: "Proporciona y recibe feedback constructivo", weight: 30 }
-        ]
+    sections: [
+      {
+        id: "sec-competencias",
+        name: "Competencias necesarias para desempeñar su cargo",
+        weight: 50,
+        items: competencias.map((c, i) => ({ ...c, weight: 25 }))
       },
-      { 
-        id: "cat-2", 
-        name: "Trabajo en Equipo", 
-        weight: 25,
-        description: "Capacidad de colaborar efectivamente con otros",
-        questions: [
-          { id: "q4", text: "Colabora proactivamente con el equipo", weight: 40 },
-          { id: "q5", text: "Apoya a compañeros cuando lo necesitan", weight: 30 },
-          { id: "q6", text: "Maneja conflictos de manera constructiva", weight: 30 }
-        ]
-      },
-      { 
-        id: "cat-3", 
-        name: "Liderazgo", 
-        weight: 25,
-        description: "Capacidad de guiar e inspirar a otros",
-        questions: [
-          { id: "q7", text: "Motiva al equipo hacia los objetivos", weight: 35 },
-          { id: "q8", text: "Delega tareas de forma efectiva", weight: 35 },
-          { id: "q9", text: "Muestra visión estratégica", weight: 30 }
-        ]
-      },
-      { 
-        id: "cat-4", 
-        name: "Orientación a Resultados", 
-        weight: 25,
-        description: "Enfoque en cumplir objetivos y metas",
-        questions: [
-          { id: "q10", text: "Cumple con los plazos establecidos", weight: 35 },
-          { id: "q11", text: "Busca la excelencia en su trabajo", weight: 35 },
-          { id: "q12", text: "Toma iniciativa para mejorar procesos", weight: 30 }
-        ]
+      {
+        id: "sec-valores",
+        name: "Valores",
+        weight: 50,
+        items: valores.map((v, i) => ({ ...v, weight: Math.round(100 / valores.length) }))
       }
-    ]
-  },
-  {
-    id: "eval-2",
-    name: "KPIs Comerciales Q1",
-    description: "Métricas de desempeño para área comercial",
-    type: "kpi",
-    isActive: true,
-    assignedTo: ["dept-4"],
-    kpis: [
-      { id: "kpi-1", name: "Ventas mensuales", weight: 35, target: 100000, unit: "$", thresholds: { red: 50, yellow: 75, green: 90 } },
-      { id: "kpi-2", name: "Clientes nuevos", weight: 25, target: 20, unit: "clientes", thresholds: { red: 40, yellow: 70, green: 90 } },
-      { id: "kpi-3", name: "Retención de clientes", weight: 25, target: 95, unit: "%", thresholds: { red: 70, yellow: 85, green: 95 } },
-      { id: "kpi-4", name: "NPS Score", weight: 15, target: 80, unit: "pts", thresholds: { red: 50, yellow: 70, green: 85 } }
+    ],
+    scale: [
+      { value: 1, label: "Nunca demuestra esta competencia/valor" },
+      { value: 2, label: "Rara vez demuestra esta competencia/valor" },
+      { value: 3, label: "A veces demuestra esta competencia/valor" },
+      { value: 4, label: "Frecuentemente demuestra esta competencia/valor" },
+      { value: 5, label: "Siempre demuestra esta competencia/valor" },
     ]
   }
 ];
 
-// Mock evaluation links
-const mockEvaluationLinks = [
-  { id: "link-1", templateId: "eval-1", employeeId: "EMP-001", evaluatorType: "leader", token: "abc123", status: "pending", createdAt: "2024-01-15", expiresAt: "2024-02-15" },
-  { id: "link-2", templateId: "eval-1", employeeId: "EMP-001", evaluatorType: "peer", token: "def456", status: "completed", createdAt: "2024-01-15", expiresAt: "2024-02-15", completedAt: "2024-01-20" },
-  { id: "link-3", templateId: "eval-1", employeeId: "EMP-002", evaluatorType: "client", token: "ghi789", status: "pending", createdAt: "2024-01-18", expiresAt: "2024-02-18" },
-];
-
-// Mock KPI entries for employees
-const mockKPIEntries = [
-  { id: "entry-1", employeeId: "EMP-006", kpiId: "kpi-1", value: 85000, target: 100000, status: "approved", period: "2024-Q1", smartGoal: "Incrementar ventas un 15% respecto al trimestre anterior", feedback: "Buen progreso, sigue así" },
-  { id: "entry-2", employeeId: "EMP-006", kpiId: "kpi-2", value: 18, target: 20, status: "pending", period: "2024-Q1", smartGoal: "Conseguir 20 clientes nuevos en el trimestre", feedback: null },
-  { id: "entry-3", employeeId: "EMP-006", kpiId: "kpi-3", value: 92, target: 95, status: "revision", period: "2024-Q1", smartGoal: "Mantener retención por encima del 95%", feedback: "Revisar estrategia de retención" },
-];
-
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
-
-const getClassification = (kpi, values) => {
-  if (kpi > 66 && values > 66) return { code: "A", label: "Top Performer", color: "green" };
-  if (kpi > 66 && values > 33 && values <= 66) return { code: "B1", label: "Alto Potencial", color: "yellow" };
-  if (kpi > 33 && kpi <= 66 && values > 66) return { code: "B2", label: "Futuro Líder", color: "yellow" };
-  if (kpi > 33 && kpi <= 66 && values > 33 && values <= 66) return { code: "B3", label: "Performer Sólido", color: "orange-light" };
-  if (kpi > 66 && values <= 33) return { code: "B4", label: "Resultados sin Valores", color: "orange" };
-  if (kpi <= 33 && values > 66) return { code: "C1", label: "Valores sin Resultados", color: "orange" };
-  if (kpi > 33 && kpi <= 66 && values <= 33) return { code: "C2", label: "Bajo Rendimiento", color: "red-light" };
-  if (kpi <= 33 && values > 33 && values <= 66) return { code: "C3", label: "Necesita Desarrollo", color: "red-light" };
-  if (kpi <= 33 && values <= 33) return { code: "C4", label: "Acción Urgente", color: "red" };
-  return { code: "B3", label: "Performer Sólido", color: "orange-light" };
-};
-
-const classificationColors = {
-  green: { bg: "#ECFDF5", border: "#10B981", text: "#047857" },
-  yellow: { bg: "#FFFBEB", border: "#F59E0B", text: "#B45309" },
-  "orange-light": { bg: "#FFF7ED", border: "#FB923C", text: "#C2410C" },
-  orange: { bg: "#FFEDD5", border: "#F97316", text: "#C2410C" },
-  "red-light": { bg: "#FEF2F2", border: "#F87171", text: "#B91C1C" },
-  red: { bg: "#FEE2E2", border: "#EF4444", text: "#991B1B" }
-};
-
-const getEmployeeClassification = (emp, evalType = "automatic") => {
-  if (emp.manualOverride) {
-    const manualColors = {
-      "A": "green", "B1": "yellow", "B2": "yellow", "B3": "orange-light",
-      "B4": "orange", "C1": "orange", "C2": "red-light", "C3": "red-light", "C4": "red"
-    };
-    return { code: emp.manualOverride, label: "Manual", color: manualColors[emp.manualOverride] };
-  }
-  
-  let kpi = emp.kpiScore;
-  let values = emp.valuesScore;
-  
-  if (evalType === "auto") {
-    values = emp.autoEvalScore || emp.valuesScore;
-  } else if (evalType === "leader") {
-    values = emp.leaderEvalScore || emp.valuesScore;
-  } else if (evalType === "peer") {
-    values = emp.peerEvalScore || emp.valuesScore;
-  }
-  
-  return getClassification(kpi, values);
-};
-
-// Auto-adjust weights when one changes
+// Auto-adjust weights
 const autoAdjustWeights = (items, changedId, newWeight, totalTarget = 100) => {
   const otherItems = items.filter(i => i.id !== changedId);
-  const remainingWeight = totalTarget - newWeight;
+  const remainingWeight = Math.max(0, totalTarget - newWeight);
   const currentOtherTotal = otherItems.reduce((sum, i) => sum + i.weight, 0);
   
-  if (currentOtherTotal === 0) {
-    const equalWeight = remainingWeight / otherItems.length;
-    return items.map(i => i.id === changedId ? { ...i, weight: newWeight } : { ...i, weight: Math.round(equalWeight) });
+  if (currentOtherTotal === 0 || otherItems.length === 0) {
+    return items.map(i => i.id === changedId ? { ...i, weight: newWeight } : i);
   }
   
   const ratio = remainingWeight / currentOtherTotal;
@@ -400,18 +324,18 @@ const Sidebar = () => {
     <aside className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col" data-testid="sidebar">
       <div className="p-6 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center">
             <BarChart3 className="w-5 h-5 text-white" />
           </div>
           <div>
             <h1 className="text-lg font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>EvalPro</h1>
-            <p className="text-xs text-slate-500">Sistema de Evaluación</p>
+            <p className="text-xs text-slate-500">Sistema 360°</p>
           </div>
         </div>
       </div>
 
       <nav className="flex-1 p-4 overflow-y-auto">
-        <p className="text-xs font-semibold tracking-wider uppercase text-slate-400 mb-3 px-3">Menú Principal</p>
+        <p className="text-xs font-semibold tracking-wider uppercase text-slate-400 mb-3 px-3">Menú</p>
         <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.path}>
@@ -422,7 +346,6 @@ const Sidebar = () => {
                     isActive ? "bg-slate-100 text-slate-900 font-medium" : "text-slate-600 hover:text-slate-900"
                   }`
                 }
-                data-testid={`nav-${item.path.replace("/", "") || "home"}`}
               >
                 <item.icon className="w-5 h-5" />
                 <div className="flex-1">
@@ -437,7 +360,7 @@ const Sidebar = () => {
       </nav>
 
       <div className="p-4 border-t border-slate-100">
-        <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-4 text-white">
           <p className="text-xs font-semibold mb-1">Modo Mockup</p>
           <p className="text-xs opacity-70">Vista previa del diseño</p>
         </div>
@@ -447,190 +370,7 @@ const Sidebar = () => {
 };
 
 // ============================================
-// DASHBOARD COMPONENT
-// ============================================
-
-const Dashboard = () => {
-  const [selectedDepartment, setSelectedDepartment] = useState("all");
-  
-  const filteredEmployees = selectedDepartment === "all" 
-    ? mockEmployees 
-    : mockEmployees.filter(e => e.departmentId === selectedDepartment);
-
-  const classificationCounts = {};
-  filteredEmployees.forEach(emp => {
-    const classification = getEmployeeClassification(emp);
-    classificationCounts[classification.code] = (classificationCounts[classification.code] || 0) + 1;
-  });
-
-  const avgKPI = Math.round(filteredEmployees.reduce((a, e) => a + e.kpiScore, 0) / filteredEmployees.length);
-  const avgValues = Math.round(filteredEmployees.reduce((a, e) => a + e.valuesScore, 0) / filteredEmployees.length);
-  const topPerformers = filteredEmployees.filter(e => getEmployeeClassification(e).code === "A").length;
-  const needsAttention = filteredEmployees.filter(e => ["C3", "C4"].includes(getEmployeeClassification(e).code)).length;
-  const pendingEvals = mockEvaluationLinks.filter(l => l.status === "pending").length;
-
-  const matrixCells = [
-    { row: 0, col: 0, code: "C1", label: "Valores sin Resultados", color: "orange" },
-    { row: 0, col: 1, code: "B2", label: "Futuro Líder", color: "yellow" },
-    { row: 0, col: 2, code: "A", label: "Top Performer", color: "green" },
-    { row: 1, col: 0, code: "C3", label: "Necesita Desarrollo", color: "red-light" },
-    { row: 1, col: 1, code: "B3", label: "Performer Sólido", color: "orange-light" },
-    { row: 1, col: 2, code: "B1", label: "Alto Potencial", color: "yellow" },
-    { row: 2, col: 0, code: "C4", label: "Acción Urgente", color: "red" },
-    { row: 2, col: 1, code: "C2", label: "Bajo Rendimiento", color: "red-light" },
-    { row: 2, col: 2, code: "B4", label: "Resultados sin Valores", color: "orange" },
-  ];
-
-  return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Dashboard General
-          </h1>
-          <p className="text-slate-500 mt-1">Resumen del estado de evaluaciones</p>
-        </div>
-        
-        <div className="relative">
-          <select
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-            className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium cursor-pointer"
-            data-testid="department-filter"
-          >
-            <option value="all">Todos los departamentos</option>
-            {mockDepartments.map(dept => (
-              <option key={dept.id} value={dept.id}>{dept.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <Users className="w-5 h-5 text-slate-400" />
-            <p className="text-sm text-slate-500">Empleados</p>
-          </div>
-          <p className="text-3xl font-bold text-slate-900" style={{ fontFamily: 'Outfit' }}>{filteredEmployees.length}</p>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <Target className="w-5 h-5 text-blue-500" />
-            <p className="text-sm text-slate-500">Promedio KPI</p>
-          </div>
-          <p className="text-3xl font-bold text-blue-600" style={{ fontFamily: 'Outfit' }}>{avgKPI}%</p>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <Star className="w-5 h-5 text-green-500" />
-            <p className="text-sm text-slate-500">Top Performers</p>
-          </div>
-          <p className="text-3xl font-bold text-green-600" style={{ fontFamily: 'Outfit' }}>{topPerformers}</p>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
-            <p className="text-sm text-slate-500">Requieren Atención</p>
-          </div>
-          <p className="text-3xl font-bold text-red-600" style={{ fontFamily: 'Outfit' }}>{needsAttention}</p>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <Clock className="w-5 h-5 text-amber-500" />
-            <p className="text-sm text-slate-500">Evaluaciones Pendientes</p>
-          </div>
-          <p className="text-3xl font-bold text-amber-600" style={{ fontFamily: 'Outfit' }}>{pendingEvals}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Mini 9-Box */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-900" style={{ fontFamily: 'Outfit' }}>
-              Distribución en Matriz 9-Box
-            </h2>
-            <NavLink to="/9box" className="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-1">
-              Ver completo <ChevronRight className="w-4 h-4" />
-            </NavLink>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-2">
-            {matrixCells.map((cell) => {
-              const count = classificationCounts[cell.code] || 0;
-              const colors = classificationColors[cell.color];
-              const employees = filteredEmployees.filter(e => getEmployeeClassification(e).code === cell.code);
-              
-              return (
-                <div
-                  key={cell.code}
-                  className="rounded-xl border-2 p-3 text-center"
-                  style={{ backgroundColor: colors.bg, borderColor: colors.border }}
-                >
-                  <span className="text-lg font-bold" style={{ color: colors.text }}>{cell.code}</span>
-                  <p className="text-xs" style={{ color: colors.text }}>{cell.label}</p>
-                  <p className="text-2xl font-bold mt-1" style={{ color: colors.text }}>{count}</p>
-                  {employees.length > 0 && (
-                    <div className="flex justify-center -space-x-1 mt-2">
-                      {employees.slice(0, 3).map((emp) => (
-                        <img key={emp.id} src={emp.avatar} alt="" className="w-5 h-5 rounded-full border border-white" />
-                      ))}
-                      {employees.length > 3 && (
-                        <span className="w-5 h-5 rounded-full bg-slate-200 border border-white flex items-center justify-center text-xs">+{employees.length - 3}</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Acciones Rápidas</h2>
-            <div className="space-y-2">
-              <NavLink to="/evaluations" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Link className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">Generar Enlace</p>
-                  <p className="text-xs text-slate-500">Crear evaluación</p>
-                </div>
-              </NavLink>
-              <NavLink to="/kpis" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">Revisar KPIs</p>
-                  <p className="text-xs text-slate-500">Pendientes de aprobación</p>
-                </div>
-              </NavLink>
-              <NavLink to="/manual-eval" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <ClipboardEdit className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">Evaluación Manual</p>
-                  <p className="text-xs text-slate-500">Asignar cuadrante</p>
-                </div>
-              </NavLink>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================
-// 9-BOX GRID ENHANCED COMPONENT
+// 9-BOX GRID WITH PERCENTAGES - MAIN COMPONENT
 // ============================================
 
 const NineBoxGridView = () => {
@@ -643,17 +383,42 @@ const NineBoxGridView = () => {
     ? mockEmployees 
     : mockEmployees.filter(e => e.departmentId === selectedDepartment);
 
-  const matrixCells = [
-    { row: 0, col: 0, code: "C1", label: "Valores sin Resultados", color: "orange", desc: "Alto en valores pero bajo en resultados. Necesita enfoque en productividad." },
-    { row: 0, col: 1, code: "B2", label: "Futuro Líder", color: "yellow", desc: "Buen balance, potencial de liderazgo. Candidato a desarrollo." },
-    { row: 0, col: 2, code: "A", label: "Top Performer", color: "green", desc: "Excelente en todo. Modelo a seguir, candidato a promoción." },
-    { row: 1, col: 0, code: "C3", label: "Necesita Desarrollo", color: "red-light", desc: "Rendimiento medio-bajo. Requiere plan de mejora integral." },
-    { row: 1, col: 1, code: "B3", label: "Performer Sólido", color: "orange-light", desc: "Desempeño consistente y confiable. Pilar del equipo." },
-    { row: 1, col: 2, code: "B1", label: "Alto Potencial", color: "yellow", desc: "Excelentes resultados. Mentoring en valores recomendado." },
-    { row: 2, col: 0, code: "C4", label: "Acción Urgente", color: "red", desc: "Bajo rendimiento crítico. Intervención inmediata necesaria." },
-    { row: 2, col: 1, code: "C2", label: "Bajo Rendimiento", color: "red-light", desc: "Resultados insuficientes. Plan de mejora con seguimiento." },
-    { row: 2, col: 2, code: "B4", label: "Resultados sin Valores", color: "orange", desc: "Buenos números pero problemas de cultura. Coaching necesario." },
+  // Matrix structure with percentage labels
+  // Y-axis (VALORES): 0-60%, 61-80%, 81-100%
+  // X-axis (RESULTADOS): 0-60%, 61-80%, 81-100%
+  const matrixRows = [
+    { yLabel: "81-100%", yRange: { min: 81, max: 100 } },
+    { yLabel: "61-80%", yRange: { min: 61, max: 80 } },
+    { yLabel: "0-60%", yRange: { min: 0, max: 60 } },
   ];
+  
+  const matrixCols = [
+    { xLabel: "0-60%", xRange: { min: 0, max: 60 } },
+    { xLabel: "61-80%", xRange: { min: 61, max: 80 } },
+    { xLabel: "81-100%", xRange: { min: 81, max: 100 } },
+  ];
+
+  const matrixCells = [
+    // Row 0 (81-100% valores)
+    { row: 0, col: 0, code: "B3", ...classificationMatrix["B3"] },
+    { row: 0, col: 1, code: "B2", ...classificationMatrix["B2"] },
+    { row: 0, col: 2, code: "A", ...classificationMatrix["A"] },
+    // Row 1 (61-80% valores)
+    { row: 1, col: 0, code: "C4", ...classificationMatrix["C4"] },
+    { row: 1, col: 1, code: "B1", ...classificationMatrix["B1"] },
+    { row: 1, col: 2, code: "B4", ...classificationMatrix["B4"] },
+    // Row 2 (0-60% valores)
+    { row: 2, col: 0, code: "C1", ...classificationMatrix["C1"] },
+    { row: 2, col: 1, code: "C2", ...classificationMatrix["C2"] },
+    { row: 2, col: 2, code: "C3", ...classificationMatrix["C3"] },
+  ];
+
+  const getEmployeesInCell = (cell) => {
+    return filteredEmployees.filter(emp => {
+      const classification = getClassification(emp.valoresScore, emp.resultadosScore);
+      return classification.code === cell.code;
+    });
+  };
 
   return (
     <div className="animate-fade-in">
@@ -662,7 +427,7 @@ const NineBoxGridView = () => {
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
             Matriz 9-Box
           </h1>
-          <p className="text-slate-500 mt-1">Visualización y clasificación de empleados</p>
+          <p className="text-slate-500 mt-1">Clasificación de empleados por Valores y Resultados</p>
         </div>
         
         <div className="flex gap-3">
@@ -670,7 +435,6 @@ const NineBoxGridView = () => {
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}
             className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
-            data-testid="dept-filter"
           >
             <option value="all">Todos los departamentos</option>
             {mockDepartments.map(dept => (
@@ -682,13 +446,26 @@ const NineBoxGridView = () => {
             value={evalType}
             onChange={(e) => setEvalType(e.target.value)}
             className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
-            data-testid="eval-type-filter"
           >
-            <option value="automatic">Automático (Promedio)</option>
-            <option value="auto">Autoevaluación</option>
-            <option value="leader">Evaluación Líder</option>
-            <option value="peer">Evaluación Pares</option>
+            <option value="automatic">Promedio General</option>
+            <option value="superior">Solo Superior</option>
+            <option value="autoevaluacion">Autoevaluación</option>
+            <option value="companeros">Solo Compañeros</option>
           </select>
+        </div>
+      </div>
+
+      {/* Legend Info */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+          <div>
+            <p className="font-medium text-blue-800">Interpretación de la Matriz</p>
+            <p className="text-sm text-blue-700">
+              <strong>Eje Y (Vertical):</strong> VALORES - Comportamientos y actitudes alineados con la cultura.{" "}
+              <strong>Eje X (Horizontal):</strong> RESULTADOS - Cumplimiento de metas y productividad.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -696,62 +473,94 @@ const NineBoxGridView = () => {
         {/* Matrix Grid */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
           <div className="flex">
-            <div className="flex flex-col justify-center items-center w-10 mr-4">
-              <span className="text-xs font-semibold text-slate-500 tracking-wider" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                VALORES / POTENCIAL
+            {/* Y-axis label */}
+            <div className="flex flex-col justify-center items-center w-16 mr-2">
+              <div className="flex items-center gap-1 mb-2">
+                <ArrowUp className="w-4 h-4 text-slate-400" />
+              </div>
+              <span className="text-xs font-bold text-slate-700 tracking-wider" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                VALORES
               </span>
             </div>
             
             <div className="flex-1">
-              <div className="grid grid-cols-3 gap-3">
-                {matrixCells.map((cell) => {
-                  const colors = classificationColors[cell.color];
-                  const cellEmployees = filteredEmployees.filter(e => getEmployeeClassification(e, evalType).code === cell.code);
-                  
-                  return (
-                    <div
-                      key={cell.code}
-                      className={`rounded-2xl border-2 p-4 min-h-[140px] transition-all cursor-pointer hover:scale-[1.02] ${
-                        selectedEmployee && getEmployeeClassification(selectedEmployee, evalType).code === cell.code ? 'ring-2 ring-slate-900 ring-offset-2' : ''
-                      }`}
-                      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
-                      data-testid={`cell-${cell.code}`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xl font-bold" style={{ color: colors.text }}>{cell.code}</span>
-                        <span className="text-sm font-semibold px-2 py-0.5 rounded-full bg-white/50" style={{ color: colors.text }}>
-                          {cellEmployees.length}
-                        </span>
+              {/* Y-axis percentage labels */}
+              <div className="flex">
+                <div className="w-16" />
+                <div className="flex-1">
+                  {/* Column headers (X percentages) */}
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    {matrixCols.map((col, idx) => (
+                      <div key={idx} className="text-center">
+                        <span className="text-xs font-semibold text-slate-500">{col.xLabel}</span>
                       </div>
-                      <p className="text-xs font-medium mb-3" style={{ color: colors.text }}>{cell.label}</p>
+                    ))}
+                  </div>
+                  
+                  {/* Grid rows */}
+                  {matrixRows.map((row, rowIdx) => (
+                    <div key={rowIdx} className="flex items-center mb-2">
+                      {/* Row label (Y percentage) */}
+                      <div className="w-16 text-right pr-2">
+                        <span className="text-xs font-semibold text-slate-500">{row.yLabel}</span>
+                      </div>
                       
-                      {/* Employee names */}
-                      <div className="space-y-1">
-                        {cellEmployees.slice(0, 4).map((emp) => (
-                          <button
-                            key={emp.id}
-                            onClick={() => setSelectedEmployee(emp)}
-                            className={`w-full flex items-center gap-2 p-1.5 rounded-lg transition-all text-left ${
-                              selectedEmployee?.id === emp.id ? 'bg-white shadow-sm' : 'hover:bg-white/50'
-                            }`}
-                          >
-                            <img src={emp.avatar} alt="" className="w-6 h-6 rounded-full" />
-                            <span className="text-xs font-medium truncate" style={{ color: colors.text }}>
-                              {emp.name.split(' ')[0]} {emp.name.split(' ')[1]?.[0]}.
-                            </span>
-                          </button>
-                        ))}
-                        {cellEmployees.length > 4 && (
-                          <p className="text-xs text-center" style={{ color: colors.text }}>+{cellEmployees.length - 4} más</p>
-                        )}
+                      {/* Cells */}
+                      <div className="flex-1 grid grid-cols-3 gap-2">
+                        {matrixCells.filter(c => c.row === rowIdx).map((cell) => {
+                          const colors = classificationColors[cell.color];
+                          const cellEmployees = getEmployeesInCell(cell);
+                          const isHighlighted = selectedEmployee && getClassification(selectedEmployee.valoresScore, selectedEmployee.resultadosScore).code === cell.code;
+                          
+                          return (
+                            <div
+                              key={cell.code}
+                              className={`rounded-xl border-2 p-3 min-h-[130px] transition-all cursor-pointer hover:scale-[1.02] ${
+                                isHighlighted ? 'ring-2 ring-slate-900 ring-offset-2' : ''
+                              }`}
+                              style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-lg font-bold" style={{ color: colors.text }}>{cell.code}</span>
+                                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/60" style={{ color: colors.text }}>
+                                  {cellEmployees.length}
+                                </span>
+                              </div>
+                              <p className="text-xs font-medium mb-2" style={{ color: colors.text }}>{cell.label}</p>
+                              
+                              {/* Employee names */}
+                              <div className="space-y-1">
+                                {cellEmployees.slice(0, 3).map((emp) => (
+                                  <button
+                                    key={emp.id}
+                                    onClick={() => setSelectedEmployee(emp)}
+                                    className={`w-full flex items-center gap-1.5 p-1 rounded-lg transition-all text-left ${
+                                      selectedEmployee?.id === emp.id ? 'bg-white shadow-sm' : 'hover:bg-white/50'
+                                    }`}
+                                  >
+                                    <img src={emp.avatar} alt="" className="w-5 h-5 rounded-full" />
+                                    <span className="text-xs font-medium truncate" style={{ color: colors.text }}>
+                                      {emp.name.split(' ')[0]}
+                                    </span>
+                                  </button>
+                                ))}
+                                {cellEmployees.length > 3 && (
+                                  <p className="text-xs text-center" style={{ color: colors.text }}>+{cellEmployees.length - 3} más</p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
               
-              <div className="text-center mt-4">
-                <span className="text-xs font-semibold text-slate-500 tracking-wider">RESULTADOS / DESEMPEÑO (KPI)</span>
+              {/* X-axis label */}
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <span className="text-xs font-bold text-slate-700 tracking-wider">RESULTADOS</span>
+                <ArrowRight className="w-4 h-4 text-slate-400" />
               </div>
             </div>
           </div>
@@ -778,52 +587,62 @@ const NineBoxGridView = () => {
 
               {/* Classification */}
               {(() => {
-                const classification = getEmployeeClassification(selectedEmployee, evalType);
+                const classification = getClassification(selectedEmployee.valoresScore, selectedEmployee.resultadosScore);
                 const colors = classificationColors[classification.color];
-                const cellInfo = matrixCells.find(c => c.code === classification.code);
                 return (
-                  <div className="rounded-xl p-4 mb-4" style={{ backgroundColor: colors.bg, border: `2px solid ${colors.border}` }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-2xl font-bold" style={{ color: colors.text }}>{classification.code}</span>
-                      <span className="text-sm font-medium" style={{ color: colors.text }}>{classification.label}</span>
+                  <>
+                    <div className="rounded-xl p-4 mb-4" style={{ backgroundColor: colors.bg, border: `2px solid ${colors.border}` }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-2xl font-bold" style={{ color: colors.text }}>{classification.code}</span>
+                        <span className="text-sm font-medium" style={{ color: colors.text }}>{classification.label}</span>
+                      </div>
+                      <p className="text-xs" style={{ color: colors.text }}>{classification.description}</p>
                     </div>
-                    <p className="text-xs" style={{ color: colors.text }}>{cellInfo?.desc}</p>
-                  </div>
+                    
+                    <div className="bg-slate-50 rounded-xl p-3 mb-4">
+                      <p className="text-xs font-semibold text-slate-600 mb-1">Acción Recomendada:</p>
+                      <p className="text-sm text-slate-700">{classification.action}</p>
+                    </div>
+                  </>
                 );
               })()}
 
               {/* Scores */}
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-600">KPI</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${selectedEmployee.kpiScore}%` }} />
-                    </div>
-                    <span className="text-sm font-semibold w-8">{selectedEmployee.kpiScore}</span>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-slate-600">Valores</span>
+                    <span className="text-sm font-bold text-slate-900">{selectedEmployee.valoresScore}%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple-500 rounded-full" style={{ width: `${selectedEmployee.valoresScore}%` }} />
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-600">Valores 360</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-purple-500 rounded-full" style={{ width: `${selectedEmployee.valuesScore}%` }} />
-                    </div>
-                    <span className="text-sm font-semibold w-8">{selectedEmployee.valuesScore}</span>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-slate-600">Resultados</span>
+                    <span className="text-sm font-bold text-slate-900">{selectedEmployee.resultadosScore}%</span>
                   </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-600">Autoevaluación</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-pink-500 rounded-full" style={{ width: `${selectedEmployee.autoEvalScore}%` }} />
-                    </div>
-                    <span className="text-sm font-semibold w-8">{selectedEmployee.autoEvalScore}</span>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-full" style={{ width: `${selectedEmployee.resultadosScore}%` }} />
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              {/* Evaluations breakdown */}
+              <div className="border-t border-slate-100 pt-4">
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-3">Por Evaluador</p>
+                <div className="space-y-2">
+                  {evaluatorTypes.map((type) => (
+                    <div key={type.id} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600">{type.name}</span>
+                      <span className="font-semibold">{selectedEmployee.evaluations[type.id]}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2 mt-6">
                 <button 
                   onClick={() => navigate('/results')}
                   className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-slate-800"
@@ -834,16 +653,35 @@ const NineBoxGridView = () => {
                   onClick={() => navigate('/manual-eval')}
                   className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50"
                 >
-                  Editar
+                  Override
                 </button>
               </div>
             </div>
           ) : (
             <div className="text-center py-12 text-slate-400">
               <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Selecciona un empleado de la matriz para ver sus detalles</p>
+              <p>Selecciona un empleado de la matriz</p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Classification Legend */}
+      <div className="mt-6 bg-white border border-slate-200 rounded-2xl p-6">
+        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Leyenda de Clasificaciones</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Object.entries(classificationMatrix).map(([code, config]) => {
+            const colors = classificationColors[config.color];
+            return (
+              <div key={code} className="flex items-start gap-3 p-3 rounded-xl" style={{ backgroundColor: colors.bg }}>
+                <span className="text-xl font-bold" style={{ color: colors.text }}>{code}</span>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: colors.text }}>{config.label}</p>
+                  <p className="text-xs" style={{ color: colors.text }}>{config.description.substring(0, 60)}...</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -851,64 +689,213 @@ const NineBoxGridView = () => {
 };
 
 // ============================================
-// EVALUATIONS MANAGEMENT COMPONENT
+// DASHBOARD COMPONENT
 // ============================================
 
-const EvaluationsView = () => {
-  const [templates, setTemplates] = useState(mockEvaluationTemplates);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [showLinkModal, setShowLinkModal] = useState(false);
-  const [linkConfig, setLinkConfig] = useState({ employeeId: '', evaluatorType: 'leader' });
-  const [generatedLink, setGeneratedLink] = useState(null);
+const Dashboard = () => {
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
+  
+  const filteredEmployees = selectedDepartment === "all" 
+    ? mockEmployees 
+    : mockEmployees.filter(e => e.departmentId === selectedDepartment);
 
-  const handleWeightChange = (categoryId, newWeight) => {
-    if (!selectedTemplate || selectedTemplate.type !== '360') return;
-    const newWeight_ = Math.max(0, Math.min(100, parseInt(newWeight) || 0));
-    const newCategories = autoAdjustWeights(selectedTemplate.categories, categoryId, newWeight_);
-    const updatedTemplate = { ...selectedTemplate, categories: newCategories };
-    setSelectedTemplate(updatedTemplate);
-    setTemplates(prev => prev.map(t => t.id === updatedTemplate.id ? updatedTemplate : t));
-  };
+  const classificationCounts = {};
+  filteredEmployees.forEach(emp => {
+    const classification = getClassification(emp.valoresScore, emp.resultadosScore);
+    classificationCounts[classification.code] = (classificationCounts[classification.code] || 0) + 1;
+  });
 
-  const handleQuestionWeightChange = (categoryId, questionId, newWeight) => {
-    if (!selectedTemplate || selectedTemplate.type !== '360') return;
-    const newWeight_ = Math.max(0, Math.min(100, parseInt(newWeight) || 0));
-    const updatedTemplate = {
-      ...selectedTemplate,
-      categories: selectedTemplate.categories.map(cat => {
-        if (cat.id !== categoryId) return cat;
-        const newQuestions = autoAdjustWeights(cat.questions, questionId, newWeight_);
-        return { ...cat, questions: newQuestions };
-      })
-    };
-    setSelectedTemplate(updatedTemplate);
-    setTemplates(prev => prev.map(t => t.id === updatedTemplate.id ? updatedTemplate : t));
-  };
-
-  const generateLink = () => {
-    const token = Math.random().toString(36).substring(2, 10);
-    const link = `${window.location.origin}/evaluate/${token}`;
-    setGeneratedLink(link);
-  };
-
-  const totalWeight = selectedTemplate?.type === '360' 
-    ? selectedTemplate.categories.reduce((sum, c) => sum + c.weight, 0) 
-    : selectedTemplate?.kpis?.reduce((sum, k) => sum + k.weight, 0) || 0;
+  const avgValores = Math.round(filteredEmployees.reduce((a, e) => a + e.valoresScore, 0) / filteredEmployees.length);
+  const avgResultados = Math.round(filteredEmployees.reduce((a, e) => a + e.resultadosScore, 0) / filteredEmployees.length);
+  const topPerformers = filteredEmployees.filter(e => getClassification(e.valoresScore, e.resultadosScore).code === "A").length;
+  const needsAttention = filteredEmployees.filter(e => ["C1", "C2", "C3"].includes(getClassification(e.valoresScore, e.resultadosScore).code)).length;
 
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Evaluaciones 360
+            Dashboard
+          </h1>
+          <p className="text-slate-500 mt-1">Resumen de evaluaciones 360°</p>
+        </div>
+        
+        <select
+          value={selectedDepartment}
+          onChange={(e) => setSelectedDepartment(e.target.value)}
+          className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
+        >
+          <option value="all">Todos los departamentos</option>
+          {mockDepartments.map(dept => (
+            <option key={dept.id} value={dept.id}>{dept.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Users className="w-5 h-5 text-slate-400" />
+            <p className="text-sm text-slate-500">Empleados</p>
+          </div>
+          <p className="text-3xl font-bold text-slate-900">{filteredEmployees.length}</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Award className="w-5 h-5 text-purple-500" />
+            <p className="text-sm text-slate-500">Prom. Valores</p>
+          </div>
+          <p className="text-3xl font-bold text-purple-600">{avgValores}%</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Target className="w-5 h-5 text-blue-500" />
+            <p className="text-sm text-slate-500">Prom. Resultados</p>
+          </div>
+          <p className="text-3xl font-bold text-blue-600">{avgResultados}%</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <Star className="w-5 h-5 text-green-500" />
+            <p className="text-sm text-slate-500">Jugadores A</p>
+          </div>
+          <p className="text-3xl font-bold text-green-600">{topPerformers}</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+            <p className="text-sm text-slate-500">Requieren Atención</p>
+          </div>
+          <p className="text-3xl font-bold text-red-600">{needsAttention}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Mini 9-Box */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Distribución 9-Box</h2>
+            <NavLink to="/9box" className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
+              Ver detalle <ChevronRight className="w-4 h-4" />
+            </NavLink>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-2">
+            {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
+              const config = classificationMatrix[code];
+              const colors = classificationColors[config.color];
+              const count = classificationCounts[code] || 0;
+              
+              return (
+                <div
+                  key={code}
+                  className="rounded-xl border-2 p-3 text-center"
+                  style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+                >
+                  <span className="text-lg font-bold" style={{ color: colors.text }}>{code}</span>
+                  <p className="text-xs" style={{ color: colors.text }}>{config.label}</p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: colors.text }}>{count}</p>
+                </div>
+              );
+            })}
+          </div>
+          
+          <div className="mt-4 flex items-center justify-center gap-4 text-xs text-slate-500">
+            <span>← Menos Resultados</span>
+            <span className="font-semibold">RESULTADOS</span>
+            <span>Más Resultados →</span>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Acciones Rápidas</h2>
+          <div className="space-y-2">
+            <NavLink to="/evaluations" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Link className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-900">Generar Enlace 360</p>
+                <p className="text-xs text-slate-500">Crear evaluación</p>
+              </div>
+            </NavLink>
+            <NavLink to="/manual-eval" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50">
+              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                <ClipboardEdit className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-900">Evaluación Manual</p>
+                <p className="text-xs text-slate-500">Asignar cuadrante</p>
+              </div>
+            </NavLink>
+            <NavLink to="/results" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <BarChart2 className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-900">Ver Resultados</p>
+                <p className="text-xs text-slate-500">Gráficas y reportes</p>
+              </div>
+            </NavLink>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// EVALUATIONS VIEW - WITH CLIENT'S STRUCTURE
+// ============================================
+
+const EvaluationsView = () => {
+  const [templates, setTemplates] = useState(mockEvaluationTemplates);
+  const [selectedTemplate, setSelectedTemplate] = useState(mockEvaluationTemplates[0]);
+  const [editMode, setEditMode] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkConfig, setLinkConfig] = useState({ employeeId: '', evaluatorType: 'superior' });
+  const [generatedLink, setGeneratedLink] = useState(null);
+
+  const handleSectionWeightChange = (sectionId, newWeight) => {
+    const newWeight_ = Math.max(0, Math.min(100, parseInt(newWeight) || 0));
+    const updatedTemplate = {
+      ...selectedTemplate,
+      sections: autoAdjustWeights(selectedTemplate.sections, sectionId, newWeight_)
+    };
+    setSelectedTemplate(updatedTemplate);
+  };
+
+  const handleItemWeightChange = (sectionId, itemId, newWeight) => {
+    const newWeight_ = Math.max(0, Math.min(100, parseInt(newWeight) || 0));
+    const updatedTemplate = {
+      ...selectedTemplate,
+      sections: selectedTemplate.sections.map(sec => {
+        if (sec.id !== sectionId) return sec;
+        return { ...sec, items: autoAdjustWeights(sec.items, itemId, newWeight_) };
+      })
+    };
+    setSelectedTemplate(updatedTemplate);
+  };
+
+  const generateLink = () => {
+    const token = Math.random().toString(36).substring(2, 10);
+    setGeneratedLink(`${window.location.origin}/evaluate/${token}`);
+  };
+
+  const totalSectionWeight = selectedTemplate?.sections?.reduce((sum, s) => sum + s.weight, 0) || 0;
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+            Evaluaciones 360°
           </h1>
           <p className="text-slate-500 mt-1">Gestiona plantillas y genera enlaces de evaluación</p>
         </div>
-        <button 
-          className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2"
-          data-testid="new-template-btn"
-        >
+        <button className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Nueva Plantilla
         </button>
@@ -919,17 +906,17 @@ const EvaluationsView = () => {
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
           <MessageSquare className="w-8 h-8 mb-3 opacity-80" />
           <h3 className="font-semibold mb-1">Evaluación 360°</h3>
-          <p className="text-sm opacity-80">Evalúa competencias desde múltiples perspectivas: líder, pares, clientes y autoevaluación.</p>
+          <p className="text-sm opacity-80">Evalúa competencias y valores desde múltiples perspectivas: superior, subordinados, compañeros, clientes y autoevaluación.</p>
         </div>
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
-          <Link className="w-8 h-8 mb-3 opacity-80" />
-          <h3 className="font-semibold mb-1">Enlaces Públicos</h3>
-          <p className="text-sm opacity-80">Genera enlaces únicos para que evaluadores externos completen las evaluaciones sin necesidad de cuenta.</p>
-        </div>
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
           <Sliders className="w-8 h-8 mb-3 opacity-80" />
           <h3 className="font-semibold mb-1">Pesos Automáticos</h3>
           <p className="text-sm opacity-80">Al modificar un peso, los demás se ajustan automáticamente para mantener el 100%.</p>
+        </div>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
+          <Link className="w-8 h-8 mb-3 opacity-80" />
+          <h3 className="font-semibold mb-1">Enlaces Públicos</h3>
+          <p className="text-sm opacity-80">Genera enlaces únicos por evaluador. Se pueden compartir por WhatsApp o email.</p>
         </div>
       </div>
 
@@ -944,17 +931,12 @@ const EvaluationsView = () => {
               className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
                 selectedTemplate?.id === template.id ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
               }`}
-              data-testid={`template-${template.id}`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  template.type === '360' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {template.type === '360' ? 'Eval 360' : 'KPI'}
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                  Eval 360
                 </span>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  template.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-                }`}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${template.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                   {template.isActive ? 'Activa' : 'Inactiva'}
                 </span>
               </div>
@@ -966,7 +948,7 @@ const EvaluationsView = () => {
 
         {/* Template Detail */}
         <div className="lg:col-span-2">
-          {selectedTemplate ? (
+          {selectedTemplate && (
             <div className="bg-white border border-slate-200 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -977,17 +959,15 @@ const EvaluationsView = () => {
                   <button
                     onClick={() => setEditMode(!editMode)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 ${
-                      editMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      editMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
                     }`}
-                    data-testid="edit-weights-btn"
                   >
                     <Sliders className="w-4 h-4" />
-                    {editMode ? 'Editando Pesos' : 'Editar Pesos'}
+                    {editMode ? 'Editando' : 'Editar Pesos'}
                   </button>
                   <button
                     onClick={() => setShowLinkModal(true)}
                     className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 flex items-center gap-2"
-                    data-testid="generate-link-btn"
                   >
                     <Link className="w-4 h-4" />
                     Generar Enlace
@@ -996,102 +976,85 @@ const EvaluationsView = () => {
               </div>
 
               {/* Weight Indicator */}
-              <div className={`mb-6 p-4 rounded-xl ${totalWeight === 100 ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+              <div className={`mb-6 p-4 rounded-xl ${totalSectionWeight === 100 ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-sm font-medium ${totalWeight === 100 ? 'text-green-700' : 'text-amber-700'}`}>
-                    Peso total: {totalWeight}%
+                  <span className={`text-sm font-medium ${totalSectionWeight === 100 ? 'text-green-700' : 'text-amber-700'}`}>
+                    Peso total secciones: {totalSectionWeight}%
                   </span>
-                  {totalWeight === 100 ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <AlertTriangle className="w-5 h-5 text-amber-600" />
-                  )}
+                  {totalSectionWeight === 100 ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <AlertTriangle className="w-5 h-5 text-amber-600" />}
                 </div>
                 <div className="h-2 bg-white rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all ${totalWeight === 100 ? 'bg-green-500' : 'bg-amber-500'}`}
-                    style={{ width: `${Math.min(totalWeight, 100)}%` }}
-                  />
+                  <div className={`h-full rounded-full ${totalSectionWeight === 100 ? 'bg-green-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(totalSectionWeight, 100)}%` }} />
                 </div>
               </div>
 
-              {/* Categories/KPIs */}
-              {selectedTemplate.type === '360' ? (
-                <div className="space-y-4">
-                  {selectedTemplate.categories.map((category) => (
-                    <div key={category.id} className="border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-slate-900">{category.name}</h3>
-                          <p className="text-xs text-slate-500">{category.description}</p>
+              {/* Sections */}
+              {selectedTemplate.sections?.map((section) => {
+                const itemsTotal = section.items.reduce((sum, i) => sum + i.weight, 0);
+                return (
+                  <div key={section.id} className="border border-slate-200 rounded-xl p-4 mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-slate-900">{section.name}</h3>
+                        <p className="text-xs text-slate-500">Subtotal items: {itemsTotal}%</p>
+                      </div>
+                      {editMode ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={section.weight}
+                            onChange={(e) => handleSectionWeightChange(section.id, e.target.value)}
+                            className="w-16 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold"
+                          />
+                          <span className="text-sm text-slate-400">%</span>
                         </div>
-                        {editMode ? (
-                          <div className="flex items-center gap-2">
+                      ) : (
+                        <span className="text-lg font-bold text-slate-900">{section.weight}%</span>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2 pl-4 border-l-2 border-slate-100">
+                      {section.items.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between py-1">
+                          <div className="flex-1">
+                            <span className="text-sm text-slate-700">{item.name}</span>
+                            {item.description && <p className="text-xs text-slate-400">{item.description}</p>}
+                          </div>
+                          {editMode ? (
                             <input
                               type="number"
                               min="0"
                               max="100"
-                              value={category.weight}
-                              onChange={(e) => handleWeightChange(category.id, e.target.value)}
-                              className="w-16 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold"
+                              value={item.weight}
+                              onChange={(e) => handleItemWeightChange(section.id, item.id, e.target.value)}
+                              className="w-14 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded text-xs"
                             />
-                            <span className="text-sm text-slate-400">%</span>
-                          </div>
-                        ) : (
-                          <span className="text-lg font-bold text-slate-900">{category.weight}%</span>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-2 mt-3 pl-4 border-l-2 border-slate-100">
-                        {category.questions.map((q) => (
-                          <div key={q.id} className="flex items-center justify-between py-1">
-                            <span className="text-sm text-slate-600 flex-1">{q.text}</span>
-                            {editMode ? (
-                              <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={q.weight}
-                                onChange={(e) => handleQuestionWeightChange(category.id, q.id, e.target.value)}
-                                className="w-14 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded text-xs"
-                              />
-                            ) : (
-                              <span className="text-xs font-medium text-slate-400 ml-2">{q.weight}%</span>
-                            )}
-                          </div>
-                        ))}
-                        {editMode && (
-                          <p className="text-xs text-slate-400 mt-2">
-                            Subtotal: {category.questions.reduce((s, q) => s + q.weight, 0)}%
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {selectedTemplate.kpis?.map((kpi) => (
-                    <div key={kpi.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
-                      <div>
-                        <h3 className="font-medium text-slate-900">{kpi.name}</h3>
-                        <p className="text-sm text-slate-500">Meta: {kpi.target} {kpi.unit}</p>
-                        <div className="flex gap-2 mt-1">
-                          <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700">{"<"}{kpi.thresholds.red}%</span>
-                          <span className="text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-700">{kpi.thresholds.red}-{kpi.thresholds.yellow}%</span>
-                          <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">{">"}{kpi.thresholds.green}%</span>
+                          ) : (
+                            <span className="text-xs font-medium text-slate-400 ml-2">{item.weight}%</span>
+                          )}
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Scale */}
+              <div className="bg-slate-50 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3">Escala de Calificación (1-5)</h4>
+                <div className="grid grid-cols-5 gap-2">
+                  {selectedTemplate.scale?.map((s) => (
+                    <div key={s.value} className="text-center">
+                      <div className="w-10 h-10 mx-auto rounded-lg bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">
+                        {s.value}
                       </div>
-                      <span className="text-lg font-bold text-slate-900">{kpi.weight}%</span>
+                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">{s.label}</p>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500">Selecciona una plantilla para ver y editar</p>
+              </div>
             </div>
           )}
         </div>
@@ -1133,9 +1096,7 @@ const EvaluationsView = () => {
                           key={type.id}
                           onClick={() => setLinkConfig(prev => ({ ...prev, evaluatorType: type.id }))}
                           className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                            linkConfig.evaluatorType === type.id 
-                              ? 'border-slate-900 bg-slate-50' 
-                              : 'border-slate-200 hover:border-slate-300'
+                            linkConfig.evaluatorType === type.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200'
                           }`}
                         >
                           <type.icon className="w-4 h-4" style={{ color: type.color }} />
@@ -1149,7 +1110,7 @@ const EvaluationsView = () => {
                 <button
                   onClick={generateLink}
                   disabled={!linkConfig.employeeId}
-                  className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 disabled:opacity-50"
                 >
                   Generar Enlace
                 </button>
@@ -1159,23 +1120,23 @@ const EvaluationsView = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8 text-green-600" />
                 </div>
-                <p className="text-sm text-slate-600 mb-4">Enlace generado exitosamente</p>
+                <p className="text-sm text-slate-600 mb-4">Enlace generado. Compártelo por WhatsApp o email.</p>
                 <div className="bg-slate-50 rounded-xl p-4 mb-4">
                   <p className="text-sm font-mono text-slate-700 break-all">{generatedLink}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => navigator.clipboard.writeText(generatedLink)}
-                    className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
+                    className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2"
                   >
                     <Copy className="w-4 h-4" />
-                    Copiar Enlace
+                    Copiar
                   </button>
                   <button
-                    onClick={() => { setShowLinkModal(false); setGeneratedLink(null); }}
-                    className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50"
+                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(generatedLink)}`, '_blank')}
+                    className="flex-1 bg-green-600 text-white rounded-xl px-4 py-2.5 text-sm font-medium"
                   >
-                    Cerrar
+                    WhatsApp
                   </button>
                 </div>
               </div>
@@ -1188,45 +1149,33 @@ const EvaluationsView = () => {
 };
 
 // ============================================
-// KPIs MANAGEMENT COMPONENT
+// KPIs VIEW
 // ============================================
 
 const KPIsView = () => {
   const [activeTab, setActiveTab] = useState('create');
-  const [kpis, setKpis] = useState([
-    { id: 'kpi-new-1', name: 'Productividad', type: 'numeric', unit: '%', thresholds: { red: 50, yellow: 75, green: 90 } },
-    { id: 'kpi-new-2', name: 'Satisfacción del Cliente', type: 'scale', unit: 'pts', thresholds: { red: 60, yellow: 80, green: 90 } },
-  ]);
-  const [selectedKPI, setSelectedKPI] = useState(null);
-  const [myEntries, setMyEntries] = useState(mockKPIEntries);
-  const [showSmartModal, setShowSmartModal] = useState(false);
-
-  const tabs = [
-    { id: 'create', label: 'Crear KPIs', icon: Plus },
-    { id: 'fill', label: 'Mis KPIs', icon: ClipboardEdit },
-    { id: 'review', label: 'Revisión', icon: CheckCircle2 },
-    { id: 'compare', label: 'Comparativa', icon: BarChart2 },
-  ];
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Gestión de KPIs
-          </h1>
-          <p className="text-slate-500 mt-1">Crea, gestiona y revisa indicadores clave de desempeño</p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+          Gestión de KPIs
+        </h1>
+        <p className="text-slate-500 mt-1">Indicadores clave de desempeño</p>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-2 mb-8 bg-slate-100 p-1 rounded-xl w-fit">
-        {tabs.map((tab) => (
+        {[
+          { id: 'create', label: 'Crear KPIs', icon: Plus },
+          { id: 'fill', label: 'Mis KPIs', icon: ClipboardEdit },
+          { id: 'review', label: 'Revisión', icon: CheckCircle2 },
+          { id: 'compare', label: 'Comparativa', icon: BarChart2 },
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -1235,239 +1184,82 @@ const KPIsView = () => {
         ))}
       </div>
 
-      {/* Create KPIs Tab */}
       {activeTab === 'create' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-slate-900">Definir Nuevo KPI</h2>
-              <button className="bg-slate-900 text-white rounded-xl px-4 py-2 text-sm font-medium hover:bg-slate-800 flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Guardar KPI
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Nombre del KPI</label>
-                  <input type="text" placeholder="Ej: Ventas mensuales" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Tipo</label>
-                  <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5">
-                    <option value="numeric">Numérico</option>
-                    <option value="percentage">Porcentaje</option>
-                    <option value="currency">Monetario</option>
-                    <option value="scale">Escala</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Unidad de medida</label>
-                <input type="text" placeholder="Ej: %, $, pts, unidades" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-4">Umbrales de Color</label>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500" />
-                      <span className="text-sm font-medium text-red-700">Rojo (Bajo)</span>
-                    </div>
-                    <input type="number" placeholder="< 50%" className="w-full border border-red-200 rounded-lg px-3 py-2 text-sm bg-white" />
-                  </div>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                      <span className="text-sm font-medium text-yellow-700">Amarillo (Medio)</span>
-                    </div>
-                    <input type="number" placeholder="50-75%" className="w-full border border-yellow-200 rounded-lg px-3 py-2 text-sm bg-white" />
-                  </div>
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500" />
-                      <span className="text-sm font-medium text-green-700">Verde (Alto)</span>
-                    </div>
-                    <input type="number" placeholder="> 90%" className="w-full border border-green-200 rounded-lg px-3 py-2 text-sm bg-white" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">KPIs Existentes</h2>
-            <div className="space-y-3">
-              {kpis.map((kpi) => (
-                <div key={kpi.id} className="p-4 border border-slate-200 rounded-xl hover:border-slate-300 cursor-pointer">
-                  <h3 className="font-medium text-slate-900">{kpi.name}</h3>
-                  <p className="text-sm text-slate-500">Tipo: {kpi.type} | Unidad: {kpi.unit}</p>
-                  <div className="flex gap-1 mt-2">
-                    <span className="w-4 h-2 rounded-full bg-red-400" />
-                    <span className="w-4 h-2 rounded-full bg-yellow-400" />
-                    <span className="w-4 h-2 rounded-full bg-green-400" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Fill My KPIs Tab */}
-      {activeTab === 'fill' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6">Mis Indicadores - Q1 2024</h2>
-              
-              <div className="space-y-4">
-                {mockKPIEntries.map((entry) => {
-                  const kpiDef = mockEvaluationTemplates[1].kpis.find(k => k.id === entry.kpiId);
-                  const percentage = Math.round((entry.value / entry.target) * 100);
-                  const color = percentage >= kpiDef?.thresholds.green ? 'green' : percentage >= kpiDef?.thresholds.yellow ? 'yellow' : 'red';
-                  
-                  return (
-                    <div key={entry.id} className="border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h3 className="font-semibold text-slate-900">{kpiDef?.name}</h3>
-                          <p className="text-sm text-slate-500">{entry.smartGoal}</p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          entry.status === 'approved' ? 'bg-green-100 text-green-700' :
-                          entry.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                          'bg-blue-100 text-blue-700'
-                        }`}>
-                          {entry.status === 'approved' ? 'Aprobado' : entry.status === 'pending' ? 'Pendiente' : 'En Revisión'}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span className="text-slate-600">Progreso</span>
-                            <span className="font-medium">{entry.value.toLocaleString()} / {entry.target.toLocaleString()}</span>
-                          </div>
-                          <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full ${color === 'green' ? 'bg-green-500' : color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${Math.min(percentage, 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                        <span className={`text-2xl font-bold ${color === 'green' ? 'text-green-600' : color === 'yellow' ? 'text-yellow-600' : 'text-red-600'}`}>
-                          {percentage}%
-                        </span>
-                      </div>
-                      
-                      {entry.feedback && (
-                        <div className="mt-3 p-3 bg-slate-50 rounded-lg">
-                          <p className="text-xs text-slate-500 mb-1">Feedback del líder:</p>
-                          <p className="text-sm text-slate-700">{entry.feedback}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Agregar Meta SMART</h2>
-              <button 
-                onClick={() => setShowSmartModal(true)}
-                className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
-              >
-                <Flag className="w-4 h-4" />
-                Nueva Meta SMART
-              </button>
-              
-              <div className="mt-4 p-4 bg-blue-50 rounded-xl">
-                <p className="text-xs font-semibold text-blue-700 mb-2">¿Qué es SMART?</p>
-                <ul className="text-xs text-blue-600 space-y-1">
-                  <li><strong>S</strong>pecific - Específico</li>
-                  <li><strong>M</strong>easurable - Medible</li>
-                  <li><strong>A</strong>chievable - Alcanzable</li>
-                  <li><strong>R</strong>elevant - Relevante</li>
-                  <li><strong>T</strong>ime-bound - Temporal</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Review Tab */}
-      {activeTab === 'review' && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6">KPIs Pendientes de Revisión</h2>
-          
-          <div className="space-y-4">
-            {myEntries.filter(e => e.status !== 'approved').map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
-                <div className="flex items-center gap-4">
-                  <img src={mockEmployees.find(e => e.id === entry.employeeId)?.avatar} alt="" className="w-10 h-10 rounded-full" />
-                  <div>
-                    <p className="font-medium text-slate-900">{mockEmployees.find(e => e.id === entry.employeeId)?.name}</p>
-                    <p className="text-sm text-slate-500">{mockEvaluationTemplates[1].kpis.find(k => k.id === entry.kpiId)?.name}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-semibold">{Math.round((entry.value / entry.target) * 100)}%</span>
-                  <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg" title="Aprobar">
-                    <ThumbsUp className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Rechazar">
-                    <ThumbsDown className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            ))}
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">Definir Nuevo KPI</h2>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Nombre</label>
+              <input type="text" placeholder="Ej: Ventas mensuales" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Unidad</label>
+              <input type="text" placeholder="Ej: $, %, unidades" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
+            </div>
           </div>
+          
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-slate-700 mb-4">Umbrales de Color</label>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="text-sm font-medium text-red-700">Rojo (0-60%)</span>
+                </div>
+                <input type="number" placeholder="60" className="w-full border border-red-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <span className="text-sm font-medium text-yellow-700">Amarillo (61-80%)</span>
+                </div>
+                <input type="number" placeholder="80" className="w-full border border-yellow-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                  <span className="text-sm font-medium text-green-700">Verde (81-100%)</span>
+                </div>
+                <input type="number" placeholder="100" className="w-full border border-green-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+            </div>
+          </div>
+          
+          <button className="bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800">
+            Guardar KPI
+          </button>
         </div>
       )}
 
-      {/* Compare Tab */}
       {activeTab === 'compare' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white border border-slate-200 rounded-2xl p-6">
             <h2 className="text-lg font-semibold text-slate-900 mb-6">Rendimiento por Equipo</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={mockDepartments.map(d => ({
-                name: d.name.substring(0, 8),
-                kpi: Math.round(mockEmployees.filter(e => e.departmentId === d.id).reduce((a, e) => a + e.kpiScore, 0) / Math.max(mockEmployees.filter(e => e.departmentId === d.id).length, 1))
+                name: d.name.substring(0, 6),
+                valor: Math.round(mockEmployees.filter(e => e.departmentId === d.id).reduce((a, e) => a + e.resultadosScore, 0) / Math.max(mockEmployees.filter(e => e.departmentId === d.id).length, 1))
               }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Bar dataKey="kpi" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="valor" fill="#3B82F6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-
           <div className="bg-white border border-slate-200 rounded-2xl p-6">
             <h2 className="text-lg font-semibold text-slate-900 mb-6">Evolución Temporal</h2>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={[
-                { month: 'Ene', promedio: 65 },
-                { month: 'Feb', promedio: 68 },
-                { month: 'Mar', promedio: 72 },
-                { month: 'Abr', promedio: 70 },
-                { month: 'May', promedio: 75 },
-                { month: 'Jun', promedio: 78 },
+                { mes: 'Ene', prom: 65 }, { mes: 'Feb', prom: 68 }, { mes: 'Mar', prom: 72 },
+                { mes: 'Abr', prom: 70 }, { mes: 'May', prom: 75 }, { mes: 'Jun', prom: 78 },
               ]}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
+                <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="promedio" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="prom" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -1478,42 +1270,29 @@ const KPIsView = () => {
 };
 
 // ============================================
-// MANUAL EVALUATION COMPONENT
+// MANUAL EVALUATION
 // ============================================
 
 const ManualEvaluation = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [selectedClassification, setSelectedClassification] = useState(null);
+  const [selectedCode, setSelectedCode] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const matrixCells = [
-    { code: "C1", label: "Valores sin Resultados", color: "orange" },
-    { code: "B2", label: "Futuro Líder", color: "yellow" },
-    { code: "A", label: "Top Performer", color: "green" },
-    { code: "C3", label: "Necesita Desarrollo", color: "red-light" },
-    { code: "B3", label: "Performer Sólido", color: "orange-light" },
-    { code: "B1", label: "Alto Potencial", color: "yellow" },
-    { code: "C4", label: "Acción Urgente", color: "red" },
-    { code: "C2", label: "Bajo Rendimiento", color: "red-light" },
-    { code: "B4", label: "Resultados sin Valores", color: "orange" },
-  ];
 
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-          Evaluación Manual
+          Evaluación Manual (Override)
         </h1>
-        <p className="text-slate-500 mt-1">Asigna directamente un cuadrante del 9-Box a un empleado</p>
+        <p className="text-slate-500 mt-1">Asigna directamente un cuadrante del 9-Box</p>
       </div>
 
-      {/* Info */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
           <div>
-            <p className="font-medium text-amber-800">Evaluación por Override</p>
-            <p className="text-sm text-amber-700">Esta clasificación sobrescribirá el resultado calculado automáticamente. Usa esta opción cuando tengas información adicional que justifique un cambio.</p>
+            <p className="font-medium text-amber-800">Override Manual</p>
+            <p className="text-sm text-amber-700">Esta clasificación sobrescribirá el resultado calculado. Usa cuando tengas información adicional que justifique un cambio.</p>
           </div>
         </div>
       </div>
@@ -1522,10 +1301,9 @@ const ManualEvaluation = () => {
         {/* Employee Selection */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">1. Seleccionar Empleado</h2>
-          
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {mockEmployees.map((emp) => {
-              const classification = getEmployeeClassification(emp);
+              const classification = getClassification(emp.valoresScore, emp.resultadosScore);
               const colors = classificationColors[classification.color];
               
               return (
@@ -1533,80 +1311,61 @@ const ManualEvaluation = () => {
                   key={emp.id}
                   onClick={() => setSelectedEmployee(emp)}
                   className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                    selectedEmployee?.id === emp.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 hover:border-slate-300'
+                    selectedEmployee?.id === emp.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200'
                   }`}
                 >
                   <img src={emp.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">{emp.name}</p>
-                    <p className="text-sm text-slate-500">{emp.position} · {emp.department}</p>
+                    <p className="text-sm text-slate-500">{emp.position}</p>
                   </div>
-                  <div className="text-right">
-                    <span 
-                      className="inline-flex px-3 py-1 rounded-lg text-sm font-bold"
-                      style={{ backgroundColor: colors.bg, color: colors.text }}
-                    >
-                      {classification.code}
-                    </span>
-                    {emp.manualOverride && (
-                      <p className="text-xs text-amber-600 mt-1">Override activo</p>
-                    )}
-                  </div>
+                  <span className="px-3 py-1 rounded-lg font-bold text-sm" style={{ backgroundColor: colors.bg, color: colors.text }}>
+                    {classification.code}
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Classification Selection */}
+        {/* Classification Grid */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">2. Seleccionar Clasificación</h2>
           
           {selectedEmployee ? (
             <>
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                {matrixCells.map((cell) => {
-                  const colors = classificationColors[cell.color];
-                  const isSelected = selectedClassification === cell.code;
+              <div className="grid grid-cols-3 gap-2 mb-6">
+                {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
+                  const config = classificationMatrix[code];
+                  const colors = classificationColors[config.color];
                   
                   return (
                     <button
-                      key={cell.code}
-                      onClick={() => setSelectedClassification(cell.code)}
-                      className={`rounded-xl border-2 p-4 text-center transition-all ${
-                        isSelected ? 'ring-2 ring-slate-900 ring-offset-2' : ''
+                      key={code}
+                      onClick={() => setSelectedCode(code)}
+                      className={`rounded-xl border-2 p-3 text-center transition-all ${
+                        selectedCode === code ? 'ring-2 ring-slate-900 ring-offset-2' : ''
                       }`}
                       style={{ backgroundColor: colors.bg, borderColor: colors.border }}
                     >
-                      <span className="text-2xl font-bold" style={{ color: colors.text }}>{cell.code}</span>
-                      <p className="text-xs mt-1" style={{ color: colors.text }}>{cell.label}</p>
+                      <span className="text-xl font-bold" style={{ color: colors.text }}>{code}</span>
+                      <p className="text-xs mt-1" style={{ color: colors.text }}>{config.label}</p>
                     </button>
                   );
                 })}
               </div>
 
-              {selectedClassification && (
+              {selectedCode && (
                 <div className="animate-fade-in">
                   <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                    <p className="text-sm text-slate-600">
-                      <strong>{selectedEmployee.name}</strong> será clasificado como <strong>{selectedClassification}</strong>
-                    </p>
+                    <p className="text-sm"><strong>{selectedEmployee.name}</strong> será clasificado como <strong>{selectedCode}</strong></p>
                   </div>
-                  
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Justificación (opcional)</label>
-                    <textarea 
-                      rows={3}
-                      placeholder="Explica el motivo del override..."
-                      className="w-full border border-slate-200 rounded-xl px-4 py-3 resize-none"
-                    />
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Justificación</label>
+                    <textarea rows={3} placeholder="Motivo del override..." className="w-full border border-slate-200 rounded-xl px-4 py-3 resize-none" />
                   </div>
-
-                  <button 
-                    onClick={() => setShowConfirm(true)}
-                    className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800"
-                  >
-                    Aplicar Clasificación
+                  <button onClick={() => setShowConfirm(true)} className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800">
+                    Aplicar Override
                   </button>
                 </div>
               )}
@@ -1620,21 +1379,15 @@ const ManualEvaluation = () => {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm animate-fade-in text-center">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">¡Clasificación Aplicada!</h3>
-            <p className="text-sm text-slate-500 mb-6">
-              {selectedEmployee?.name} ha sido clasificado como {selectedClassification}
-            </p>
-            <button
-              onClick={() => { setShowConfirm(false); setSelectedClassification(null); }}
-              className="w-full bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800"
-            >
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">¡Override Aplicado!</h3>
+            <p className="text-sm text-slate-500 mb-6">{selectedEmployee?.name} ahora es {selectedCode}</p>
+            <button onClick={() => { setShowConfirm(false); setSelectedCode(null); }} className="w-full bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium">
               Continuar
             </button>
           </div>
@@ -1645,25 +1398,21 @@ const ManualEvaluation = () => {
 };
 
 // ============================================
-// RESULTS VIEW COMPONENT
+// RESULTS VIEW
 // ============================================
 
 const ResultsView = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
 
   const radarData = [
-    { subject: 'Comunicación', score: 85, fullMark: 100 },
-    { subject: 'Trabajo en Equipo', score: 78, fullMark: 100 },
-    { subject: 'Liderazgo', score: 72, fullMark: 100 },
-    { subject: 'Orientación a Resultados', score: 88, fullMark: 100 },
+    ...competencias.map(c => ({ subject: c.name, score: Math.round(Math.random() * 30 + 60), fullMark: 100 })),
   ];
 
-  const pieData = [
-    { name: 'Líder', value: 30, color: '#3B82F6' },
-    { name: 'Pares', value: 25, color: '#8B5CF6' },
-    { name: 'Clientes', value: 25, color: '#10B981' },
-    { name: 'Autoevaluación', value: 20, color: '#EC4899' },
-  ];
+  const valoresRadarData = valores.map(v => ({ 
+    subject: v.name.substring(0, 10), 
+    score: Math.round(Math.random() * 30 + 60), 
+    fullMark: 100 
+  }));
 
   return (
     <div className="animate-fade-in">
@@ -1672,21 +1421,18 @@ const ResultsView = () => {
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
             Resultados de Evaluación
           </h1>
-          <p className="text-slate-500 mt-1">Visualiza el desempeño detallado por empleado</p>
+          <p className="text-slate-500 mt-1">Visualización detallada por empleado</p>
         </div>
         
-        <div className="relative">
-          <select
-            value={selectedEmployee?.id || ''}
-            onChange={(e) => setSelectedEmployee(mockEmployees.find(emp => emp.id === e.target.value))}
-            className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
-          >
-            {mockEmployees.map(emp => (
-              <option key={emp.id} value={emp.id}>{emp.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        </div>
+        <select
+          value={selectedEmployee?.id || ''}
+          onChange={(e) => setSelectedEmployee(mockEmployees.find(emp => emp.id === e.target.value))}
+          className="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-sm"
+        >
+          {mockEmployees.map(emp => (
+            <option key={emp.id} value={emp.id}>{emp.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Employee Header */}
@@ -1698,14 +1444,11 @@ const ResultsView = () => {
             <p className="text-slate-500">{selectedEmployee?.position} · {selectedEmployee?.department}</p>
           </div>
           {(() => {
-            const classification = getEmployeeClassification(selectedEmployee);
+            const classification = getClassification(selectedEmployee.valoresScore, selectedEmployee.resultadosScore);
             const colors = classificationColors[classification.color];
             return (
               <div className="text-center">
-                <div 
-                  className="inline-flex items-center justify-center w-20 h-20 rounded-2xl text-3xl font-bold"
-                  style={{ backgroundColor: colors.bg, color: colors.text, border: `2px solid ${colors.border}` }}
-                >
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl text-3xl font-bold" style={{ backgroundColor: colors.bg, color: colors.text, border: `2px solid ${colors.border}` }}>
                   {classification.code}
                 </div>
                 <p className="text-sm text-slate-500 mt-2">{classification.label}</p>
@@ -1716,63 +1459,42 @@ const ResultsView = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Radar Chart */}
+        {/* Competencias Radar */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6">Gráfica de Araña - Competencias</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">Competencias</h2>
           <ResponsiveContainer width="100%" height={300}>
             <RadarChart data={radarData}>
               <PolarGrid stroke="#E2E8F0" />
-              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
+              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11 }} />
               <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
               <Radar name="Score" dataKey="score" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} strokeWidth={2} />
             </RadarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Score Breakdown */}
+        {/* Valores Radar */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6">Desglose por Evaluador</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <RechartsPie>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </RechartsPie>
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">Valores</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <RadarChart data={valoresRadarData}>
+              <PolarGrid stroke="#E2E8F0" />
+              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+              <Radar name="Score" dataKey="score" stroke="#8B5CF6" fill="#8B5CF6" fillOpacity={0.3} strokeWidth={2} />
+            </RadarChart>
           </ResponsiveContainer>
-          <div className="flex flex-wrap justify-center gap-4 mt-4">
-            {pieData.map((item) => (
-              <div key={item.name} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-sm text-slate-600">{item.name}: {item.value}%</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Detailed Scores */}
+        {/* Evaluator Breakdown */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6">Puntuaciones Detalladas</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: 'KPI', value: selectedEmployee?.kpiScore, color: '#3B82F6' },
-              { label: 'Valores 360', value: selectedEmployee?.valuesScore, color: '#8B5CF6' },
-              { label: 'Autoevaluación', value: selectedEmployee?.autoEvalScore, color: '#EC4899' },
-              { label: 'Líder', value: selectedEmployee?.leaderEvalScore, color: '#10B981' },
-            ].map((item) => (
-              <div key={item.label} className="bg-slate-50 rounded-xl p-4 text-center">
-                <p className="text-sm text-slate-500 mb-2">{item.label}</p>
-                <p className="text-4xl font-bold" style={{ color: item.color }}>{item.value}</p>
+          <h2 className="text-lg font-semibold text-slate-900 mb-6">Desglose por Evaluador</h2>
+          <div className="grid grid-cols-5 gap-4">
+            {evaluatorTypes.map((type) => (
+              <div key={type.id} className="bg-slate-50 rounded-xl p-4 text-center">
+                <type.icon className="w-8 h-8 mx-auto mb-2" style={{ color: type.color }} />
+                <p className="text-sm text-slate-500 mb-1">{type.name}</p>
+                <p className="text-3xl font-bold" style={{ color: type.color }}>{selectedEmployee?.evaluations[type.id]}%</p>
+                <p className="text-xs text-slate-400 mt-1">Peso: {type.weight}%</p>
               </div>
             ))}
           </div>
@@ -1783,26 +1505,123 @@ const ResultsView = () => {
 };
 
 // ============================================
-// PUBLIC EVALUATION FORM (for links)
+// EMPLOYEES LIST
+// ============================================
+
+const EmployeeList = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
+
+  const filteredEmployees = mockEmployees.filter(emp => {
+    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDept = selectedDepartment === "all" || emp.departmentId === selectedDepartment;
+    return matchesSearch && matchesDept;
+  });
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>Empleados</h1>
+          <p className="text-slate-500 mt-1">Gestión del personal</p>
+        </div>
+        <button className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          Agregar
+        </button>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6">
+        <div className="flex gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
+            />
+          </div>
+          <select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm"
+          >
+            <option value="all">Todos</option>
+            {mockDepartments.map(dept => (
+              <option key={dept.id} value={dept.id}>{dept.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Empleado</th>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Dept.</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Valores</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Resultados</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Clasificación</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {filteredEmployees.map((emp) => {
+              const classification = getClassification(emp.valoresScore, emp.resultadosScore);
+              const colors = classificationColors[classification.color];
+              
+              return (
+                <tr key={emp.id} className="hover:bg-slate-50">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <img src={emp.avatar} alt="" className="w-10 h-10 rounded-full" />
+                      <div>
+                        <p className="font-medium text-slate-900">{emp.name}</p>
+                        <p className="text-sm text-slate-500">{emp.position}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{emp.department}</td>
+                  <td className="px-6 py-4 text-center font-semibold text-purple-600">{emp.valoresScore}%</td>
+                  <td className="px-6 py-4 text-center font-semibold text-blue-600">{emp.resultadosScore}%</td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="px-3 py-1 rounded-lg font-bold text-sm" style={{ backgroundColor: colors.bg, color: colors.text }}>
+                      {classification.code}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// PUBLIC EVALUATION FORM
 // ============================================
 
 const PublicEvaluationForm = () => {
   const { token } = useParams();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentSection, setCurrentSection] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
   const template = mockEvaluationTemplates[0];
   const employee = mockEmployees[0];
-  const categories = template.categories;
+  const sections = template.sections;
+  const currentSec = sections[currentSection];
+  const isLastSection = currentSection === sections.length - 1;
 
-  const handleAnswer = (questionId, value) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  const handleAnswer = (itemId, value) => {
+    setAnswers(prev => ({ ...prev, [itemId]: value }));
   };
 
-  const currentCategory = categories[currentStep];
-  const isLastStep = currentStep === categories.length - 1;
-  const categoryAnswered = currentCategory?.questions.every(q => answers[q.id]);
+  const sectionAnswered = currentSec?.items.every(item => answers[item.id]);
 
   if (submitted) {
     return (
@@ -1812,7 +1631,7 @@ const PublicEvaluationForm = () => {
             <CheckCircle2 className="w-10 h-10 text-green-600" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">¡Gracias por tu evaluación!</h1>
-          <p className="text-slate-500 mb-6">Tu feedback ha sido registrado exitosamente y ayudará en el desarrollo profesional de {employee.name}.</p>
+          <p className="text-slate-500 mb-6">Tu feedback ha sido registrado y ayudará en el desarrollo de {employee.name}.</p>
           <div className="bg-slate-50 rounded-xl p-4">
             <p className="text-sm text-slate-600">Esta ventana se puede cerrar.</p>
           </div>
@@ -1829,46 +1648,35 @@ const PublicEvaluationForm = () => {
           <div className="flex items-center gap-4 mb-4">
             <img src={employee.avatar} alt="" className="w-16 h-16 rounded-xl object-cover" />
             <div>
-              <p className="text-sm text-slate-500">Evaluación para:</p>
+              <p className="text-sm text-slate-500">Evaluación 360° para:</p>
               <h2 className="text-xl font-semibold text-slate-900">{employee.name}</h2>
               <p className="text-sm text-slate-500">{employee.position}</p>
             </div>
           </div>
           
           {/* Progress */}
-          <div className="flex gap-2">
-            {categories.map((_, idx) => (
-              <div 
-                key={idx}
-                className={`flex-1 h-2 rounded-full transition-all ${
-                  idx < currentStep ? 'bg-green-500' : idx === currentStep ? 'bg-slate-900' : 'bg-slate-200'
-                }`}
-              />
+          <div className="flex gap-2 mb-2">
+            {sections.map((_, idx) => (
+              <div key={idx} className={`flex-1 h-2 rounded-full ${idx < currentSection ? 'bg-green-500' : idx === currentSection ? 'bg-slate-900' : 'bg-slate-200'}`} />
             ))}
           </div>
-          <p className="text-sm text-slate-500 mt-2">Paso {currentStep + 1} de {categories.length}</p>
+          <p className="text-sm text-slate-500">Sección {currentSection + 1} de {sections.length}: <strong>{currentSec?.name}</strong></p>
         </div>
 
         {/* Form */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">{currentCategory?.name}</h3>
-            <p className="text-sm text-slate-500">{currentCategory?.description}</p>
-          </div>
-
           <div className="space-y-6">
-            {currentCategory?.questions.map((q) => (
-              <div key={q.id}>
-                <p className="text-slate-700 mb-3">{q.text}</p>
+            {currentSec?.items.map((item) => (
+              <div key={item.id}>
+                <p className="text-slate-700 font-medium mb-2">{item.name}</p>
+                {item.description && <p className="text-sm text-slate-500 mb-3">{item.description}</p>}
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((val) => (
                     <button
                       key={val}
-                      onClick={() => handleAnswer(q.id, val)}
+                      onClick={() => handleAnswer(item.id, val)}
                       className={`flex-1 h-12 rounded-xl border-2 font-semibold transition-all ${
-                        answers[q.id] === val
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
+                        answers[item.id] === val ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-400'
                       }`}
                     >
                       {val}
@@ -1876,28 +1684,25 @@ const PublicEvaluationForm = () => {
                   ))}
                 </div>
                 <div className="flex justify-between text-xs text-slate-400 mt-1">
-                  <span>Muy bajo</span>
-                  <span>Excelente</span>
+                  <span>Nunca</span>
+                  <span>Siempre</span>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="flex gap-3 mt-8">
-            {currentStep > 0 && (
-              <button
-                onClick={() => setCurrentStep(prev => prev - 1)}
-                className="px-6 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50"
-              >
+            {currentSection > 0 && (
+              <button onClick={() => setCurrentSection(prev => prev - 1)} className="px-6 py-3 border border-slate-200 rounded-xl font-medium">
                 Anterior
               </button>
             )}
             <button
-              onClick={() => isLastStep ? setSubmitted(true) : setCurrentStep(prev => prev + 1)}
-              disabled={!categoryAnswered}
-              className="flex-1 bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => isLastSection ? setSubmitted(true) : setCurrentSection(prev => prev + 1)}
+              disabled={!sectionAnswered}
+              className="flex-1 bg-slate-900 text-white rounded-xl px-6 py-3 font-medium disabled:opacity-50"
             >
-              {isLastStep ? 'Enviar Evaluación' : 'Siguiente'}
+              {isLastSection ? 'Enviar Evaluación' : 'Siguiente'}
             </button>
           </div>
         </div>
@@ -1907,128 +1712,7 @@ const PublicEvaluationForm = () => {
 };
 
 // ============================================
-// EMPLOYEES LIST COMPONENT
-// ============================================
-
-const EmployeeList = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("all");
-
-  const filteredEmployees = mockEmployees.filter(emp => {
-    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         emp.position.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDept = selectedDepartment === "all" || emp.departmentId === selectedDepartment;
-    return matchesSearch && matchesDept;
-  });
-
-  return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Empleados
-          </h1>
-          <p className="text-slate-500 mt-1">Gestión del personal</p>
-        </div>
-        <button className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Agregar Empleado
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Buscar empleado..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
-            />
-          </div>
-          <select
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm"
-          >
-            <option value="all">Todos los departamentos</option>
-            {mockDepartments.map(dept => (
-              <option key={dept.id} value={dept.id}>{dept.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Empleado</th>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Departamento</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">KPI</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">360</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Clasificación</th>
-              <th className="text-right text-xs font-semibold text-slate-500 uppercase px-6 py-4">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredEmployees.map((emp) => {
-              const classification = getEmployeeClassification(emp);
-              const colors = classificationColors[classification.color];
-              
-              return (
-                <tr key={emp.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img src={emp.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
-                      <div>
-                        <p className="font-medium text-slate-900">{emp.name}</p>
-                        <p className="text-sm text-slate-500">{emp.position}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-slate-600">{emp.department}</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`font-semibold ${emp.kpiScore > 66 ? 'text-green-600' : emp.kpiScore > 33 ? 'text-yellow-600' : 'text-red-600'}`}>
-                      {emp.kpiScore}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`font-semibold ${emp.valuesScore > 66 ? 'text-green-600' : emp.valuesScore > 33 ? 'text-yellow-600' : 'text-red-600'}`}>
-                      {emp.valuesScore}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span 
-                      className="inline-flex px-3 py-1 rounded-lg font-bold text-sm"
-                      style={{ backgroundColor: colors.bg, color: colors.text }}
-                    >
-                      {classification.code}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-// ============================================
-// MAIN LAYOUT & APP
+// MAIN APP
 // ============================================
 
 const Layout = ({ children }) => (
@@ -2044,10 +1728,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public evaluation route (no sidebar) */}
         <Route path="/evaluate/:token" element={<PublicEvaluationForm />} />
-        
-        {/* Main app routes */}
         <Route path="*" element={
           <Layout>
             <Routes>
