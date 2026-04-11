@@ -101,3 +101,124 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Sistema web de evaluación de empleados (UI/UX mockups). Combina KPIs y Evaluaciones 360 para clasificar empleados en matriz 9-box personalizada (A, B1-B4, C1-C4). SOLO diseños visuales interactivos, sin backend/DB activo."
+
+frontend:
+  - task: "Título 'Empleado A' reemplaza 'Matriz 9-Box'"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Actualizado título de la vista matriz 9-box en líneas 534 y 1792. Ahora muestra 'Empleado A' en lugar de 'Matriz 9-Box'. Las categorías dentro de las celdas mantienen sus nombres correctos (Empleado A, Futuro A, etc.)"
+
+  - task: "Porcentajes dentro de las celdas de la matriz 9-box"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Verificado en líneas 605-613. Los porcentajes de Valores y Resultados están dentro de cada celda en un recuadro semitransparente (V: XX-XX%, R: XX-XX%)"
+
+  - task: "Vista Perfil+Resultados fusionada"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implementado en líneas 747-960. Muestra categoría calculada vs autoevaluación lado a lado (líneas 815-840), con indicador de diferencia cuando no coinciden"
+
+  - task: "UI para asignación de plantillas KPI"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implementado en líneas 1430-1700. Incluye pestañas: Plantillas KPI, Asignar a Empleados (con selector y lista de empleados), Evaluar KPIs (con campos de entrada), y Comparativa"
+
+  - task: "Contadores de evaluadores (nombres ocultos para empleados)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implementado en líneas 696-722 y 882-909. En modo Admin muestra nombres de evaluadores, en modo Empleado solo muestra contadores (X personas)"
+
+  - task: "General Dashboard con matriz resumida"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Dashboard funcional con métricas y matriz resumida con título 'Empleado A'"
+
+  - task: "Vista Evaluaciones 360° con plantillas"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Vista funcional en /evaluations con plantillas, enlaces públicos y funcionalidades completas"
+
+backend:
+  - task: "Backend FastAPI (INACTIVO)"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backend existe pero no se utiliza. Usuario solo requiere mockups visuales en esta fase"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Título 'Empleado A' reemplaza 'Matriz 9-Box'"
+    - "Porcentajes dentro de las celdas de la matriz 9-box"
+    - "Vista Perfil+Resultados fusionada"
+    - "UI para asignación de plantillas KPI"
+    - "Contadores de evaluadores"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implementadas TODAS las correcciones del feedback del usuario (Mensaje 120). Cambios realizados: 1) Título 'Empleado A' reemplaza 'Matriz 9-Box' (NO reemplaza 'Jugador A' en categorías), 2) Porcentajes dentro de celdas 9-box, 3) Vista perfil+resultados fusionada con comparación de categoría calculada vs autoevaluación, 4) UI completa para asignación y evaluación de KPIs con pestañas, 5) Contadores de evaluadores con lógica Admin/Empleado. Frontend compila exitosamente. Screenshots preliminares muestran todo funcionando correctamente. Requiere testing completo de UI."
