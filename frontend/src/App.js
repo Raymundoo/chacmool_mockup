@@ -1,6 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, NavLink, useLocation, useParams, useNavigate } from "react-router-dom";
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginPage from './components/LoginPage';
+import { employeesAPI, aciertosAPI } from './services/api';
 import { 
   Users, 
   Target, 
@@ -60,7 +63,8 @@ import {
   ClipboardList,
   LayoutGrid,
   List,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 
@@ -965,6 +969,7 @@ const autoAdjustWeights = (items, changedId, newWeight, totalTarget = 100) => {
 
 const Sidebar = ({ isAdmin, setIsAdmin }) => {
   const location = useLocation();
+  const { user, logout } = useAuth();
   
   const navItems = [
     { path: "/", icon: LayoutDashboard, label: "Dashboard", description: "Vista general" },
@@ -980,7 +985,7 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
   return (
     <aside className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col">
       <div className="p-6 border-b border-slate-100">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center">
             <BarChart3 className="w-5 h-5 text-white" />
           </div>
@@ -989,29 +994,20 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
             <p className="text-xs text-slate-500">Sistema 360°</p>
           </div>
         </div>
-      </div>
-
-      {/* Role Toggle */}
-      <div className="px-4 py-3 border-b border-slate-100">
-        <div className="flex items-center justify-between bg-slate-50 rounded-xl p-2">
-          <button
-            onClick={() => setIsAdmin(true)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all ${
-              isAdmin ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
-            }`}
-          >
-            <Shield className="w-3 h-3" />
-            Admin
-          </button>
-          <button
-            onClick={() => setIsAdmin(false)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all ${
-              !isAdmin ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
-            }`}
-          >
-            <User className="w-3 h-3" />
-            Empleado
-          </button>
+        
+        {/* User info */}
+        <div className="bg-slate-50 rounded-xl p-3">
+          <p className="text-xs font-semibold text-slate-900 mb-0.5">{user?.name}</p>
+          <p className="text-xs text-slate-500">{user?.email}</p>
+          <div className="mt-2">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+              user?.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+              user?.role === 'manager' ? 'bg-blue-100 text-blue-700' :
+              'bg-green-100 text-green-700'
+            }`}>
+              {user?.role === 'admin' ? 'Admin' : user?.role === 'manager' ? 'Manager' : 'Empleado'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -1038,11 +1034,14 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-slate-100">
-        <div className={`rounded-xl p-4 text-white ${isAdmin ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gradient-to-r from-purple-600 to-purple-700'}`}>
-          <p className="text-xs font-semibold mb-1">{isAdmin ? '👑 Modo Admin' : '👤 Modo Empleado'}</p>
-          <p className="text-xs opacity-70">{isAdmin ? 'Ves quién evaluó' : 'Ves cuántos evaluaron'}</p>
-        </div>
+      <div className="p-4 border-t border-slate-100 space-y-3">
+        <button
+          onClick={logout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-sm font-medium"
+        >
+          <LogOut className="w-4 h-4" />
+          Cerrar Sesión
+        </button>
       </div>
     </aside>
   );
@@ -2828,14 +2827,55 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
   const [showForm, setShowForm] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
+  const [evaluations, setEvaluations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredEvaluations = mockAciertosDesaciertos.filter(ev => {
-    if (filterMonth !== 'all' && ev.month !== parseInt(filterMonth)) return false;
-    if (filterYear !== 'all' && ev.year !== parseInt(filterYear)) return false;
-    if (filterDepartment !== 'all' && ev.department !== filterDepartment) return false;
-    if (filterEmployee !== 'all' && ev.evaluatedId !== filterEmployee) return false;
-    return true;
-  });
+  // Fetch evaluations from API
+  useEffect(() => {
+    fetchEvaluations();
+  }, [filterMonth, filterYear, filterDepartment, filterEmployee]);
+
+  const fetchEvaluations = async () => {
+    setLoading(true);
+    try {
+      const filters = {
+        month: filterMonth,
+        year: filterYear,
+        department: filterDepartment,
+        employee_id: filterEmployee
+      };
+      const data = await aciertosAPI.getAll(filters);
+      setEvaluations(data);
+    } catch (error) {
+      console.error('Error fetching evaluations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateEvaluation = async (evalData) => {
+    try {
+      await aciertosAPI.create(evalData);
+      fetchEvaluations();
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error creating evaluation:', error);
+      alert('Error al crear evaluación');
+    }
+  };
+
+  const handleUpdateEvaluation = async (id, evalData) => {
+    try {
+      await aciertosAPI.update(id, evalData);
+      fetchEvaluations();
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error updating evaluation:', error);
+      alert('Error al actualizar evaluación');
+    }
+  };
+
+  const filteredEvaluations = evaluations;
 
   const groupedByMonth = filteredEvaluations.reduce((acc, ev) => {
     const key = `${ev.year}-${String(ev.month).padStart(2, '0')}`;
@@ -3855,29 +3895,54 @@ const Layout = ({ children, isAdmin, setIsAdmin }) => (
   </div>
 );
 
-function App() {
-  const [isAdmin, setIsAdmin] = useState(true);
+const AppContent = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  const isAdmin = user.role === 'admin';
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/evaluate/:token" element={<PublicEvaluationForm />} />
-        <Route path="*" element={
-          <Layout isAdmin={isAdmin} setIsAdmin={setIsAdmin}>
-            <Routes>
-              <Route path="/" element={<Dashboard isAdmin={isAdmin} />} />
-              <Route path="/9box" element={<NineBoxGridView isAdmin={isAdmin} />} />
-              <Route path="/employees" element={<EmployeeList isAdmin={isAdmin} />} />
-              <Route path="/evaluations" element={<EvaluationsView isAdmin={isAdmin} />} />
-              <Route path="/aciertos-desaciertos" element={<AciertosDesaciertosView isAdmin={isAdmin} />} />
-              <Route path="/kpis" element={<KPIsView isAdmin={isAdmin} />} />
-              <Route path="/my-profile" element={<MyProfileResultsView isAdmin={isAdmin} />} />
-              <Route path="/manual-eval" element={<ManualEvaluation />} />
-            </Routes>
-          </Layout>
-        } />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/evaluate/:token" element={<PublicEvaluationForm />} />
+      <Route path="*" element={
+        <Layout isAdmin={isAdmin} setIsAdmin={() => {}}>
+          <Routes>
+            <Route path="/" element={<Dashboard isAdmin={isAdmin} />} />
+            <Route path="/9box" element={<NineBoxGridView isAdmin={isAdmin} />} />
+            <Route path="/employees" element={<EmployeeList isAdmin={isAdmin} />} />
+            <Route path="/evaluations" element={<EvaluationsView isAdmin={isAdmin} />} />
+            <Route path="/aciertos-desaciertos" element={<AciertosDesaciertosView isAdmin={isAdmin} />} />
+            <Route path="/kpis" element={<KPIsView isAdmin={isAdmin} />} />
+            <Route path="/my-profile" element={<MyProfileResultsView isAdmin={isAdmin} />} />
+            <Route path="/manual-eval" element={<ManualEvaluation />} />
+          </Routes>
+        </Layout>
+      } />
+    </Routes>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
