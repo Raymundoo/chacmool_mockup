@@ -56,7 +56,11 @@ import {
   Percent,
   Save,
   PlusCircle,
-  MinusCircle
+  MinusCircle,
+  ClipboardList,
+  LayoutGrid,
+  List,
+  AlertCircle
 } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 
