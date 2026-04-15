@@ -47,8 +47,8 @@ const EmpleadoAPage = ({ isAdmin }) => {
       setAllResults(resultsData);
       setPendingEvaluations(pendingData);
       
-      // Para empleados, seleccionar automáticamente su propio perfil
-      if (!isAdmin && user?.employee_id) {
+      // Para TODOS los usuarios, seleccionar su propio perfil automáticamente
+      if (user?.employee_id) {
         const myEmployee = employeesData.find(e => e.id === user.employee_id);
         if (myEmployee) {
           setSelectedEmployee(myEmployee);
@@ -86,36 +86,50 @@ const EmpleadoAPage = ({ isAdmin }) => {
             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Grid3X3 className="w-4 h-4 text-blue-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-medium text-blue-900">Matriz de Clasificación de Empleados</h3>
               <p className="text-sm text-blue-700 mt-1">
                 <strong>Eje Y:</strong> VALORES (comportamientos y actitudes) | <strong>Eje X:</strong> RESULTADOS (cumplimiento de metas)
               </p>
             </div>
+            {selectedEmployee && (
+              <div className="bg-white rounded-lg px-4 py-2 border border-blue-300">
+                <p className="text-xs text-blue-600 font-medium">Evaluaciones Pendientes</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {plans.find(p => p.employee_id === selectedEmployee.id)?.evaluaciones_pendientes || 0}
+                </p>
+                <p className="text-xs text-blue-500">personas por evaluar</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Selector de empleado (solo admin) */}
-        {isAdmin && (
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Seleccionar Empleado para Ver Detalles
-            </label>
-            <select
-              className="w-full border border-slate-300 rounded-lg px-4 py-2"
-              onChange={(e) => {
-                const emp = employees.find(emp => emp.id === e.target.value);
-                if (emp) handleEmployeeSelect(emp);
-              }}
-              value={selectedEmployee?.id || ''}
-            >
-              <option value="">Selecciona un empleado</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
+        {/* Selector de empleado (siempre visible, muestra el nombre seleccionado) */}
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            {isAdmin ? 'Ver Empleado' : 'Tu Perfil'}
+          </label>
+          <select
+            className="w-full border border-slate-300 rounded-lg px-4 py-2"
+            onChange={(e) => {
+              const emp = employees.find(emp => emp.id === e.target.value);
+              if (emp) handleEmployeeSelect(emp);
+            }}
+            value={selectedEmployee?.id || ''}
+            disabled={!isAdmin}
+          >
+            {isAdmin ? (
+              <>
+                <option value="">Selecciona un empleado</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </>
+            ) : (
+              <option value={selectedEmployee?.id}>{selectedEmployee?.name}</option>
+            )}
+          </select>
+        </div>
 
         {/* Grid 9-Box con miniaturas */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6">

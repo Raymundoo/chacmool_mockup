@@ -398,6 +398,27 @@ async def seed_database():
             "fecha_creacion": "2024-03-01",
             "fecha_limite": "2024-03-31",
             "created_at": datetime.now()
+        },
+        {
+            "id": "plan-empleado-a-3",
+            "employee_id": "5",
+            "employee_name": "Ana Martínez",
+            "employee_email": "ana@empresa.com",
+            "employee_avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana",
+            "period": "Q1 2024",
+            "status": "activo",
+            "evaluators": [
+                {"id": "1", "name": "María García López", "email": "maria@empresa.com", "status": "pendiente"},
+                {"id": "2", "name": "Juan Rodríguez", "email": "juan@empresa.com", "status": "pendiente"},
+                {"id": "4", "name": "Carlos Mendoza", "email": "carlos@empresa.com", "status": "pendiente"}
+            ],
+            "votes": [],
+            "total_evaluadores": 3,
+            "evaluaciones_completadas": 0,
+            "evaluaciones_pendientes": 3,
+            "fecha_creacion": "2024-03-01",
+            "fecha_limite": "2024-03-31",
+            "created_at": datetime.now()
         }
     ]
     await db.empleado_a_plans.insert_many(empleado_a_plans)
