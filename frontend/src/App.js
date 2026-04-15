@@ -495,6 +495,80 @@ const mockEvaluationResults = [
         mostCommon: 4
       }
     }
+  },
+  {
+    planId: "plan-2",
+    employeeId: "2",
+    employeeName: "Juan Rodríguez",
+    results: {
+      "comp-tech-1": {
+        responses: [
+          { evaluatorId: "ev-8", type: "lider", score: 5 },
+          { evaluatorId: "ev-11", type: "autoevaluacion", score: 4 }
+        ],
+        average: 4.5,
+        mostCommon: 5
+      },
+      "comp-tech-2": {
+        responses: [
+          { evaluatorId: "ev-8", type: "lider", score: 4 },
+          { evaluatorId: "ev-11", type: "autoevaluacion", score: 4 }
+        ],
+        average: 4.0,
+        mostCommon: 4
+      }
+    }
+  },
+  {
+    planId: "plan-3",
+    employeeId: "3",
+    employeeName: "Laura Sánchez",
+    results: {
+      "comp-1": {
+        responses: [
+          { type: "lider", score: 3 },
+          { type: "igual", score: 4 },
+          { type: "igual", score: 3 },
+          { type: "subordinado", score: 4 },
+          { type: "autoevaluacion", score: 4 }
+        ],
+        average: 3.6,
+        mostCommon: 4
+      },
+      "comp-2": {
+        responses: [
+          { type: "lider", score: 3 },
+          { type: "igual", score: 3 },
+          { type: "igual", score: 3 },
+          { type: "subordinado", score: 4 },
+          { type: "autoevaluacion", score: 3 }
+        ],
+        average: 3.2,
+        mostCommon: 3
+      },
+      "comp-3": {
+        responses: [
+          { type: "lider", score: 4 },
+          { type: "igual", score: 4 },
+          { type: "igual", score: 3 },
+          { type: "subordinado", score: 4 },
+          { type: "autoevaluacion", score: 4 }
+        ],
+        average: 3.8,
+        mostCommon: 4
+      },
+      "comp-4": {
+        responses: [
+          { type: "lider", score: 3 },
+          { type: "igual", score: 3 },
+          { type: "igual", score: 2 },
+          { type: "subordinado", score: 3 },
+          { type: "autoevaluacion", score: 3 }
+        ],
+        average: 2.8,
+        mostCommon: 3
+      }
+    }
   }
 ];
 
@@ -517,6 +591,48 @@ const mockPDIs = [
         aprendizajeAplicado: "Implementar reuniones 1-1 semanales con equipo",
         voluntad: "3 horas semanales al curso, reuniones 1-1 sin falta, 2 técnicas nuevas de feedback/mes",
         evaluaciones: "Evaluación 360° trimestral + feedback equipo + retención"
+      }
+    ]
+  },
+  {
+    id: "pdi-2",
+    employeeId: "2",
+    employeeName: "Juan Rodríguez",
+    department: "Desarrollo",
+    leader: "Tech Lead Senior",
+    reviewer: "Director Tecnología",
+    period: "Q1 2024",
+    quarters: [
+      {
+        quarter: "Q1 2024",
+        meta: "Profundizar conocimientos en arquitectura de software y patrones de diseño para liderar proyectos complejos",
+        realidad: "Tengo buen dominio técnico pero me falta experiencia en diseño de arquitecturas escalables. A veces tomo decisiones técnicas sin considerar el impacto a largo plazo.",
+        aprendizajeFormal: "Certificación en AWS Solutions Architect + Libro 'Design Patterns' de Gang of Four",
+        aprendizajeSocial: "Participar en code reviews de proyectos complejos + Asistir a meetups de arquitectura",
+        aprendizajeAplicado: "Liderar el rediseño de la arquitectura del módulo de pagos + Documentar decisiones arquitectónicas",
+        voluntad: "Dedicar 5 horas semanales a estudio + Presentar propuesta de arquitectura cada mes + Mentoría con arquitecto senior quincenal",
+        evaluaciones: "Evaluación técnica 360° + Revisión de código por pares + Éxito del proyecto de rediseño"
+      }
+    ]
+  },
+  {
+    id: "pdi-3",
+    employeeId: "3",
+    employeeName: "Laura Sánchez",
+    department: "Ventas",
+    leader: "Gerente Comercial",
+    reviewer: "Director Comercial",
+    period: "Q1 2024",
+    quarters: [
+      {
+        quarter: "Q1 2024",
+        meta: "Mejorar habilidades de negociación y cierre de ventas complejas para aumentar conversión en 25%",
+        realidad: "Tengo buena relación con clientes pero me cuesta cerrar ventas de alto valor. Necesito mejorar técnicas de manejo de objeciones y presentación de propuestas de valor.",
+        aprendizajeFormal: "Curso 'Negociación Avanzada' en LinkedIn Learning + Taller presencial de técnicas de cierre",
+        aprendizajeSocial: "Acompañar a top performer en 5 reuniones con clientes + Sesiones de role-play semanales con equipo",
+        aprendizajeAplicado: "Aplicar framework SPIN en todas las reuniones de prospección + Crear plantilla de propuestas de valor",
+        voluntad: "Practicar técnicas 30 min diarios + Aplicar al menos 2 técnicas nuevas por semana + Revisar grabaciones de llamadas semanalmente",
+        evaluaciones: "Aumento en tasa de conversión + Valor promedio de deal + Feedback de clientes + Evaluación 360°"
       }
     ]
   }
@@ -2250,6 +2366,175 @@ const EvalResultsPDIView = ({ isAdmin }) => {
   );
 };
 
+// Vista 6: Formulario Público de Evaluación
+const PublicEvaluationForm = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [token] = useState('abc123'); // Simulated from URL
+  const [loading, setLoading] = useState(true);
+  const [submitted, setSubmitted] = useState(false);
+  const [evaluationData, setEvaluationData] = useState(null);
+  const [responses, setResponses] = useState({});
+
+  // Simulate loading evaluation data
+  useState(() => {
+    setTimeout(() => {
+      // Find evaluation by token (simulated)
+      const plan = mockEvaluationPlans[0];
+      const template = mockEval360Templates.find(t => t.id === plan.templateId);
+      setEvaluationData({
+        employeeName: plan.employeeName,
+        templateName: template.name,
+        description: template.generalDescription,
+        competencies: template.competencies
+      });
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  const handleSubmit = () => {
+    // Validate all responses
+    const allAnswered = evaluationData.competencies.every(comp => responses[comp.id]);
+    if (!allAnswered) {
+      alert('Por favor responde todas las competencias');
+      return;
+    }
+    setSubmitted(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Cargando evaluación...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-12 h-12 text-green-600" />
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900 mb-4">¡Evaluación Completada!</h1>
+          <p className="text-slate-600 mb-8">
+            Gracias por tomarte el tiempo de completar esta evaluación. 
+            Tus respuestas han sido registradas exitosamente.
+          </p>
+          <p className="text-sm text-slate-400">
+            Este link ya ha sido utilizado y no puede volver a usarse.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-12 px-6">
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-sm p-8 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">{evaluationData.templateName}</h1>
+              <p className="text-sm text-slate-500">Evaluando a: {evaluationData.employeeName}</p>
+            </div>
+          </div>
+
+          {evaluationData.description && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4">
+              <p className="text-sm text-blue-800">{evaluationData.description}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Competencies Form */}
+        <div className="space-y-6">
+          {evaluationData.competencies.map((comp, idx) => (
+            <div key={comp.id} className="bg-white rounded-2xl shadow-sm p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-sm">{idx + 1}</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">{comp.title}</h3>
+                  <p className="text-sm text-slate-600 italic mb-2">{comp.behavior}</p>
+                  {comp.description && (
+                    <p className="text-xs text-slate-500 bg-slate-50 rounded-lg p-2">{comp.description}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2 pl-11">
+                {comp.responses.map((resp) => (
+                  <label
+                    key={resp.value}
+                    className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-slate-50 ${
+                      responses[comp.id] === resp.value
+                        ? 'border-slate-900 bg-slate-50 ring-2 ring-slate-900/10'
+                        : 'border-slate-200'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={comp.id}
+                      value={resp.value}
+                      checked={responses[comp.id] === resp.value}
+                      onChange={() => setResponses(prev => ({ ...prev, [comp.id]: resp.value }))}
+                      className="mt-1 w-4 h-4 text-slate-900"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-xs font-bold text-slate-700">
+                          {resp.value}
+                        </span>
+                        <span className="font-medium text-slate-900">{resp.label}</span>
+                      </div>
+                      <p className="text-sm text-slate-600">{resp.description}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Submit Button */}
+        <div className="mt-8 bg-white rounded-2xl shadow-sm p-6">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-slate-600">
+              <p className="font-medium">Progreso: {Object.keys(responses).length} / {evaluationData.competencies.length}</p>
+              <p className="text-xs text-slate-400 mt-1">Por favor completa todas las competencias antes de enviar</p>
+            </div>
+            <button
+              onClick={handleSubmit}
+              disabled={Object.keys(responses).length !== evaluationData.competencies.length}
+              className="bg-slate-900 text-white rounded-xl px-8 py-3 font-semibold hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+            >
+              <Send className="w-4 h-4" />
+              Enviar Evaluación
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-slate-400">
+            Esta evaluación es confidencial. Tus respuestas ayudarán en el desarrollo profesional del evaluado.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const KPIsView = ({ isAdmin }) => {
   const [activeTab, setActiveTab] = useState('templates');
   const [showCreateKPI, setShowCreateKPI] = useState(false);
@@ -2806,81 +3091,6 @@ const ManualEvaluation = () => {
               <p>Selecciona un empleado primero</p>
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PublicEvaluationForm = () => {
-  const { token } = useParams();
-  const [currentSection, setCurrentSection] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const template = mockEvaluationTemplates[0];
-  const employee = mockEmployees[0];
-  const sections = template.sections;
-  const currentSec = sections[currentSection];
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">¡Gracias!</h1>
-          <p className="text-slate-500">Tu evaluación ha sido registrada.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-          <div className="flex items-center gap-4 mb-4">
-            <img src={employee.avatar} alt="" className="w-16 h-16 rounded-xl" />
-            <div>
-              <p className="text-sm text-slate-500">Evaluación 360° para:</p>
-              <h2 className="text-xl font-semibold text-slate-900">{employee.name}</h2>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            {sections.map((_, idx) => (
-              <div key={idx} className={`flex-1 h-2 rounded-full ${idx <= currentSection ? 'bg-slate-900' : 'bg-slate-200'}`} />
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h3 className="font-semibold text-slate-900 mb-4">{currentSec?.name}</h3>
-          {currentSec?.items.map((item) => (
-            <div key={item.id} className="mb-6">
-              <p className="text-sm text-slate-700 mb-3">{item.name}</p>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setAnswers(prev => ({ ...prev, [item.id]: n }))}
-                    className={`flex-1 h-12 rounded-xl border-2 font-semibold ${answers[item.id] === n ? 'bg-slate-900 border-slate-900 text-white' : 'border-slate-200 text-slate-400'}`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-          <div className="flex gap-3">
-            {currentSection > 0 && <button onClick={() => setCurrentSection(p => p - 1)} className="px-6 py-3 border rounded-xl">Anterior</button>}
-            <button
-              onClick={() => currentSection === sections.length - 1 ? setSubmitted(true) : setCurrentSection(p => p + 1)}
-              className="flex-1 bg-slate-900 text-white rounded-xl px-6 py-3 font-medium"
-            >
-              {currentSection === sections.length - 1 ? 'Enviar' : 'Siguiente'}
-            </button>
-          </div>
         </div>
       </div>
     </div>
