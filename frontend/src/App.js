@@ -296,71 +296,228 @@ const mockEmployees = [
 ];
 
 // Mock evaluation templates
-const mockEvaluationTemplates = [
+// Evaluator types for 360 evaluations
+const evaluatorTypes360 = [
+  { id: 'lider', name: 'Líder', icon: Shield, color: '#8B5CF6', description: 'Jefe, supervisor o manager' },
+  { id: 'igual', name: 'Compañeros', icon: Users2, color: '#3B82F6', description: 'Pares o colegas del mismo nivel' },
+  { id: 'subordinado', name: 'Subordinados', icon: User, color: '#10B981', description: 'Colaboradores a cargo' },
+  { id: 'cliente', name: 'Cliente', icon: Briefcase, color: '#F59E0B', description: 'Clientes internos/externos' },
+  { id: 'autoevaluacion', name: 'Autoevaluación', icon: UserCheck, color: '#EC4899', description: 'El mismo empleado' }
+];
+
+const mockEval360Templates = [
   {
     id: "eval-1",
     name: "Evaluación 360° Estándar",
-    description: "Evaluación integral de competencias y valores para todos los empleados",
-    type: "360",
+    description: "Evaluación integral de competencias y valores. Se evalúa liderazgo, trabajo en equipo, comunicación y orientación a resultados.",
+    generalDescription: "Esta evaluación mide las competencias clave para el éxito en la organización. Cada competencia se califica en una escala del 1 al 5, donde 1 es el nivel más bajo y 5 el más alto. Los resultados se promedian por tipo de evaluador para obtener una visión 360° completa.",
     isActive: true,
     assignedPositions: ["Todos"],
-    sections: [
+    competencies: [
       {
-        id: "sec-competencias",
-        name: "Competencias necesarias para desempeñar su cargo",
-        weight: 50,
-        items: competencias.map((c, i) => ({ ...c, weight: 25 }))
+        id: "comp-1",
+        title: "Trabajo en Equipo",
+        behavior: "Colabora y participa activamente con los demás para alcanzar metas comunes",
+        description: "Evalúa la capacidad del colaborador para trabajar efectivamente con otros y contribuir al logro de objetivos compartidos.",
+        responses: [
+          { value: 1, label: "Nunca colabora", description: "Nunca colabora ni apoya al equipo" },
+          { value: 2, label: "Colabora poco", description: "Colabora poco y solo cuando se le pide" },
+          { value: 3, label: "Colabora regularmente", description: "Colabora de forma regular según expectativas" },
+          { value: 4, label: "Colabora frecuentemente", description: "Colabora frecuentemente y motiva a otros" },
+          { value: 5, label: "Colabora siempre", description: "Siempre colabora y lidera iniciativas de equipo" }
+        ]
       },
       {
-        id: "sec-valores",
-        name: "Valores",
-        weight: 50,
-        items: valores.map((v, i) => ({ ...v, weight: Math.round(100 / valores.length) }))
+        id: "comp-2",
+        title: "Comunicación",
+        behavior: "Se comunica de manera clara, efectiva y respetuosa",
+        description: "Mide la habilidad para transmitir ideas y mantener comunicación constructiva.",
+        responses: [
+          { value: 1, label: "No se comunica", description: "No se comunica o lo hace de manera confusa" },
+          { value: 2, label: "Comunica poco", description: "Se comunica poco y con dificultad" },
+          { value: 3, label: "Comunica adecuadamente", description: "Se comunica adecuadamente la mayoría del tiempo" },
+          { value: 4, label: "Comunica muy bien", description: "Se comunica muy bien, claro y escucha activamente" },
+          { value: 5, label: "Comunicación excepcional", description: "Comunicación excepcional, facilita diálogos" }
+        ]
+      },
+      {
+        id: "comp-3",
+        title: "Orientación a Resultados",
+        behavior: "Cumple metas y busca mejorar su desempeño",
+        description: "",
+        responses: [
+          { value: 1, label: "No cumple", description: "Raramente cumple metas establecidas" },
+          { value: 2, label: "Cumple parcialmente", description: "Cumple parcialmente con las metas" },
+          { value: 3, label: "Cumple metas", description: "Cumple con las metas establecidas" },
+          { value: 4, label: "Supera metas", description: "Frecuentemente supera las metas" },
+          { value: 5, label: "Siempre supera", description: "Siempre supera metas y busca excelencia" }
+        ]
+      },
+      {
+        id: "comp-4",
+        title: "Liderazgo",
+        behavior: "Inspira, guía y desarrolla a otros",
+        description: "Evalúa capacidad para influir positivamente y empoderar al equipo.",
+        responses: [
+          { value: 1, label: "No lidera", description: "No demuestra capacidad de liderazgo" },
+          { value: 2, label: "Lidera ocasionalmente", description: "Lidera ocasionalmente pero le falta confianza" },
+          { value: 3, label: "Liderazgo adecuado", description: "Demuestra liderazgo cuando es necesario" },
+          { value: 4, label: "Buen líder", description: "Buen líder, inspira y motiva al equipo" },
+          { value: 5, label: "Líder excepcional", description: "Líder excepcional, desarrolla talento" }
+        ]
       }
-    ],
-    scale: [
-      { value: 1, label: "Nunca demuestra" },
-      { value: 2, label: "Rara vez demuestra" },
-      { value: 3, label: "A veces demuestra" },
-      { value: 4, label: "Frecuentemente demuestra" },
-      { value: 5, label: "Siempre demuestra" },
     ]
   },
   {
     id: "eval-2",
     name: "Evaluación Técnica",
-    description: "Para posiciones técnicas y de desarrollo",
-    type: "360",
+    description: "Para posiciones técnicas. Evalúa conocimientos técnicos, resolución de problemas y aprendizaje.",
+    generalDescription: "Evaluación enfocada en competencias técnicas. Se mide dominio de herramientas, capacidad de resolución de problemas y aprendizaje continuo.",
     isActive: true,
     assignedPositions: ["Desarrollador", "Tech Lead", "Técnico"],
-    sections: [
+    competencies: [
       {
-        id: "sec-tech",
-        name: "Habilidades Técnicas",
-        weight: 60,
-        items: [
-          { id: "calidad_codigo", name: "Calidad de código", weight: 30 },
-          { id: "arquitectura", name: "Diseño de arquitectura", weight: 25 },
-          { id: "debugging", name: "Resolución de bugs", weight: 25 },
-          { id: "documentacion", name: "Documentación", weight: 20 },
+        id: "comp-tech-1",
+        title: "Conocimiento Técnico",
+        behavior: "Domina las herramientas necesarias para su rol",
+        description: "",
+        responses: [
+          { value: 1, label: "Básico", description: "Conocimiento muy básico" },
+          { value: 2, label: "Limitado", description: "Conocimiento limitado, necesita supervisión" },
+          { value: 3, label: "Adecuado", description: "Conocimiento adecuado para su nivel" },
+          { value: 4, label: "Avanzado", description: "Conocimiento avanzado, resuelve problemas complejos" },
+          { value: 5, label: "Experto", description: "Experto, es referente técnico" }
         ]
       },
       {
-        id: "sec-soft",
-        name: "Habilidades Blandas",
-        weight: 40,
-        items: [
-          { id: "comunicacion_tech", name: "Comunicación técnica", weight: 50 },
-          { id: "mentoria", name: "Mentoría", weight: 50 },
+        id: "comp-tech-2",
+        title: "Resolución de Problemas",
+        behavior: "Analiza situaciones y propone soluciones efectivas",
+        description: "",
+        responses: [
+          { value: 1, label: "No resuelve", description: "No resuelve problemas autónomamente" },
+          { value: 2, label: "Simples", description: "Resuelve solo problemas simples" },
+          { value: 3, label: "Adecuado", description: "Resuelve problemas de complejidad media" },
+          { value: 4, label: "Muy bien", description: "Resuelve muy bien problemas complejos" },
+          { value: 5, label: "Excepcional", description: "Resuelve excepcionalmente problemas complejos" }
         ]
       }
-    ],
-    scale: [
-      { value: 1, label: "Nunca demuestra" },
-      { value: 2, label: "Rara vez demuestra" },
-      { value: 3, label: "A veces demuestra" },
-      { value: 4, label: "Frecuentemente demuestra" },
-      { value: 5, label: "Siempre demuestra" },
+    ]
+  }
+];
+
+const mockEvaluationPlans = [
+  {
+    id: "plan-1",
+    employeeId: "1",
+    employeeName: "María García López",
+    templateId: "eval-1",
+    templateName: "Evaluación 360° Estándar",
+    period: "Q1 2024",
+    createdDate: "2024-01-15",
+    dueDate: "2024-03-31",
+    evaluators: [
+      { id: "ev-1", type: "lider", name: "Director Operaciones", email: "director@empresa.com", status: "completado", link: "eval/abc123", completedDate: "2024-02-10" },
+      { id: "ev-2", type: "igual", name: "Juan Rodríguez", email: "juan@empresa.com", status: "completado", link: "eval/def456", completedDate: "2024-02-12" },
+      { id: "ev-3", type: "igual", name: "Laura Sánchez", email: "laura@empresa.com", status: "enviado", link: "eval/ghi789", completedDate: null },
+      { id: "ev-4", type: "subordinado", name: "Carlos Mendoza", email: "carlos@empresa.com", status: "completado", link: "eval/jkl012", completedDate: "2024-02-15" },
+      { id: "ev-5", type: "subordinado", name: "Ana Martínez", email: "ana@empresa.com", status: "pendiente", link: "eval/mno345", completedDate: null },
+      { id: "ev-6", type: "cliente", name: "Cliente Corp A", email: "cliente@corp.com", status: "completado", link: "eval/pqr678", completedDate: "2024-02-20" },
+      { id: "ev-7", type: "autoevaluacion", name: "María García López", email: "maria@empresa.com", status: "completado", link: "eval/stu901", completedDate: "2024-02-08" }
+    ]
+  },
+  {
+    id: "plan-2",
+    employeeId: "2",
+    employeeName: "Juan Rodríguez",
+    templateId: "eval-2",
+    templateName: "Evaluación Técnica",
+    period: "Q1 2024",
+    createdDate: "2024-01-15",
+    dueDate: "2024-03-31",
+    evaluators: [
+      { id: "ev-8", type: "lider", name: "Tech Lead Senior", email: "techlead@empresa.com", status: "completado", link: "eval/vwx234", completedDate: "2024-02-11" },
+      { id: "ev-9", type: "igual", name: "María García López", email: "maria@empresa.com", status: "enviado", link: "eval/yza567", completedDate: null },
+      { id: "ev-10", type: "subordinado", name: "Pedro García", email: "pedro@empresa.com", status: "pendiente", link: "eval/bcd890", completedDate: null },
+      { id: "ev-11", type: "autoevaluacion", name: "Juan Rodríguez", email: "juan@empresa.com", status: "completado", link: "eval/efg123", completedDate: "2024-02-09" }
+    ]
+  }
+];
+
+const mockEvaluationResults = [
+  {
+    planId: "plan-1",
+    employeeId: "1",
+    employeeName: "María García López",
+    results: {
+      "comp-1": {
+        responses: [
+          { evaluatorId: "ev-1", type: "lider", score: 5 },
+          { evaluatorId: "ev-2", type: "igual", score: 4 },
+          { evaluatorId: "ev-4", type: "subordinado", score: 5 },
+          { evaluatorId: "ev-6", type: "cliente", score: 4 },
+          { evaluatorId: "ev-7", type: "autoevaluacion", score: 4 }
+        ],
+        average: 4.4,
+        mostCommon: 4
+      },
+      "comp-2": {
+        responses: [
+          { evaluatorId: "ev-1", type: "lider", score: 5 },
+          { evaluatorId: "ev-2", type: "igual", score: 5 },
+          { evaluatorId: "ev-4", type: "subordinado", score: 4 },
+          { evaluatorId: "ev-6", type: "cliente", score: 5 },
+          { evaluatorId: "ev-7", type: "autoevaluacion", score: 4 }
+        ],
+        average: 4.6,
+        mostCommon: 5
+      },
+      "comp-3": {
+        responses: [
+          { evaluatorId: "ev-1", type: "lider", score: 4 },
+          { evaluatorId: "ev-2", type: "igual", score: 4 },
+          { evaluatorId: "ev-4", type: "subordinado", score: 5 },
+          { evaluatorId: "ev-6", type: "cliente", score: 4 },
+          { evaluatorId: "ev-7", type: "autoevaluacion", score: 5 }
+        ],
+        average: 4.4,
+        mostCommon: 4
+      },
+      "comp-4": {
+        responses: [
+          { evaluatorId: "ev-1", type: "lider", score: 5 },
+          { evaluatorId: "ev-2", type: "igual", score: 4 },
+          { evaluatorId: "ev-4", type: "subordinado", score: 5 },
+          { evaluatorId: "ev-6", type: "cliente", score: 4 },
+          { evaluatorId: "ev-7", type: "autoevaluacion", score: 4 }
+        ],
+        average: 4.4,
+        mostCommon: 4
+      }
+    }
+  }
+];
+
+const mockPDIs = [
+  {
+    id: "pdi-1",
+    employeeId: "1",
+    employeeName: "María García López",
+    department: "Tecnología",
+    leader: "Director Operaciones",
+    reviewer: "CEO",
+    period: "Q1 2024",
+    quarters: [
+      {
+        quarter: "Q1 2024",
+        meta: "Mejorar habilidades de liderazgo técnico y mentoría del equipo junior",
+        realidad: "Lidero equipo de 4 desarrolladores junior. Me falta experiencia en delegar tareas complejas y dar feedback regular.",
+        aprendizajeFormal: "Curso online 'Leadership for Tech Managers' en Coursera (8 semanas)",
+        aprendizajeSocial: "Mentoring mensual con CTO para casos de liderazgo",
+        aprendizajeAplicado: "Implementar reuniones 1-1 semanales con equipo",
+        voluntad: "3 horas semanales al curso, reuniones 1-1 sin falta, 2 técnicas nuevas de feedback/mes",
+        evaluaciones: "Evaluación 360° trimestral + feedback equipo + retención"
+      }
     ]
   }
 ];
@@ -962,472 +1119,1136 @@ const MyProfileResultsView = ({ isAdmin }) => {
 // EVALUATIONS VIEW - WITH CREATE TEMPLATE
 // ============================================
 
+// ============================================
+// EVALUATIONS 360 MODULE - REDESIGNED
+// ============================================
+
 const EvaluationsView = ({ isAdmin }) => {
-  const [templates, setTemplates] = useState(mockEvaluationTemplates);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showLinkModal, setShowLinkModal] = useState(false);
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [linkConfig, setLinkConfig] = useState({ employeeId: '', evaluatorType: 'superior' });
-  const [generatedLink, setGeneratedLink] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeView, setActiveView] = useState('design');
   
-  // New template form state
-  const [newTemplate, setNewTemplate] = useState({
-    name: '',
-    description: '',
-    sections: [{ id: 'sec-1', name: '', weight: 100, items: [{ id: 'item-1', name: '', description: '', weight: 100 }] }]
-  });
+  // Extract view from URL if present
+  useState(() => {
+    const path = location.pathname.split('/');
+    if (path[2]) setActiveView(path[2]);
+  }, [location]);
 
-  const handleSectionWeightChange = (sectionId, newWeight) => {
-    if (!selectedTemplate) return;
-    const newWeight_ = Math.max(0, Math.min(100, parseInt(newWeight) || 0));
-    const updatedTemplate = {
-      ...selectedTemplate,
-      sections: autoAdjustWeights(selectedTemplate.sections, sectionId, newWeight_)
-    };
-    setSelectedTemplate(updatedTemplate);
-  };
-
-  const generateLink = () => {
-    const token = Math.random().toString(36).substring(2, 10);
-    setGeneratedLink(`${window.location.origin}/evaluate/${token}`);
-  };
-
-  const addSection = () => {
-    setNewTemplate(prev => ({
-      ...prev,
-      sections: [...prev.sections, { 
-        id: `sec-${Date.now()}`, 
-        name: '', 
-        weight: 0, 
-        items: [{ id: `item-${Date.now()}`, name: '', description: '', weight: 100 }] 
-      }]
-    }));
-  };
-
-  const addItem = (sectionId) => {
-    setNewTemplate(prev => ({
-      ...prev,
-      sections: prev.sections.map(sec => 
-        sec.id === sectionId 
-          ? { ...sec, items: [...sec.items, { id: `item-${Date.now()}`, name: '', description: '', weight: 0 }] }
-          : sec
-      )
-    }));
-  };
+  const views = [
+    { id: 'design', label: 'Diseño', icon: FileText, description: 'Crear plantillas' },
+    { id: 'planning', label: 'Planificación', icon: UserPlus, description: 'Asignar evaluadores' },
+    { id: 'stats', label: 'Estadísticas', icon: BarChart2, description: 'Resultados agregados' },
+    { id: 'tracking', label: 'Tracking', icon: Activity, description: 'Estado evaluaciones' },
+    { id: 'pdi', label: 'Resultados y PDI', icon: Award, description: 'Vista 1-1 y PDI' },
+  ];
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
             Evaluaciones 360°
           </h1>
-          <p className="text-slate-500 mt-1">Gestiona plantillas y genera enlaces de evaluación</p>
-        </div>
-        <button 
-          onClick={() => setShowCreateModal(true)}
-          className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Nueva Plantilla
-        </button>
-      </div>
-
-      {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
-          <MessageSquare className="w-8 h-8 mb-3 opacity-80" />
-          <h3 className="font-semibold mb-1">Evaluación 360°</h3>
-          <p className="text-sm opacity-80">Múltiples perspectivas: superior, subordinados, compañeros, clientes y autoevaluación.</p>
-        </div>
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
-          <Sliders className="w-8 h-8 mb-3 opacity-80" />
-          <h3 className="font-semibold mb-1">Pesos Automáticos</h3>
-          <p className="text-sm opacity-80">Al modificar un peso, los demás se ajustan para mantener 100%.</p>
-        </div>
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
-          <Link className="w-8 h-8 mb-3 opacity-80" />
-          <h3 className="font-semibold mb-1">Enlaces Públicos</h3>
-          <p className="text-sm opacity-80">Comparte por WhatsApp o email. El evaluador no necesita cuenta.</p>
+          <p className="text-slate-500 mt-1">Sistema completo de evaluaciones</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Templates List */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Plantillas ({templates.length})</h2>
-          {templates.map((template) => (
-            <div
-              key={template.id}
-              onClick={() => { setSelectedTemplate(template); setEditMode(false); }}
-              className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
-                selectedTemplate?.id === template.id ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                  360°
-                </span>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${template.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                  {template.isActive ? 'Activa' : 'Inactiva'}
-                </span>
-              </div>
-              <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
-              <p className="text-sm text-slate-500 line-clamp-2">{template.description}</p>
-              <p className="text-xs text-slate-400 mt-2">Asignada a: {template.assignedPositions?.join(', ')}</p>
+      {/* Navigation Tabs */}
+      <div className="flex gap-2 mb-8 bg-slate-100 p-1 rounded-xl w-full overflow-x-auto">
+        {views.map((view) => (
+          <button
+            key={view.id}
+            onClick={() => setActiveView(view.id)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+              activeView === view.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <view.icon className="w-4 h-4" />
+            <span>{view.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* View Content */}
+      {activeView === 'design' && <EvalDesignView isAdmin={isAdmin} />}
+      {activeView === 'planning' && <EvalPlanningView isAdmin={isAdmin} />}
+      {activeView === 'stats' && <EvalStatsView isAdmin={isAdmin} />}
+      {activeView === 'tracking' && <EvalTrackingView isAdmin={isAdmin} />}
+      {activeView === 'pdi' && <EvalResultsPDIView isAdmin={isAdmin} />}
+    </div>
+  );
+};
+
+// Vista 1: Diseño de Evaluaciones
+const EvalDesignView = ({ isAdmin }) => {
+  const [templates, setTemplates] = useState(mockEval360Templates);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newTemplate, setNewTemplate] = useState({
+    name: '',
+    description: '',
+    generalDescription: '',
+    competencies: []
+  });
+
+  const addCompetency = () => {
+    setNewTemplate(prev => ({
+      ...prev,
+      competencies: [...prev.competencies, {
+        id: `comp-${Date.now()}`,
+        title: '',
+        behavior: '',
+        description: '',
+        responses: [
+          { value: 1, label: '', description: '' },
+          { value: 2, label: '', description: '' },
+          { value: 3, label: '', description: '' },
+          { value: 4, label: '', description: '' },
+          { value: 5, label: '', description: '' }
+        ]
+      }]
+    }));
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Templates List */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase">Plantillas ({templates.length})</h2>
+          <button 
+            onClick={() => { setIsCreating(true); setNewTemplate({ name: '', description: '', generalDescription: '', competencies: [] }); }}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Nueva
+          </button>
+        </div>
+        
+        {templates.map((template) => (
+          <div
+            key={template.id}
+            onClick={() => { setSelectedTemplate(template); setIsCreating(false); setIsEditing(false); }}
+            className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
+              selectedTemplate?.id === template.id ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${template.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                {template.isActive ? 'Activa' : 'Inactiva'}
+              </span>
+              <span className="text-xs text-slate-400">{template.competencies?.length || 0} competencias</span>
             </div>
-          ))}
-        </div>
+            <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
+            <p className="text-sm text-slate-500 line-clamp-2">{template.description}</p>
+          </div>
+        ))}
+      </div>
 
-        {/* Template Detail */}
-        <div className="lg:col-span-2">
-          {selectedTemplate ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-900">{selectedTemplate.name}</h2>
-                  <p className="text-sm text-slate-500">{selectedTemplate.description}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowPreviewModal(true)}
-                    className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 flex items-center gap-2"
-                  >
-                    <Eye className="w-4 h-4" />
-                    Vista Previa
-                  </button>
-                  <button
-                    onClick={() => setEditMode(!editMode)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 ${
-                      editMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    <Sliders className="w-4 h-4" />
-                    {editMode ? 'Editando' : 'Editar Pesos'}
-                  </button>
-                  <button
-                    onClick={() => setShowLinkModal(true)}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 flex items-center gap-2"
-                  >
-                    <Link className="w-4 h-4" />
-                    Generar Enlace
-                  </button>
-                </div>
+      {/* Template Detail/Editor */}
+      <div className="lg:col-span-2">
+        {isCreating || isEditing ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-slate-900">{isCreating ? 'Crear Nueva Plantilla' : 'Editar Plantilla'}</h2>
+              <button onClick={() => { setIsCreating(false); setIsEditing(false); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Nombre de la plantilla *</label>
+                <input 
+                  type="text"
+                  placeholder="Ej: Evaluación 360° Gerentes 2024"
+                  value={newTemplate.name}
+                  onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
+                />
               </div>
 
-              {/* Sections */}
-              {selectedTemplate.sections?.map((section) => (
-                <div key={section.id} className="border border-slate-200 rounded-xl p-4 mb-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-slate-900">{section.name}</h3>
-                    {editMode ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={section.weight}
-                          onChange={(e) => handleSectionWeightChange(section.id, e.target.value)}
-                          className="w-16 px-2 py-1 text-center bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold"
-                        />
-                        <span className="text-sm text-slate-400">%</span>
-                      </div>
-                    ) : (
-                      <span className="text-lg font-bold text-slate-900">{section.weight}%</span>
-                    )}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Descripción breve *</label>
+                <textarea 
+                  rows={2}
+                  placeholder="Descripción de la evaluación..."
+                  value={newTemplate.description}
+                  onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Descripción general (cómo se evalúa, cómo se califica)</label>
+                <textarea 
+                  rows={3}
+                  placeholder="Explica el propósito de la evaluación, cómo se califica, qué escala se usa..."
+                  value={newTemplate.generalDescription}
+                  onChange={(e) => setNewTemplate(prev => ({ ...prev, generalDescription: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
+                />
+              </div>
+
+              {/* Competencies */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-700">Competencias</h3>
+                  <button 
+                    onClick={addCompetency}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    Agregar competencia
+                  </button>
+                </div>
+
+                {newTemplate.competencies.length === 0 && (
+                  <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl">
+                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Agrega competencias a evaluar</p>
                   </div>
-                  
+                )}
+
+                {newTemplate.competencies.map((comp, idx) => (
+                  <div key={comp.id} className="border border-slate-200 rounded-xl p-4 mb-4 bg-slate-50">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-700">Competencia {idx + 1}</h4>
+                      <button 
+                        onClick={() => setNewTemplate(prev => ({ ...prev, competencies: prev.competencies.filter(c => c.id !== comp.id) }))}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <input 
+                        type="text"
+                        placeholder="Título de la competencia (ej: Trabajo en Equipo)"
+                        value={comp.title}
+                        onChange={(e) => {
+                          const updated = [...newTemplate.competencies];
+                          updated[idx].title = e.target.value;
+                          setNewTemplate(prev => ({ ...prev, competencies: updated }));
+                        }}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
+                      />
+
+                      <input 
+                        type="text"
+                        placeholder="Comportamiento (ej: Colabora y participa activamente...)"
+                        value={comp.behavior}
+                        onChange={(e) => {
+                          const updated = [...newTemplate.competencies];
+                          updated[idx].behavior = e.target.value;
+                          setNewTemplate(prev => ({ ...prev, competencies: updated }));
+                        }}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
+                      />
+
+                      <textarea 
+                        rows={2}
+                        placeholder="Descripción de la competencia (opcional)"
+                        value={comp.description}
+                        onChange={(e) => {
+                          const updated = [...newTemplate.competencies];
+                          updated[idx].description = e.target.value;
+                          setNewTemplate(prev => ({ ...prev, competencies: updated }));
+                        }}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white resize-none"
+                      />
+
+                      <div className="mt-3">
+                        <p className="text-xs font-semibold text-slate-600 mb-2">Escala de respuestas (1-5)</p>
+                        {comp.responses.map((resp, respIdx) => (
+                          <div key={respIdx} className="flex gap-2 mb-2 items-start">
+                            <span className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-xs font-bold text-slate-700 mt-1">
+                              {resp.value}
+                            </span>
+                            <div className="flex-1 space-y-1">
+                              <input 
+                                type="text"
+                                placeholder={`Etiqueta nivel ${resp.value}`}
+                                value={resp.label}
+                                onChange={(e) => {
+                                  const updated = [...newTemplate.competencies];
+                                  updated[idx].responses[respIdx].label = e.target.value;
+                                  setNewTemplate(prev => ({ ...prev, competencies: updated }));
+                                }}
+                                className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white"
+                              />
+                              <input 
+                                type="text"
+                                placeholder={`Descripción nivel ${resp.value}`}
+                                value={resp.description}
+                                onChange={(e) => {
+                                  const updated = [...newTemplate.competencies];
+                                  updated[idx].responses[respIdx].description = e.target.value;
+                                  setNewTemplate(prev => ({ ...prev, competencies: updated }));
+                                }}
+                                className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  onClick={() => { setIsCreating(false); setIsEditing(false); }}
+                  className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => { alert('Plantilla guardada (demo)'); setIsCreating(false); setIsEditing(false); }}
+                  className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Guardar Plantilla
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : selectedTemplate ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">{selectedTemplate.name}</h2>
+                <p className="text-sm text-slate-500">{selectedTemplate.description}</p>
+              </div>
+              <button
+                onClick={() => { setIsEditing(true); setNewTemplate(selectedTemplate); }}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 flex items-center gap-2"
+              >
+                <Edit3 className="w-4 h-4" />
+                Editar
+              </button>
+            </div>
+
+            {selectedTemplate.generalDescription && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <p className="text-xs font-semibold text-blue-700 mb-1">DESCRIPCIÓN GENERAL</p>
+                <p className="text-sm text-blue-800">{selectedTemplate.generalDescription}</p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {selectedTemplate.competencies.map((comp, idx) => (
+                <div key={comp.id} className="border border-slate-200 rounded-xl p-4">
+                  <div className="mb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-slate-900 mb-1">{comp.title}</h3>
+                        <p className="text-sm text-slate-600 italic mb-2">{comp.behavior}</p>
+                        {comp.description && <p className="text-xs text-slate-500">{comp.description}</p>}
+                      </div>
+                      <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">#{idx + 1}</span>
+                    </div>
+                  </div>
+
                   <div className="space-y-2 pl-4 border-l-2 border-slate-100">
-                    {section.items.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between py-1">
-                        <span className="text-sm text-slate-700">{item.name}</span>
-                        <span className="text-xs text-slate-400">{item.weight}%</span>
+                    {comp.responses.map((resp) => (
+                      <div key={resp.value} className="flex gap-3">
+                        <span className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-xs font-bold text-slate-700">
+                          {resp.value}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-slate-800">{resp.label}</p>
+                          <p className="text-xs text-slate-500">{resp.description}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500 mb-4">Selecciona una plantilla o crea una nueva</p>
+            <button 
+              onClick={() => setIsCreating(true)}
+              className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Nueva Plantilla
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-              {/* Scale */}
-              <div className="bg-slate-50 rounded-xl p-4">
-                <h4 className="text-sm font-semibold text-slate-700 mb-3">Escala de Calificación</h4>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <div key={n} className="flex-1 text-center">
-                      <div className="w-10 h-10 mx-auto rounded-lg bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">
-                        {n}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1">{selectedTemplate.scale?.[n-1]?.label}</p>
-                    </div>
-                  ))}
-                </div>
+// Vista 2: Planificación de Evaluaciones
+const EvalPlanningView = ({ isAdmin }) => {
+  const [plans, setPlans] = useState(mockEvaluationPlans);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showCreatePlan, setShowCreatePlan] = useState(false);
+  const [newPlan, setNewPlan] = useState({
+    employeeId: '',
+    templateId: '',
+    period: 'Q1 2024',
+    evaluators: []
+  });
+  const [showAddEvaluator, setShowAddEvaluator] = useState(false);
+  const [newEvaluator, setNewEvaluator] = useState({ type: 'lider', name: '', email: '' });
+
+  const addEvaluatorToPlan = () => {
+    const evaluator = {
+      id: `ev-${Date.now()}`,
+      ...newEvaluator,
+      status: 'pendiente',
+      link: `eval/${Math.random().toString(36).substring(7)}`,
+      completedDate: null
+    };
+    setNewPlan(prev => ({ ...prev, evaluators: [...prev.evaluators, evaluator] }));
+    setNewEvaluator({ type: 'lider', name: '', email: '' });
+    setShowAddEvaluator(false);
+  };
+
+  const simulateEmail = (evaluator) => {
+    alert(`Email simulado enviado a: ${evaluator.email}\nAsunto: Evaluación 360°\nLink: ${window.location.origin}/${evaluator.link}`);
+  };
+
+  const copyLink = (link) => {
+    navigator.clipboard.writeText(`${window.location.origin}/${link}`);
+    alert('Link copiado al portapapeles');
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Plans List */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase">Planes ({plans.length})</h2>
+          <button 
+            onClick={() => setShowCreatePlan(true)}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo Plan
+          </button>
+        </div>
+
+        {plans.map((plan) => {
+          const completed = plan.evaluators.filter(e => e.status === 'completado').length;
+          const total = plan.evaluators.length;
+          const progress = (completed / total) * 100;
+          
+          return (
+            <div
+              key={plan.id}
+              onClick={() => setSelectedPlan(plan)}
+              className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
+                selectedPlan?.id === plan.id ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <h3 className="font-semibold text-slate-900 mb-1">{plan.employeeName}</h3>
+              <p className="text-xs text-slate-500 mb-2">{plan.templateName} · {plan.period}</p>
+              <div className="flex items-center gap-2 text-xs text-slate-600 mb-2">
+                <Users className="w-3 h-3" />
+                <span>{completed}/{total} completadas</span>
+              </div>
+              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
               </div>
             </div>
-          ) : (
-            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500">Selecciona una plantilla para ver detalles</p>
-            </div>
-          )}
-        </div>
+          );
+        })}
       </div>
 
-      {/* Create Template Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl my-8">
+      {/* Plan Detail */}
+      <div className="lg:col-span-2">
+        {showCreatePlan ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Crear Nueva Plantilla 360°</h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">
+              <h2 className="text-xl font-semibold text-slate-900">Crear Plan de Evaluación</h2>
+              <button onClick={() => setShowCreatePlan(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nombre de la plantilla</label>
-                <input 
-                  type="text" 
-                  placeholder="Ej: Evaluación Gerentes 2024"
-                  value={newTemplate.name}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                <label className="block text-sm font-medium text-slate-700 mb-2">Empleado a evaluar *</label>
+                <select 
+                  value={newPlan.employeeId}
+                  onChange={(e) => setNewPlan(prev => ({ ...prev, employeeId: e.target.value }))}
                   className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Descripción</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Descripción breve de la evaluación..."
-                  value={newTemplate.description}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
-                />
-              </div>
-            </div>
-
-            {/* Sections */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold text-slate-700">Secciones</h4>
-                <button 
-                  onClick={addSection}
-                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                 >
-                  <PlusCircle className="w-4 h-4" />
-                  Agregar sección
-                </button>
-              </div>
-              
-              {newTemplate.sections.map((section, secIdx) => (
-                <div key={section.id} className="border border-slate-200 rounded-xl p-4 mb-3">
-                  <div className="flex gap-3 mb-3">
-                    <input 
-                      type="text"
-                      placeholder="Nombre de la sección"
-                      className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                    />
-                    <input 
-                      type="number"
-                      placeholder="Peso %"
-                      className="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center"
-                    />
-                  </div>
-                  
-                  {section.items.map((item, itemIdx) => (
-                    <div key={item.id} className="flex gap-2 mb-2 pl-4">
-                      <input 
-                        type="text"
-                        placeholder="Pregunta o competencia"
-                        className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                      />
-                      <input 
-                        type="number"
-                        placeholder="%"
-                        className="w-16 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center"
-                      />
-                    </div>
+                  <option value="">Seleccionar empleado...</option>
+                  {mockEmployees.map(emp => (
+                    <option key={emp.id} value={emp.id}>{emp.name} - {emp.position}</option>
                   ))}
-                  
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Plantilla de evaluación *</label>
+                <select 
+                  value={newPlan.templateId}
+                  onChange={(e) => setNewPlan(prev => ({ ...prev, templateId: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
+                >
+                  <option value="">Seleccionar plantilla...</option>
+                  {mockEval360Templates.map(tmpl => (
+                    <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Período *</label>
+                <select 
+                  value={newPlan.period}
+                  onChange={(e) => setNewPlan(prev => ({ ...prev, period: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
+                >
+                  <option value="Q1 2024">Q1 2024</option>
+                  <option value="Q2 2024">Q2 2024</option>
+                  <option value="Q3 2024">Q3 2024</option>
+                  <option value="Q4 2024">Q4 2024</option>
+                </select>
+              </div>
+
+              {/* Evaluators */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-700">Evaluadores Asignados ({newPlan.evaluators.length})</h3>
                   <button 
-                    onClick={() => addItem(section.id)}
-                    className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1 ml-4"
+                    onClick={() => setShowAddEvaluator(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                   >
-                    <Plus className="w-3 h-3" />
-                    Agregar pregunta
+                    <PlusCircle className="w-4 h-4" />
+                    Agregar evaluador
                   </button>
                 </div>
-              ))}
+
+                {newPlan.evaluators.length === 0 && (
+                  <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl">
+                    <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Agrega evaluadores para este empleado</p>
+                  </div>
+                )}
+
+                {newPlan.evaluators.map((ev) => {
+                  const evType = evaluatorTypes360.find(t => t.id === ev.type);
+                  return (
+                    <div key={ev.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl mb-2">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${evType.color}20` }}>
+                          {evType.id === 'lider' && <Shield className="w-4 h-4" style={{ color: evType.color }} />}
+                          {evType.id === 'igual' && <Users2 className="w-4 h-4" style={{ color: evType.color }} />}
+                          {evType.id === 'subordinado' && <User className="w-4 h-4" style={{ color: evType.color }} />}
+                          {evType.id === 'cliente' && <Briefcase className="w-4 h-4" style={{ color: evType.color }} />}
+                          {evType.id === 'autoevaluacion' && <UserCheck className="w-4 h-4" style={{ color: evType.color }} />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{ev.name}</p>
+                          <p className="text-xs text-slate-500">{evType.name} · {ev.email}</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => setNewPlan(prev => ({ ...prev, evaluators: prev.evaluators.filter(e => e.id !== ev.id) }))}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {showAddEvaluator && (
+                  <div className="border-2 border-blue-200 bg-blue-50 rounded-xl p-4 mb-2">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Tipo de evaluador</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {evaluatorTypes360.map((type) => (
+                            <button
+                              key={type.id}
+                              onClick={() => setNewEvaluator(prev => ({ ...prev, type: type.id }))}
+                              className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all text-left ${
+                                newEvaluator.type === type.id ? 'border-slate-900 bg-white' : 'border-slate-200 bg-white/50'
+                              }`}
+                            >
+                              {type.id === 'lider' && <Shield className="w-4 h-4" style={{ color: type.color }} />}
+                              {type.id === 'igual' && <Users2 className="w-4 h-4" style={{ color: type.color }} />}
+                              {type.id === 'subordinado' && <User className="w-4 h-4" style={{ color: type.color }} />}
+                              {type.id === 'cliente' && <Briefcase className="w-4 h-4" style={{ color: type.color }} />}
+                              {type.id === 'autoevaluacion' && <UserCheck className="w-4 h-4" style={{ color: type.color }} />}
+                              <span className="text-xs font-medium">{type.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <input 
+                        type="text"
+                        placeholder="Nombre del evaluador"
+                        value={newEvaluator.name}
+                        onChange={(e) => setNewEvaluator(prev => ({ ...prev, name: e.target.value }))}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                      />
+
+                      <input 
+                        type="email"
+                        placeholder="Email del evaluador"
+                        value={newEvaluator.email}
+                        onChange={(e) => setNewEvaluator(prev => ({ ...prev, email: e.target.value }))}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                      />
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { setShowAddEvaluator(false); setNewEvaluator({ type: 'lider', name: '', email: '' }); }}
+                          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-white"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          onClick={addEvaluatorToPlan}
+                          disabled={!newEvaluator.name || !newEvaluator.email}
+                          className="flex-1 bg-slate-900 text-white rounded-lg px-3 py-2 text-sm font-medium disabled:opacity-50"
+                        >
+                          Agregar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-4 border-t">
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => setShowCreatePlan(false)}
                 className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50"
               >
                 Cancelar
               </button>
               <button
-                onClick={() => { setShowCreateModal(false); alert('Plantilla guardada (demo)'); }}
-                className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
+                onClick={() => { alert('Plan creado (demo)'); setShowCreatePlan(false); }}
+                className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800"
               >
-                <Save className="w-4 h-4" />
-                Guardar Plantilla
+                Crear Plan
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Preview Modal */}
-      {showPreviewModal && selectedTemplate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-slate-50 rounded-2xl w-full max-w-2xl my-8">
-            <div className="bg-white rounded-t-2xl p-4 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500">Vista previa del formulario</p>
-                <h3 className="font-semibold text-slate-900">{selectedTemplate.name}</h3>
-              </div>
-              <button onClick={() => setShowPreviewModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
+        ) : selectedPlan ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-slate-900">{selectedPlan.employeeName}</h2>
+              <p className="text-sm text-slate-500">{selectedPlan.templateName} · {selectedPlan.period}</p>
             </div>
-            
-            <div className="p-6 max-h-[70vh] overflow-y-auto">
-              {selectedTemplate.sections.map((section, secIdx) => (
-                <div key={section.id} className="mb-6">
-                  <h4 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">
-                      {secIdx + 1}
-                    </span>
-                    {section.name}
-                  </h4>
-                  
-                  {section.items.map((item) => (
-                    <div key={item.id} className="bg-white rounded-xl p-4 mb-3 border border-slate-200">
-                      <p className="text-sm font-medium text-slate-700 mb-3">{item.name}</p>
+
+            <div className="space-y-3">
+              {selectedPlan.evaluators.map((ev) => {
+                const evType = evaluatorTypes360.find(t => t.id === ev.type);
+                const statusColors = {
+                  pendiente: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200' },
+                  enviado: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
+                  completado: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' }
+                };
+                const statusColor = statusColors[ev.status];
+
+                return (
+                  <div key={ev.id} className={`border-2 ${statusColor.border} rounded-xl p-4`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${evType.color}20` }}>
+                          {evType.id === 'lider' && <Shield className="w-5 h-5" style={{ color: evType.color }} />}
+                          {evType.id === 'igual' && <Users2 className="w-5 h-5" style={{ color: evType.color }} />}
+                          {evType.id === 'subordinado' && <User className="w-5 h-5" style={{ color: evType.color }} />}
+                          {evType.id === 'cliente' && <Briefcase className="w-5 h-5" style={{ color: evType.color }} />}
+                          {evType.id === 'autoevaluacion' && <UserCheck className="w-5 h-5" style={{ color: evType.color }} />}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{ev.name}</p>
+                          <p className="text-xs text-slate-500">{evType.name}</p>
+                          <p className="text-xs text-slate-400">{ev.email}</p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor.bg} ${statusColor.text}`}>
+                        {ev.status === 'pendiente' && '🟡 Pendiente'}
+                        {ev.status === 'enviado' && '🔵 Enviado'}
+                        {ev.status === 'completado' && '🟢 Completado'}
+                      </span>
+                    </div>
+
+                    {ev.status !== 'completado' && (
                       <div className="flex gap-2">
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <button
-                            key={n}
-                            className="flex-1 h-10 rounded-lg border-2 border-slate-200 font-semibold text-slate-400 hover:border-slate-900 hover:text-slate-900 transition-all"
-                          >
-                            {n}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="flex justify-between text-xs text-slate-400 mt-1">
-                        <span>Nunca</span>
-                        <span>Siempre</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-            
-            <div className="bg-white rounded-b-2xl p-4 border-t border-slate-200">
-              <button className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium">
-                Enviar Evaluación
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Generate Link Modal */}
-      {showLinkModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Generar Enlace</h3>
-              <button onClick={() => { setShowLinkModal(false); setGeneratedLink(null); }} className="text-slate-400">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {!generatedLink ? (
-              <>
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Empleado a evaluar</label>
-                    <select 
-                      value={linkConfig.employeeId}
-                      onChange={(e) => setLinkConfig(prev => ({ ...prev, employeeId: e.target.value }))}
-                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
-                    >
-                      <option value="">Seleccionar...</option>
-                      {mockEmployees.map(emp => (
-                        <option key={emp.id} value={emp.id}>{emp.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Tipo de evaluador</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {evaluatorTypes.filter(t => t.id !== 'autoevaluacion').map((type) => (
                         <button
-                          key={type.id}
-                          onClick={() => setLinkConfig(prev => ({ ...prev, evaluatorType: type.id }))}
-                          className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                            linkConfig.evaluatorType === type.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200'
-                          }`}
+                          onClick={() => copyLink(ev.link)}
+                          className="flex-1 bg-slate-100 text-slate-700 rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-200 flex items-center justify-center gap-2"
                         >
-                          <type.icon className="w-4 h-4" style={{ color: type.color }} />
-                          <span className="text-sm font-medium">{type.name}</span>
+                          <Copy className="w-4 h-4" />
+                          Copiar Link
                         </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                        <button
+                          onClick={() => simulateEmail(ev)}
+                          className="flex-1 bg-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2"
+                        >
+                          <Mail className="w-4 h-4" />
+                          Enviar Email
+                        </button>
+                      </div>
+                    )}
 
-                <button
-                  onClick={generateLink}
-                  disabled={!linkConfig.employeeId}
-                  className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium disabled:opacity-50"
-                >
-                  Generar Enlace
-                </button>
-              </>
-            ) : (
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 className="w-8 h-8 text-green-600" />
-                </div>
-                <p className="text-sm text-slate-600 mb-4">Enlace listo para compartir</p>
-                <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                  <p className="text-sm font-mono text-slate-700 break-all">{generatedLink}</p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => navigator.clipboard.writeText(generatedLink)}
-                    className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    Copiar
-                  </button>
-                  <button
-                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent('Evalúa a tu compañero: ' + generatedLink)}`, '_blank')}
-                    className="flex-1 bg-green-600 text-white rounded-xl px-4 py-2.5 text-sm font-medium"
-                  >
-                    WhatsApp
-                  </button>
-                </div>
-              </div>
-            )}
+                    {ev.status === 'completado' && ev.completedDate && (
+                      <p className="text-xs text-green-600 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Completado el {ev.completedDate}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+            <UserPlus className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500 mb-4">Selecciona un plan o crea uno nuevo</p>
+            <button 
+              onClick={() => setShowCreatePlan(true)}
+              className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Nuevo Plan
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-// ============================================
-// KPIs VIEW - WITH ASSIGNMENT
-// ============================================
+// Vista 3: Estadísticas
+const EvalStatsView = ({ isAdmin }) => {
+  const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
+  const results = mockEvaluationResults.find(r => r.employeeId === selectedEmployee.id);
+  const plan = mockEvaluationPlans.find(p => p.employeeId === selectedEmployee.id);
+  
+  if (!results || !plan) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+        <BarChart2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <p className="text-slate-500">No hay resultados disponibles</p>
+      </div>
+    );
+  }
+
+  const template = mockEval360Templates.find(t => t.id === plan.templateId);
+  const completed = plan.evaluators.filter(e => e.status === 'completado').length;
+  const pending = plan.evaluators.length - completed;
+
+  return (
+    <div>
+      <div className="mb-6">
+        <select 
+          value={selectedEmployee.id}
+          onChange={(e) => setSelectedEmployee(mockEmployees.find(emp => emp.id === e.target.value))}
+          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5"
+        >
+          {mockEmployees.map(emp => (
+            <option key={emp.id} value={emp.id}>{emp.name}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
+          <CheckCircle2 className="w-8 h-8 mb-2 opacity-80" />
+          <p className="text-2xl font-bold">{completed}</p>
+          <p className="text-sm opacity-80">Completadas</p>
+        </div>
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl p-5 text-white">
+          <Clock className="w-8 h-8 mb-2 opacity-80" />
+          <p className="text-2xl font-bold">{pending}</p>
+          <p className="text-sm opacity-80">Pendientes</p>
+        </div>
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
+          <Award className="w-8 h-8 mb-2 opacity-80" />
+          <p className="text-2xl font-bold">{Math.round((completed / plan.evaluators.length) * 100)}%</p>
+          <p className="text-sm opacity-80">Progreso</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {template.competencies.map((comp) => {
+          const compResults = results.results[comp.id];
+          if (!compResults) return null;
+
+          const responseCounts = [0, 0, 0, 0, 0];
+          compResults.responses.forEach(r => {
+            responseCounts[r.score - 1]++;
+          });
+
+          const pieData = responseCounts.map((count, idx) => ({
+            name: comp.responses[idx].label,
+            value: count,
+            color: ['#EF4444', '#F59E0B', '#EAB308', '#84CC16', '#22C55E'][idx]
+          }));
+
+          return (
+            <div key={comp.id} className="bg-white border border-slate-200 rounded-2xl p-6">
+              <h3 className="font-semibold text-slate-900 mb-1">{comp.title}</h3>
+              <p className="text-sm text-slate-500 mb-4">{comp.behavior}</p>
+
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-slate-500">Promedio</span>
+                  <span className="text-2xl font-bold text-slate-900">{compResults.average.toFixed(1)}</span>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${(compResults.average / 5) * 100}%` }} />
+                </div>
+              </div>
+
+              <div className="h-48 mb-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPie>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => `${entry.value}`}
+                      outerRadius={60}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </RechartsPie>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="space-y-2">
+                {comp.responses.map((resp, idx) => (
+                  <div key={resp.value} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: pieData[idx].color }} />
+                      <span className="text-slate-600">{resp.label}</span>
+                    </div>
+                    <span className="font-semibold text-slate-900">{responseCounts[idx]} votos</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Vista 4: Tracking
+const EvalTrackingView = ({ isAdmin }) => {
+  const [filterStatus, setFilterStatus] = useState('all');
+  const allEvaluations = mockEvaluationPlans.flatMap(plan => 
+    plan.evaluators.map(ev => ({
+      ...ev,
+      employeeName: plan.employeeName,
+      planId: plan.id,
+      period: plan.period
+    }))
+  );
+
+  const filtered = filterStatus === 'all' 
+    ? allEvaluations 
+    : allEvaluations.filter(ev => ev.status === filterStatus);
+
+  const stats = {
+    pendiente: allEvaluations.filter(e => e.status === 'pendiente').length,
+    enviado: allEvaluations.filter(e => e.status === 'enviado').length,
+    completado: allEvaluations.filter(e => e.status === 'completado').length
+  };
+
+  return (
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div 
+          onClick={() => setFilterStatus('all')}
+          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
+            filterStatus === 'all' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <Activity className="w-6 h-6 text-slate-400 mb-2" />
+          <p className="text-2xl font-bold text-slate-900">{allEvaluations.length}</p>
+          <p className="text-sm text-slate-500">Total</p>
+        </div>
+        <div 
+          onClick={() => setFilterStatus('pendiente')}
+          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
+            filterStatus === 'pendiente' ? 'border-yellow-500 ring-2 ring-yellow-500/10' : 'border-slate-200 hover:border-yellow-300'
+          }`}
+        >
+          <Clock className="w-6 h-6 text-yellow-500 mb-2" />
+          <p className="text-2xl font-bold text-slate-900">{stats.pendiente}</p>
+          <p className="text-sm text-slate-500">Pendientes</p>
+        </div>
+        <div 
+          onClick={() => setFilterStatus('enviado')}
+          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
+            filterStatus === 'enviado' ? 'border-blue-500 ring-2 ring-blue-500/10' : 'border-slate-200 hover:border-blue-300'
+          }`}
+        >
+          <Send className="w-6 h-6 text-blue-500 mb-2" />
+          <p className="text-2xl font-bold text-slate-900">{stats.enviado}</p>
+          <p className="text-sm text-slate-500">Enviados</p>
+        </div>
+        <div 
+          onClick={() => setFilterStatus('completado')}
+          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
+            filterStatus === 'completado' ? 'border-green-500 ring-2 ring-green-500/10' : 'border-slate-200 hover:border-green-300'
+          }`}
+        >
+          <CheckCircle2 className="w-6 h-6 text-green-500 mb-2" />
+          <p className="text-2xl font-bold text-slate-900">{stats.completado}</p>
+          <p className="text-sm text-slate-500">Completados</p>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Empleado</th>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Evaluador</th>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Tipo</th>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Estado</th>
+              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Período</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((ev, idx) => {
+              const evType = evaluatorTypes360.find(t => t.id === ev.type);
+              return (
+                <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900">{ev.employeeName}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{ev.name}</td>
+                  <td className="px-6 py-4">
+                    <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ backgroundColor: `${evType.color}20`, color: evType.color }}>
+                      {evType.name}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {ev.status === 'pendiente' && <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">🟡 Pendiente</span>}
+                    {ev.status === 'enviado' && <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-700">🔵 Enviado</span>}
+                    {ev.status === 'completado' && <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">🟢 Completado</span>}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-500">{ev.period}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Vista 5: Resultados y PDI
+const EvalResultsPDIView = ({ isAdmin }) => {
+  const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
+  const results = mockEvaluationResults.find(r => r.employeeId === selectedEmployee.id);
+  const plan = mockEvaluationPlans.find(p => p.employeeId === selectedEmployee.id);
+  const pdi = mockPDIs.find(p => p.employeeId === selectedEmployee.id) || {
+    employeeName: selectedEmployee.name,
+    department: selectedEmployee.department,
+    leader: "Director",
+    reviewer: "CEO",
+    quarters: [{ quarter: "Q1 2024", meta: "", realidad: "", aprendizajeFormal: "", aprendizajeSocial: "", aprendizajeAplicado: "", voluntad: "", evaluaciones: "" }]
+  };
+
+  const [pdiData, setPdiData] = useState(pdi.quarters[0]);
+
+  if (!results || !plan) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+        <Award className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <p className="text-slate-500">Selecciona un empleado con resultados</p>
+      </div>
+    );
+  }
+
+  const template = mockEval360Templates.find(t => t.id === plan.templateId);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <select 
+          value={selectedEmployee.id}
+          onChange={(e) => setSelectedEmployee(mockEmployees.find(emp => emp.id === e.target.value))}
+          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5"
+        >
+          {mockEmployees.map(emp => (
+            <option key={emp.id} value={emp.id}>{emp.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Parte 1: Resultados 1 a 1 */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="text-xl font-semibold text-slate-900 mb-4">📊 Resultados de Evaluación 360°</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {template.competencies.map((comp) => {
+            const compResults = results.results[comp.id];
+            if (!compResults) return null;
+
+            return (
+              <div key={comp.id} className="border border-slate-200 rounded-xl p-4">
+                <h3 className="font-semibold text-slate-900 mb-2">{comp.title}</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-500">Promedio</span>
+                  <span className="text-2xl font-bold text-green-600">{compResults.average.toFixed(1)}/5</span>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${(compResults.average / 5) * 100}%` }} />
+                </div>
+                <p className="text-xs text-slate-500 mt-2">Más elegida: {comp.responses[compResults.mostCommon - 1].label}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Parte 2: PDI */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-slate-900 mb-1">📝 Plan de Desarrollo Individual (PDI)</h2>
+          <p className="text-sm text-slate-500">Basado en resultados de la evaluación 360°</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-slate-50 rounded-xl">
+          <div>
+            <p className="text-xs text-slate-500">Evaluado</p>
+            <p className="font-semibold text-slate-900">{pdi.employeeName}</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Departamento</p>
+            <p className="font-semibold text-slate-900">{pdi.department}</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Líder que Reporta</p>
+            <p className="font-semibold text-slate-900">{pdi.leader}</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Quien Revisa</p>
+            <p className="font-semibold text-slate-900">{pdi.reviewer}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Meta - ¿Qué quieres lograr en este trimestre?</label>
+            <textarea 
+              rows={2}
+              value={pdiData.meta}
+              onChange={(e) => setPdiData(prev => ({ ...prev, meta: e.target.value }))}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
+              placeholder="Describe tu meta principal para este trimestre..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Realidad - Situación actual y obstáculos</label>
+            <textarea 
+              rows={2}
+              value={pdiData.realidad}
+              onChange={(e) => setPdiData(prev => ({ ...prev, realidad: e.target.value }))}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
+              placeholder="Describe tu situación actual y los obstáculos que enfrentas..."
+            />
+          </div>
+
+          <div className="border-t pt-4">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">OPCIONES DE DESARROLLO</h3>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Aprendizaje Formal</label>
+                <input 
+                  type="text"
+                  value={pdiData.aprendizajeFormal}
+                  onChange={(e) => setPdiData(prev => ({ ...prev, aprendizajeFormal: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                  placeholder="Cursos, certificaciones, talleres..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Aprendizaje Social</label>
+                <input 
+                  type="text"
+                  value={pdiData.aprendizajeSocial}
+                  onChange={(e) => setPdiData(prev => ({ ...prev, aprendizajeSocial: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                  placeholder="Mentoría, coaching, networking..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Aprendizaje Aplicado</label>
+                <input 
+                  type="text"
+                  value={pdiData.aprendizajeAplicado}
+                  onChange={(e) => setPdiData(prev => ({ ...prev, aprendizajeAplicado: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                  placeholder="Proyectos, práctica en el trabajo..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Voluntad - Compromiso y actividades específicas</label>
+            <textarea 
+              rows={2}
+              value={pdiData.voluntad}
+              onChange={(e) => setPdiData(prev => ({ ...prev, voluntad: e.target.value }))}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
+              placeholder="¿A qué te comprometes? ¿Qué actividades específicas harás?"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Evaluaciones - Cómo se evidenciará el resultado</label>
+            <textarea 
+              rows={2}
+              value={pdiData.evaluaciones}
+              onChange={(e) => setPdiData(prev => ({ ...prev, evaluaciones: e.target.value }))}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
+              placeholder="¿Cómo se medirá el progreso y los resultados?"
+            />
+          </div>
+
+          <button
+            onClick={() => alert('PDI guardado (demo)')}
+            className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
+          >
+            <Save className="w-4 h-4" />
+            Guardar PDI
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const KPIsView = ({ isAdmin }) => {
   const [activeTab, setActiveTab] = useState('templates');
