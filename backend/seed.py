@@ -76,7 +76,7 @@ async def seed_database():
             "email": "maria@empresa.com",
             "name": "María García López",
             "hashed_password": get_password_hash("maria123"),
-            "role": "manager",
+            "role": "admin",
             "employee_id": "1",
             "department": "Tecnología",
             "position": "Tech Lead",
