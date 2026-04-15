@@ -26,8 +26,7 @@ const LoginPage = () => {
   const quickLogin = async (role) => {
     const credentials = {
       admin: { email: 'admin@empresa.com', password: 'admin123' },
-      manager: { email: 'manager@empresa.com', password: 'manager123' },
-      empleado: { email: 'empleado@empresa.com', password: 'empleado123' }
+      empleado: { email: 'juan@empresa.com', password: 'juan123' }
     };
 
     const cred = credentials[role];
@@ -95,22 +94,16 @@ const LoginPage = () => {
 
         <div className="mt-6 pt-6 border-t border-slate-200">
           <p className="text-xs text-slate-500 text-center mb-3">Acceso rápido (demo)</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => quickLogin('admin')}
-              className="text-xs px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-medium"
+              className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-medium"
             >
               Admin
             </button>
             <button
-              onClick={() => quickLogin('manager')}
-              className="text-xs px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-medium"
-            >
-              Manager
-            </button>
-            <button
               onClick={() => quickLogin('empleado')}
-              className="text-xs px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-medium"
+              className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-medium"
             >
               Empleado
             </button>
