@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
+from typing import List, Optional
 from models.empleado_a_evaluation import (
     EmpleadoAEvaluationPlan,
     EmpleadoAEvaluationPlanCreate,
     EmpleadoAVoteCreate,
     EmpleadoAVote,
-    EmpleadoAResult
+    EmpleadoAResult,
+    EmpleadoAAutoevaluacion,
+    EmpleadoAAutoevaluacionCreate
 )
 from middlewares.auth import get_current_user, db
 from datetime import datetime
@@ -278,4 +280,78 @@ async def get_all_results(
         )
         results.append(result)
     
+    return results
+
+
+# ============== AUTOEVALUACIÓN ==============
+
+@router.post("/autoevaluacion", response_model=EmpleadoAAutoevaluacion)
+async def create_autoevaluacion(
+    data: EmpleadoAAutoevaluacionCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear o actualizar autoevaluación del usuario actual"""
+    employee_id = current_user.get("employee_id")
+    if not employee_id:
+        raise HTTPException(status_code=400, detail="Usuario no tiene employee_id asociado")
+    
+    # Verificar si ya existe una autoevaluación para este periodo
+    existing = await db.empleado_a_autoevaluaciones.find_one({
+        "employee_id": employee_id,
+        "period": data.period
+    }, {"_id": 0})
+    
+    if existing:
+        # Actualizar existente
+        await db.empleado_a_autoevaluaciones.update_one(
+            {"employee_id": employee_id, "period": data.period},
+            {"$set": {
+                "cuadrante": data.cuadrante,
+                "valores_score": data.valores_score,
+                "resultados_score": data.resultados_score,
+                "comentarios": data.comentarios,
+                "fecha_evaluacion": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }}
+        )
+        updated = await db.empleado_a_autoevaluaciones.find_one({
+            "employee_id": employee_id,
+            "period": data.period
+        }, {"_id": 0})
+        return updated
+    
+    # Crear nueva
+    autoevaluacion = EmpleadoAAutoevaluacion(
+        id=str(uuid4()),
+        employee_id=employee_id,
+        employee_name=current_user["name"],
+        period=data.period,
+        cuadrante=data.cuadrante,
+        valores_score=data.valores_score,
+        resultados_score=data.resultados_score,
+        comentarios=data.comentarios,
+        fecha_evaluacion=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        created_at=datetime.now()
+    )
+    
+    await db.empleado_a_autoevaluaciones.insert_one(autoevaluacion.dict())
+    return autoevaluacion
+
+@router.get("/autoevaluacion/{employee_id}", response_model=Optional[EmpleadoAAutoevaluacion])
+async def get_autoevaluacion(
+    employee_id: str,
+    period: str = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener autoevaluación de un empleado"""
+    # Verificar permisos
+    if current_user["role"] not in ["admin"] and current_user.get("employee_id") != employee_id:
+        raise HTTPException(status_code=403, detail="No autorizado")
+    
+    query = {"employee_id": employee_id}
+    if period:
+        query["period"] = period
+    
+    autoevaluacion = await db.empleado_a_autoevaluaciones.find_one(query, {"_id": 0})
+    return autoevaluacion
+
     return results

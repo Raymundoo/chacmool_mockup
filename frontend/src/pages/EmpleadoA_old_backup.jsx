@@ -10,8 +10,7 @@ import {
   Clock, 
   Plus,
   Trash2,
-  UserX,
-  User
+  UserX
 } from 'lucide-react';
 
 const EmpleadoAPage = ({ isAdmin }) => {
@@ -24,15 +23,10 @@ const EmpleadoAPage = ({ isAdmin }) => {
   const [selectedResult, setSelectedResult] = useState(null);
   const [pendingEvaluations, setPendingEvaluations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [autoevaluacion, setAutoevaluacion] = useState(null);
   
   // Estado para evaluación visual
   const [evaluatingPlan, setEvaluatingPlan] = useState(null);
   const [selectedCuadrante, setSelectedCuadrante] = useState(null);
-  
-  // Estado para autoevaluación
-  const [showAutoevalForm, setShowAutoevalForm] = useState(false);
-  const [autoevalCuadrante, setAutoevalCuadrante] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -58,7 +52,12 @@ const EmpleadoAPage = ({ isAdmin }) => {
         const myEmployee = employeesData.find(e => e.id === user.employee_id);
         if (myEmployee) {
           setSelectedEmployee(myEmployee);
-          await loadEmployeeData(user.employee_id);
+          try {
+            const myResults = await empleadoAAPI.getEmployeeResults(user.employee_id);
+            setSelectedResult(myResults);
+          } catch (err) {
+            console.log('No results found for employee');
+          }
         }
       }
     } catch (error) {
@@ -68,29 +67,17 @@ const EmpleadoAPage = ({ isAdmin }) => {
     }
   };
 
-  const loadEmployeeData = async (employeeId) => {
-    try {
-      const [results, autoeval] = await Promise.all([
-        empleadoAAPI.getEmployeeResults(employeeId).catch(() => null),
-        empleadoAAPI.getAutoevaluacion(employeeId, 'Q1 2024').catch(() => null)
-      ]);
-      setSelectedResult(results);
-      setAutoevaluacion(autoeval);
-    } catch (err) {
-      console.log('Error loading employee data');
-    }
-  };
-
   // Tab: Matriz (Grid 9-Box con miniaturas de evaluadores)
   const MatrizTab = () => {
     const handleEmployeeSelect = async (emp) => {
       setSelectedEmployee(emp);
-      await loadEmployeeData(emp.id);
+      try {
+        const results = await empleadoAAPI.getEmployeeResults(emp.id);
+        setSelectedResult(results);
+      } catch (err) {
+        setSelectedResult(null);
+      }
     };
-
-    // Calcular cuántas personas faltan por evaluar al empleado seleccionado
-    const plan = plans.find(p => p.employee_id === selectedEmployee?.id);
-    const pendingEvaluators = plan?.evaluaciones_pendientes || 0;
 
     return (
       <div className="space-y-6">
@@ -107,45 +94,52 @@ const EmpleadoAPage = ({ isAdmin }) => {
             </div>
             {selectedEmployee && (
               <div className="bg-white rounded-lg px-4 py-2 border border-blue-300">
-                <p className="text-xs text-blue-600 font-medium">Evaluadores Pendientes</p>
-                <p className="text-2xl font-bold text-blue-900">{pendingEvaluators}</p>
-                <p className="text-xs text-blue-500">personas por evaluarte</p>
+                <p className="text-xs text-blue-600 font-medium">Evaluaciones Pendientes</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {plans.find(p => p.employee_id === selectedEmployee.id)?.evaluaciones_pendientes || 0}
+                </p>
+                <p className="text-xs text-blue-500">personas por evaluar</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Selector de empleado - SOLO VISIBLE PARA ADMIN */}
-        {isAdmin && (
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Ver Empleado
-            </label>
-            <select
-              className="w-full border border-slate-300 rounded-lg px-4 py-2"
-              onChange={(e) => {
-                const emp = employees.find(emp => emp.id === e.target.value);
-                if (emp) handleEmployeeSelect(emp);
-              }}
-              value={selectedEmployee?.id || ''}
-            >
-              <option value="">Selecciona un empleado</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
+        {/* Selector de empleado (siempre visible, muestra el nombre seleccionado) */}
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            {isAdmin ? 'Ver Empleado' : 'Tu Perfil'}
+          </label>
+          <select
+            className="w-full border border-slate-300 rounded-lg px-4 py-2"
+            onChange={(e) => {
+              const emp = employees.find(emp => emp.id === e.target.value);
+              if (emp) handleEmployeeSelect(emp);
+            }}
+            value={selectedEmployee?.id || ''}
+            disabled={!isAdmin}
+          >
+            {isAdmin ? (
+              <>
+                <option value="">Selecciona un empleado</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </>
+            ) : (
+              <option value={selectedEmployee?.id}>{selectedEmployee?.name}</option>
+            )}
+          </select>
+        </div>
 
-        {/* Grid 9-Box con iconos/nombres */}
+        {/* Grid 9-Box con miniaturas */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <div className="grid grid-cols-3 gap-3">
             {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
               const config = classificationMatrix[code];
               const colors = classificationColors[config.color];
               
-              // Obtener votos para este cuadrante del empleado seleccionado
-              const votesInQuadrant = selectedResult?.all_votes?.filter(v => v.cuadrante === code) || [];
+              // Obtener empleados en este cuadrante
+              const employeesInQuadrant = allResults.filter(r => r.cuadrante_mayoria === code);
               
               return (
                 <div
@@ -161,26 +155,34 @@ const EmpleadoAPage = ({ isAdmin }) => {
                     </p>
                   </div>
                   
-                  {/* Miniaturas de evaluadores */}
-                  <div className="flex-1 flex flex-wrap gap-1 mt-2 justify-center">
-                    {votesInQuadrant.map((vote, idx) => (
-                      <div key={idx} className="relative group">
-                        {isAdmin ? (
-                          <img 
-                            src={vote.evaluator_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${vote.evaluator_name}`}
-                            alt={vote.evaluator_name}
-                            className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
-                            title={vote.evaluator_name}
-                          />
-                        ) : (
-                          <div 
-                            className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center border-2 shadow-sm"
-                            style={{ borderColor: colors.border }}
-                            title="Evaluador"
-                          >
-                            <User className="w-4 h-4" style={{ color: colors.text }} />
-                          </div>
-                        )}
+                  {/* Miniaturas de empleados y evaluadores */}
+                  <div className="flex-1 space-y-2 mt-2">
+                    {employeesInQuadrant.map(result => (
+                      <div key={result.employee_id} className="bg-white/70 rounded-lg p-2">
+                        <p className="text-xs font-medium" style={{ color: colors.text }}>
+                          {result.employee_name}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {result.all_votes?.map((vote, idx) => (
+                            <div key={idx} className="relative group">
+                              {isAdmin ? (
+                                <img 
+                                  src={vote.evaluator_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${vote.evaluator_name}`}
+                                  alt={vote.evaluator_name}
+                                  className="w-6 h-6 rounded-full border border-white"
+                                  title={vote.evaluator_name}
+                                />
+                              ) : (
+                                <div 
+                                  className="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center"
+                                  title="Evaluador"
+                                >
+                                  <UserX className="w-3 h-3 text-slate-500" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -190,99 +192,73 @@ const EmpleadoAPage = ({ isAdmin }) => {
           </div>
         </div>
 
-        {/* Evaluación Calculada y Autoevaluación */}
+        {/* Detalle del empleado seleccionado */}
         {selectedEmployee && selectedResult && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Evaluación Calculada (Promedio de otros) */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-600" />
-                Evaluación Calculada
-              </h3>
-              
-              <div className="text-center mb-4">
-                <div 
-                  className="inline-block px-6 py-3 rounded-xl border-2"
-                  style={{ 
-                    backgroundColor: classificationColors[classificationMatrix[selectedResult.cuadrante_mayoria].color].bg,
-                    borderColor: classificationColors[classificationMatrix[selectedResult.cuadrante_mayoria].color].border
-                  }}
-                >
-                  <p className="text-4xl font-bold" style={{ 
-                    color: classificationColors[classificationMatrix[selectedResult.cuadrante_mayoria].color].text 
-                  }}>
-                    {selectedResult.cuadrante_mayoria}
-                  </p>
-                  <p className="text-sm font-medium mt-1" style={{ 
-                    color: classificationColors[classificationMatrix[selectedResult.cuadrante_mayoria].color].text 
-                  }}>
-                    {classificationMatrix[selectedResult.cuadrante_mayoria].label}
-                  </p>
-                </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-4">
+              Detalles de Evaluación: {selectedEmployee.name}
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <p className="text-sm text-purple-600">Promedio Valores</p>
+                <p className="text-3xl font-bold text-purple-900">{selectedResult.promedio_valores}%</p>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <p className="text-xs text-purple-600">Valores</p>
-                  <p className="text-2xl font-bold text-purple-900">{selectedResult.promedio_valores}%</p>
-                </div>
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-blue-600">Resultados</p>
-                  <p className="text-2xl font-bold text-blue-900">{selectedResult.promedio_resultados}%</p>
-                </div>
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-600">Promedio Resultados</p>
+                <p className="text-3xl font-bold text-blue-900">{selectedResult.promedio_resultados}%</p>
               </div>
-
-              <p className="text-xs text-slate-500 mt-3 text-center">
-                Basado en {selectedResult.total_votos} evaluacion(es)
-              </p>
             </div>
 
-            {/* Autoevaluación */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-green-600" />
-                Autoevaluación
-              </h3>
-              
-              {autoevaluacion ? (
-                <>
-                  <div className="text-center mb-4">
-                    <div 
-                      className="inline-block px-6 py-3 rounded-xl border-2"
-                      style={{ 
-                        backgroundColor: classificationColors[classificationMatrix[autoevaluacion.cuadrante].color].bg,
-                        borderColor: classificationColors[classificationMatrix[autoevaluacion.cuadrante].color].border
-                      }}
-                    >
-                      <p className="text-4xl font-bold" style={{ 
-                        color: classificationColors[classificationMatrix[autoevaluacion.cuadrante].color].text 
-                      }}>
-                        {autoevaluacion.cuadrante}
-                      </p>
-                      <p className="text-sm font-medium mt-1" style={{ 
-                        color: classificationColors[classificationMatrix[autoevaluacion.cuadrante].color].text 
-                      }}>
-                        {classificationMatrix[autoevaluacion.cuadrante].label}
-                      </p>
+            <div className="mb-4">
+              <h4 className="font-medium mb-2">Clasificación por Evaluadores ({selectedResult.total_votos} votos)</h4>
+              <div className="space-y-2">
+                {Object.entries(selectedResult.votos_por_cuadrante).map(([cuad, count]) => (
+                  <div key={cuad} className="flex items-center gap-2">
+                    <span className="w-12 text-sm font-medium">{cuad}:</span>
+                    <div className="flex-1 h-6 bg-slate-100 rounded overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-500"
+                        style={{ width: `${(count / selectedResult.total_votos) * 100}%` }}
+                      />
                     </div>
+                    <span className="text-sm">{count} votos</span>
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <p className="text-xs text-purple-600">Valores</p>
-                      <p className="text-2xl font-bold text-purple-900">{autoevaluacion.valores_score}%</p>
-                    </div>
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <p className="text-xs text-blue-600">Resultados</p>
-                      <p className="text-2xl font-bold text-blue-900">{autoevaluacion.resultados_score}%</p>
-                    </div>
+            <div>
+              <h4 className="font-medium mb-2">Evaluadores</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {selectedResult.all_votes.map((vote, idx) => (
+                  <div key={idx} className="p-3 border border-slate-200 rounded-lg flex items-center gap-3">
+                    {isAdmin ? (
+                      <>
+                        <img 
+                          src={vote.evaluator_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${vote.evaluator_name}`}
+                          alt="" 
+                          className="w-8 h-8 rounded-full" 
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{vote.evaluator_name}</p>
+                          <p className="text-xs text-slate-500">Votó: {vote.cuadrante}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
+                          <UserX className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-400">Evaluador {idx + 1}</p>
+                          <p className="text-xs text-slate-500">Votó: {vote.cuadrante}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
-                </>
-              ) : (
-                <div className="text-center py-8 text-slate-400">
-                  <p className="text-sm">No hay autoevaluación registrada</p>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -453,7 +429,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
     );
   };
 
-  // Tab: Evaluar + Autoevaluación
+  // Tab: Evaluar (Listado + Evaluación Visual)
   const EvaluarTab = () => {
     const handleStartEvaluation = (plan) => {
       setEvaluatingPlan(plan);
@@ -471,6 +447,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
       }
 
       const config = classificationMatrix[selectedCuadrante];
+      // Usar promedios de los rangos como valores
       const valoresScore = Math.round((config.valores.min + config.valores.max) / 2);
       const resultadosScore = Math.round((config.resultados.min + config.resultados.max) / 2);
 
@@ -484,33 +461,6 @@ const EmpleadoAPage = ({ isAdmin }) => {
         alert('Evaluación enviada exitosamente');
         setEvaluatingPlan(null);
         setSelectedCuadrante(null);
-        fetchData();
-      } catch (error) {
-        alert('Error: ' + error.message);
-      }
-    };
-
-    const handleSubmitAutoeval = async () => {
-      if (!autoevalCuadrante) {
-        alert('Por favor selecciona un cuadrante');
-        return;
-      }
-
-      const config = classificationMatrix[autoevalCuadrante];
-      const valoresScore = Math.round((config.valores.min + config.valores.max) / 2);
-      const resultadosScore = Math.round((config.resultados.min + config.resultados.max) / 2);
-
-      try {
-        await empleadoAAPI.createAutoevaluacion({
-          period: 'Q1 2024',
-          cuadrante: autoevalCuadrante,
-          valores_score: valoresScore,
-          resultados_score: resultadosScore,
-          comentarios: `Autoevaluación - ${config.label}`
-        });
-        alert('Autoevaluación guardada exitosamente');
-        setShowAutoevalForm(false);
-        setAutoevalCuadrante(null);
         fetchData();
       } catch (error) {
         alert('Error: ' + error.message);
@@ -589,136 +539,42 @@ const EmpleadoAPage = ({ isAdmin }) => {
       );
     }
 
-    if (showAutoevalForm) {
+    // Listado de evaluaciones pendientes
+    if (pendingEvaluations.length === 0) {
       return (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-6">
-            <h3 className="font-semibold text-lg mb-2">
-              Autoevaluación
-            </h3>
-            <p className="text-sm text-slate-500 mb-4">
-              Haz clic en el cuadrante donde te clasificarías
-            </p>
-
-            {/* Grid Visual Clickeable */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
-                const config = classificationMatrix[code];
-                const colors = classificationColors[config.color];
-                const isSelected = autoevalCuadrante === code;
-
-                return (
-                  <button
-                    key={code}
-                    onClick={() => setAutoevalCuadrante(code)}
-                    className={`rounded-xl border-2 p-6 min-h-[120px] flex flex-col items-center justify-center cursor-pointer transition-all ${
-                      isSelected ? 'ring-4 ring-green-500 scale-105' : 'hover:scale-102'
-                    }`}
-                    style={{ 
-                      backgroundColor: colors.bg, 
-                      borderColor: isSelected ? '#10b981' : colors.border 
-                    }}
-                  >
-                    <span className="text-3xl font-bold mb-1" style={{ color: colors.text }}>{code}</span>
-                    <p className="text-sm font-medium text-center" style={{ color: colors.text }}>{config.label}</p>
-                    <p className="text-xs mt-2 text-center" style={{ color: colors.text }}>
-                      V: {config.valores.min}-{config.valores.max}%
-                      <br />
-                      R: {config.resultados.min}-{config.resultados.max}%
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {autoevalCuadrante && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                <p className="font-medium text-green-900">Seleccionaste: {classificationMatrix[autoevalCuadrante].label}</p>
-                <p className="text-sm text-green-700 mt-1">{classificationMatrix[autoevalCuadrante].description}</p>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleSubmitAutoeval}
-                disabled={!autoevalCuadrante}
-                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
-              >
-                Guardar Autoevaluación
-              </button>
-              <button
-                onClick={() => {
-                  setShowAutoevalForm(false);
-                  setAutoevalCuadrante(null);
-                }}
-                className="px-4 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center">
+          <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-2" />
+          <p className="text-slate-600">No tienes evaluaciones pendientes</p>
         </div>
       );
     }
 
-    // Listado de evaluaciones pendientes + autoevaluación
     return (
-      <div className="space-y-6">
-        {/* Sección de Autoevaluación */}
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium text-green-900">Autoevaluación</h3>
-              <p className="text-sm text-green-700 mt-1">
-                Evalúate a ti mismo. Esta evaluación no se incluye en el cálculo, es solo para comparación.
-              </p>
-            </div>
-            <button
-              onClick={() => setShowAutoevalForm(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-            >
-              <User className="w-4 h-4" />
-              {autoevaluacion ? 'Actualizar' : 'Autoevaluarme'}
-            </button>
-          </div>
+      <div className="space-y-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <h3 className="font-medium text-blue-900">Evaluaciones Pendientes</h3>
+          <p className="text-sm text-blue-700 mt-1">
+            Tienes {pendingEvaluations.length} evaluación(es) pendiente(s). Haz clic en "Evaluar" para clasificar al colaborador.
+          </p>
         </div>
 
-        {/* Evaluaciones Pendientes */}
-        {pendingEvaluations.length === 0 ? (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center">
-            <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-2" />
-            <p className="text-slate-600">No tienes evaluaciones pendientes</p>
+        {pendingEvaluations.map((plan) => (
+          <div key={plan.id} className="bg-white border border-slate-200 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-slate-900">{plan.employee_name}</h4>
+                <p className="text-sm text-slate-500">Periodo: {plan.period}</p>
+                <p className="text-xs text-slate-400">Vence: {plan.fecha_limite}</p>
+              </div>
+              <button
+                onClick={() => handleStartEvaluation(plan)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Evaluar
+              </button>
+            </div>
           </div>
-        ) : (
-          <>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <h3 className="font-medium text-blue-900">Evaluaciones Pendientes</h3>
-              <p className="text-sm text-blue-700 mt-1">
-                Tienes {pendingEvaluations.length} evaluación(es) pendiente(s). Haz clic en "Evaluar" para clasificar al colaborador.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {pendingEvaluations.map((plan) => (
-                <div key={plan.id} className="bg-white border border-slate-200 rounded-xl p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-slate-900">{plan.employee_name}</h4>
-                      <p className="text-sm text-slate-500">Periodo: {plan.period}</p>
-                      <p className="text-xs text-slate-400">Vence: {plan.fecha_limite}</p>
-                    </div>
-                    <button
-                      onClick={() => handleStartEvaluation(plan)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Evaluar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        ))}
       </div>
     );
   };

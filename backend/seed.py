@@ -39,6 +39,7 @@ async def seed_database():
     await db.evaluation_results.delete_many({})
     await db.pdis.delete_many({})
     await db.empleado_a_plans.delete_many({})
+    await db.empleado_a_autoevaluaciones.delete_many({})
     
     # Seed Employees FIRST (para referenciarlos en users)
     print("Creating employees...")
@@ -424,10 +425,42 @@ async def seed_database():
     await db.empleado_a_plans.insert_many(empleado_a_plans)
     print(f"✅ Created {len(empleado_a_plans)} Empleado A evaluation plans")
     
+    # Seed Autoevaluaciones
+    print("Creating autoevaluaciones...")
+    autoevaluaciones = [
+        {
+            "id": "autoeval-1",
+            "employee_id": "1",
+            "employee_name": "María García López",
+            "period": "Q1 2024",
+            "cuadrante": "A",
+            "valores_score": 90,
+            "resultados_score": 88,
+            "comentarios": "Autoevaluación - Empleado A",
+            "fecha_evaluacion": "2024-03-10 10:00:00",
+            "created_at": datetime.now()
+        },
+        {
+            "id": "autoeval-2",
+            "employee_id": "4",
+            "employee_name": "Carlos Mendoza",
+            "period": "Q1 2024",
+            "cuadrante": "B1",
+            "valores_score": 72,
+            "resultados_score": 85,
+            "comentarios": "Autoevaluación - Performer Sólido",
+            "fecha_evaluacion": "2024-03-12 14:30:00",
+            "created_at": datetime.now()
+        }
+    ]
+    await db.empleado_a_autoevaluaciones.insert_many(autoevaluaciones)
+    print(f"✅ Created {len(autoevaluaciones)} autoevaluaciones")
+
+    
     print("\n🎉 Database seeded successfully!")
     print("\n📝 Test Credentials:")
     print("   Admin: admin@empresa.com / admin123")
-    print("   María (Manager): maria@empresa.com / maria123")
+    print("   María (Admin): maria@empresa.com / maria123")
     print("   Juan (Empleado): juan@empresa.com / juan123")
     print("   Laura (Empleado): laura@empresa.com / laura123")
     print("   Carlos (Empleado): carlos@empresa.com / carlos123")

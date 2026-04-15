@@ -975,15 +975,17 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
   
-  const navItems = [
-    { path: "/", icon: LayoutDashboard, label: "Dashboard", description: "Vista general" },
-    { path: "/9box", icon: Grid3X3, label: "Empleado A", description: "Empleados A, B, C" },
-    { path: "/employees", icon: Users, label: "Empleados", description: "Gestión de personal" },
-    { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces" },
-    { path: "/aciertos-desaciertos", icon: ClipboardList, label: "Aciertos y Desaciertos", description: "Evaluación bilateral" },
-    { path: "/kpis", icon: Target, label: "KPIs", description: "Indicadores clave" },
-    // "Mi Perfil" y "Evaluación Manual" ocultos - ahora integrados en "Empleado A"
+  const allNavItems = [
+    { path: "/", icon: LayoutDashboard, label: "Dashboard", description: "Vista general", roles: ['admin', 'empleado'] },
+    { path: "/9box", icon: Grid3X3, label: "Empleado A", description: "Empleados A, B, C", roles: ['admin', 'empleado'] },
+    { path: "/employees", icon: Users, label: "Empleados", description: "Gestión de personal", roles: ['admin'] },
+    { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces", roles: ['admin', 'empleado'] },
+    { path: "/aciertos-desaciertos", icon: ClipboardList, label: "Aciertos y Desaciertos", description: "Evaluación bilateral", roles: ['admin'] },
+    { path: "/kpis", icon: Target, label: "KPIs", description: "Indicadores clave", roles: ['admin'] },
   ];
+  
+  // Filtrar navItems basado en el rol del usuario
+  const navItems = allNavItems.filter(item => item.roles.includes(user?.role || 'empleado'));
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col">
@@ -1961,6 +1963,145 @@ const AciertosDesaciertosForm = ({ onClose, evaluation, employees, onSubmit }) =
         <div className="border-t border-slate-200 px-6 py-4 flex gap-3">
           <button onClick={onClose} className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50">Cancelar</button>
           <button onClick={handleSubmit} className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800">{isEditing ? 'Actualizar' : 'Guardar'} Evaluación</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AciertosDesaciertosDetail = ({ evaluation, onClose, onEdit }) => {
+  if (!evaluation) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-4xl w-full my-8">
+        <div className="sticky top-0 bg-white border-b border-slate-200 rounded-t-2xl px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-xl font-semibold text-slate-900">Detalle de Evaluación</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Header Info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl">
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Evaluado</p>
+              <p className="font-semibold text-slate-900">{evaluation.evaluatedName}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Evaluador</p>
+              <p className="font-semibold text-slate-900">{evaluation.evaluatorName}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Fecha</p>
+              <p className="font-semibold text-slate-900">{new Date(evaluation.date).toLocaleDateString('es-ES')}</p>
+            </div>
+          </div>
+
+          {/* Resultado vs Objetivo */}
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-2">Resultado vs Objetivo del Trimestre</h3>
+            <p className="text-slate-700 bg-blue-50 p-4 rounded-lg">{evaluation.resultadoVsObjetivo}</p>
+          </div>
+
+          {/* Aciertos y Desaciertos - Colaborador */}
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-3">Colaborador</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                  <ThumbsUp className="w-4 h-4" />
+                  Aciertos ({evaluation.aciertosColaborador?.length || 0})
+                </p>
+                <ul className="space-y-1">
+                  {evaluation.aciertosColaborador?.map((item, idx) => (
+                    <li key={idx} className="text-sm text-green-900">• {item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="font-medium text-red-800 mb-2 flex items-center gap-2">
+                  <ThumbsDown className="w-4 h-4" />
+                  Desaciertos ({evaluation.desaciertosColaborador?.length || 0})
+                </p>
+                <ul className="space-y-1">
+                  {evaluation.desaciertosColaborador?.map((item, idx) => (
+                    <li key={idx} className="text-sm text-red-900">• {item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Aciertos y Desaciertos - Empresa */}
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-3">Empresa</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                  <ThumbsUp className="w-4 h-4" />
+                  Aciertos ({evaluation.aciertosEmpresa?.length || 0})
+                </p>
+                <ul className="space-y-1">
+                  {evaluation.aciertosEmpresa?.map((item, idx) => (
+                    <li key={idx} className="text-sm text-green-900">• {item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="font-medium text-red-800 mb-2 flex items-center gap-2">
+                  <ThumbsDown className="w-4 h-4" />
+                  Desaciertos ({evaluation.desaciertosEmpresa?.length || 0})
+                </p>
+                <ul className="space-y-1">
+                  {evaluation.desaciertosEmpresa?.map((item, idx) => (
+                    <li key={idx} className="text-sm text-red-900">• {item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Compromisos */}
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-3">Compromisos Generados ({evaluation.compromisos?.length || 0})</h3>
+            <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Tipo</th>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Compromiso</th>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {evaluation.compromisos?.map((comp, idx) => (
+                    <tr key={idx} className="border-t border-slate-100">
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          comp.tipo === 'colaborador' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                        }`}>
+                          {comp.tipo === 'colaborador' ? 'Colaborador' : 'Empresa'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-700">{comp.compromiso}</td>
+                      <td className="px-4 py-3 text-sm text-slate-500">{comp.fecha}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-200 px-6 py-4 flex gap-3">
+          <button onClick={onClose} className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50">
+            Cerrar
+          </button>
+          <button onClick={onEdit} className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800">
+            Editar
+          </button>
         </div>
       </div>
     </div>

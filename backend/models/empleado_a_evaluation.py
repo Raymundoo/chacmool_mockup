@@ -49,6 +49,27 @@ class EmpleadoAVoteCreate(BaseModel):
     resultados_score: int
     comentarios: Optional[str] = ""
 
+class EmpleadoAAutoevaluacion(BaseModel):
+    """Autoevaluación del empleado"""
+    id: str
+    employee_id: str
+    employee_name: str
+    period: str
+    cuadrante: Literal["A", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4"]
+    valores_score: int
+    resultados_score: int
+    comentarios: Optional[str] = ""
+    fecha_evaluacion: str
+    created_at: datetime = datetime.now()
+
+class EmpleadoAAutoevaluacionCreate(BaseModel):
+    """Crear autoevaluación"""
+    period: str
+    cuadrante: Literal["A", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4"]
+    valores_score: int
+    resultados_score: int
+    comentarios: Optional[str] = ""
+
 class EmpleadoAResult(BaseModel):
     """Resultado agregado de evaluaciones de un empleado"""
     employee_id: str

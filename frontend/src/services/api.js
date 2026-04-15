@@ -416,6 +416,31 @@ export const empleadoAAPI = {
     });
     if (!response.ok) throw new Error('Failed to fetch all results');
     return response.json();
+  },
+
+  // Autoevaluación
+  createAutoevaluacion: async (data) => {
+    const response = await fetch(`${API_URL}/api/empleado-a/autoevaluacion`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to create autoevaluacion');
+    }
+    return response.json();
+  },
+
+  getAutoevaluacion: async (employeeId, period = null) => {
+    const url = period 
+      ? `${API_URL}/api/empleado-a/autoevaluacion/${employeeId}?period=${period}`
+      : `${API_URL}/api/empleado-a/autoevaluacion/${employeeId}`;
+    const response = await fetch(url, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch autoevaluacion');
+    return response.json();
   }
 };
 
