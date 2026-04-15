@@ -26,6 +26,7 @@ from routes.employees import router as employees_router
 from routes.aciertos_desaciertos import router as aciertos_router
 from routes.evaluations360 import router as evaluations360_router
 from routes.kpis import router as kpis_router
+from routes.empleado_a import router as empleado_a_router
 
 # Include routers
 app.include_router(auth_router)
@@ -33,6 +34,7 @@ app.include_router(employees_router)
 app.include_router(aciertos_router)
 app.include_router(evaluations360_router)
 app.include_router(kpis_router)
+app.include_router(empleado_a_router)
 
 @app.get("/api/health")
 async def health_check():

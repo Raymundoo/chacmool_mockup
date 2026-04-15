@@ -38,8 +38,24 @@ async def seed_database():
     await db.evaluation_plans.delete_many({})
     await db.evaluation_results.delete_many({})
     await db.pdis.delete_many({})
+    await db.empleado_a_plans.delete_many({})
     
-    # Seed Users
+    # Seed Employees FIRST (para referenciarlos en users)
+    print("Creating employees...")
+    employees = [
+        {"id": "1", "name": "María García López", "position": "Tech Lead", "department": "Tecnología", "area": "Tecnología", "email": "maria@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria", "evaluations": {"superior": 90, "subordinados": 88, "companeros": 85, "cliente": 92}, "kpis_score": 88, "eval_360_score": 89, "category": "A", "created_at": datetime.now()},
+        {"id": "2", "name": "Juan Rodríguez", "position": "Senior Developer", "department": "Desarrollo", "area": "Desarrollo", "email": "juan@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Juan", "evaluations": {"superior": 82, "subordinados": 80, "companeros": 78}, "kpis_score": 82, "eval_360_score": 80, "category": "B1", "created_at": datetime.now()},
+        {"id": "3", "name": "Laura Sánchez", "position": "Sales Manager", "department": "Ventas", "area": "Ventas", "email": "laura@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Laura", "evaluations": {"superior": 75, "companeros": 80}, "kpis_score": 72, "eval_360_score": 77, "category": "B2", "created_at": datetime.now()},
+        {"id": "4", "name": "Carlos Mendoza", "position": "Developer", "department": "Tecnología", "area": "Tecnología", "email": "carlos@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos", "evaluations": {"superior": 88, "companeros": 85}, "kpis_score": 85, "eval_360_score": 87, "category": "A", "created_at": datetime.now()},
+        {"id": "5", "name": "Ana Martínez", "position": "Junior Developer", "department": "Tecnología", "area": "Tecnología", "email": "ana@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana", "evaluations": {"superior": 70, "companeros": 75}, "kpis_score": 68, "eval_360_score": 72, "category": "B2", "created_at": datetime.now()},
+        {"id": "6", "name": "Roberto Fernández", "position": "Operations Manager", "department": "Operaciones", "area": "Operaciones", "email": "roberto@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Roberto", "evaluations": {"superior": 78, "subordinados": 76}, "kpis_score": 80, "eval_360_score": 77, "category": "B1", "created_at": datetime.now()},
+        {"id": "7", "name": "Patricia Ruiz", "position": "Sales Representative", "department": "Ventas", "area": "Ventas", "email": "patricia@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Patricia", "evaluations": {"superior": 65}, "kpis_score": 60, "eval_360_score": 65, "category": "C1", "created_at": datetime.now()},
+        {"id": "8", "name": "Diego Morales", "position": "Product Manager", "department": "Producto", "area": "Producto", "email": "diego@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Diego", "evaluations": {"superior": 85, "companeros": 82}, "kpis_score": 84, "eval_360_score": 83, "category": "B1", "created_at": datetime.now()}
+    ]
+    await db.employees.insert_many(employees)
+    print(f"✅ Created {len(employees)} employees")
+    
+    # Seed Users (vinculados a empleados reales)
     print("Creating users...")
     users = [
         {
@@ -48,51 +64,94 @@ async def seed_database():
             "name": "Admin Usuario",
             "hashed_password": get_password_hash("admin123"),
             "role": "admin",
+            "employee_id": None,  # Admin no es empleado
             "department": "Administración",
             "position": "Administrador",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
             "is_active": True,
             "created_at": datetime.now()
         },
         {
-            "id": "manager-1",
-            "email": "manager@empresa.com",
-            "name": "Manager Usuario",
-            "hashed_password": get_password_hash("manager123"),
+            "id": "1",  # Mismo ID que empleado
+            "email": "maria@empresa.com",
+            "name": "María García López",
+            "hashed_password": get_password_hash("maria123"),
             "role": "manager",
+            "employee_id": "1",
             "department": "Tecnología",
-            "position": "Director de Tecnología",
+            "position": "Tech Lead",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
             "is_active": True,
             "created_at": datetime.now()
         },
         {
-            "id": "emp-1",
-            "email": "empleado@empresa.com",
-            "name": "Empleado Usuario",
-            "hashed_password": get_password_hash("empleado123"),
+            "id": "2",
+            "email": "juan@empresa.com",
+            "name": "Juan Rodríguez",
+            "hashed_password": get_password_hash("juan123"),
             "role": "empleado",
+            "employee_id": "2",
             "department": "Desarrollo",
-            "position": "Desarrollador",
+            "position": "Senior Developer",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Juan",
+            "is_active": True,
+            "created_at": datetime.now()
+        },
+        {
+            "id": "3",
+            "email": "laura@empresa.com",
+            "name": "Laura Sánchez",
+            "hashed_password": get_password_hash("laura123"),
+            "role": "empleado",
+            "employee_id": "3",
+            "department": "Ventas",
+            "position": "Sales Manager",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Laura",
+            "is_active": True,
+            "created_at": datetime.now()
+        },
+        {
+            "id": "4",
+            "email": "carlos@empresa.com",
+            "name": "Carlos Mendoza",
+            "hashed_password": get_password_hash("carlos123"),
+            "role": "empleado",
+            "employee_id": "4",
+            "department": "Tecnología",
+            "position": "Developer",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos",
+            "is_active": True,
+            "created_at": datetime.now()
+        },
+        {
+            "id": "5",
+            "email": "ana@empresa.com",
+            "name": "Ana Martínez",
+            "hashed_password": get_password_hash("ana123"),
+            "role": "empleado",
+            "employee_id": "5",
+            "department": "Tecnología",
+            "position": "Junior Developer",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana",
+            "is_active": True,
+            "created_at": datetime.now()
+        },
+        {
+            "id": "6",
+            "email": "roberto@empresa.com",
+            "name": "Roberto Fernández",
+            "hashed_password": get_password_hash("roberto123"),
+            "role": "empleado",
+            "employee_id": "6",
+            "department": "Operaciones",
+            "position": "Operations Manager",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Roberto",
             "is_active": True,
             "created_at": datetime.now()
         }
     ]
     await db.users.insert_many(users)
     print(f"✅ Created {len(users)} users")
-    
-    # Seed Employees
-    print("Creating employees...")
-    employees = [
-        {"id": "1", "name": "María García López", "position": "Tech Lead", "department": "Tecnología", "email": "maria@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria", "evaluations": {"superior": 90, "subordinados": 88, "companeros": 85, "cliente": 92}, "kpis_score": 88, "eval_360_score": 89, "category": "A", "created_at": datetime.now()},
-        {"id": "2", "name": "Juan Rodríguez", "position": "Senior Developer", "department": "Desarrollo", "email": "juan@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Juan", "evaluations": {"superior": 82, "subordinados": 80, "companeros": 78}, "kpis_score": 82, "eval_360_score": 80, "category": "B1", "created_at": datetime.now()},
-        {"id": "3", "name": "Laura Sánchez", "position": "Sales Manager", "department": "Ventas", "email": "laura@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Laura", "evaluations": {"superior": 75, "companeros": 80}, "kpis_score": 72, "eval_360_score": 77, "category": "B2", "created_at": datetime.now()},
-        {"id": "4", "name": "Carlos Mendoza", "position": "Developer", "department": "Tecnología", "email": "carlos@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos", "evaluations": {"superior": 88, "companeros": 85}, "kpis_score": 85, "eval_360_score": 87, "category": "A", "created_at": datetime.now()},
-        {"id": "5", "name": "Ana Martínez", "position": "Junior Developer", "department": "Tecnología", "email": "ana@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana", "evaluations": {"superior": 70, "companeros": 75}, "kpis_score": 68, "eval_360_score": 72, "category": "B2", "created_at": datetime.now()},
-        {"id": "6", "name": "Roberto Fernández", "position": "Operations Manager", "department": "Operaciones", "email": "roberto@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Roberto", "evaluations": {"superior": 78, "subordinados": 76}, "kpis_score": 80, "eval_360_score": 77, "category": "B1", "created_at": datetime.now()},
-        {"id": "7", "name": "Patricia Ruiz", "position": "Sales Representative", "department": "Ventas", "email": "patricia@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Patricia", "evaluations": {"superior": 65}, "kpis_score": 60, "eval_360_score": 65, "category": "C1", "created_at": datetime.now()},
-        {"id": "8", "name": "Diego Morales", "position": "Product Manager", "department": "Producto", "email": "diego@empresa.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Diego", "evaluations": {"superior": 85, "companeros": 82}, "kpis_score": 84, "eval_360_score": 83, "category": "B1", "created_at": datetime.now()}
-    ]
-    await db.employees.insert_many(employees)
-    print(f"✅ Created {len(employees)} employees")
     
     # Seed Aciertos y Desaciertos
     print("Creating Aciertos y Desaciertos evaluations...")
@@ -255,11 +314,104 @@ async def seed_database():
     await db.pdis.insert_many(pdis)
     print(f"✅ Created {len(pdis)} PDIs")
     
+    # Seed Empleado A Evaluation Plans
+    print("Creating Empleado A evaluation plans...")
+    empleado_a_plans = [
+        {
+            "id": "plan-empleado-a-1",
+            "employee_id": "1",
+            "employee_name": "María García López",
+            "employee_email": "maria@empresa.com",
+            "employee_avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
+            "period": "Q1 2024",
+            "status": "activo",
+            "evaluators": [
+                {"id": "2", "name": "Juan Rodríguez", "email": "juan@empresa.com", "status": "completado"},
+                {"id": "4", "name": "Carlos Mendoza", "email": "carlos@empresa.com", "status": "completado"},
+                {"id": "5", "name": "Ana Martínez", "email": "ana@empresa.com", "status": "pendiente"}
+            ],
+            "votes": [
+                {
+                    "id": "vote-1",
+                    "evaluator_id": "2",
+                    "evaluator_name": "Juan Rodríguez",
+                    "evaluator_email": "juan@empresa.com",
+                    "evaluator_avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Juan",
+                    "cuadrante": "A",
+                    "valores_score": 90,
+                    "resultados_score": 92,
+                    "comentarios": "Excelente liderazgo y resultados consistentes",
+                    "fecha_evaluacion": "2024-03-15 10:30:00",
+                    "created_at": datetime.now()
+                },
+                {
+                    "id": "vote-2",
+                    "evaluator_id": "4",
+                    "evaluator_name": "Carlos Mendoza",
+                    "evaluator_email": "carlos@empresa.com",
+                    "evaluator_avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos",
+                    "cuadrante": "A",
+                    "valores_score": 88,
+                    "resultados_score": 90,
+                    "comentarios": "Gran líder, siempre da resultados",
+                    "fecha_evaluacion": "2024-03-16 14:20:00",
+                    "created_at": datetime.now()
+                }
+            ],
+            "total_evaluadores": 3,
+            "evaluaciones_completadas": 2,
+            "evaluaciones_pendientes": 1,
+            "fecha_creacion": "2024-03-01",
+            "fecha_limite": "2024-03-31",
+            "created_at": datetime.now()
+        },
+        {
+            "id": "plan-empleado-a-2",
+            "employee_id": "4",
+            "employee_name": "Carlos Mendoza",
+            "employee_email": "carlos@empresa.com",
+            "employee_avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos",
+            "period": "Q1 2024",
+            "status": "activo",
+            "evaluators": [
+                {"id": "1", "name": "María García López", "email": "maria@empresa.com", "status": "completado"},
+                {"id": "2", "name": "Juan Rodríguez", "email": "juan@empresa.com", "status": "pendiente"}
+            ],
+            "votes": [
+                {
+                    "id": "vote-3",
+                    "evaluator_id": "1",
+                    "evaluator_name": "María García López",
+                    "evaluator_email": "maria@empresa.com",
+                    "evaluator_avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
+                    "cuadrante": "B4",
+                    "valores_score": 75,
+                    "resultados_score": 88,
+                    "comentarios": "Buenos resultados, necesita trabajar en valores de liderazgo",
+                    "fecha_evaluacion": "2024-03-14 09:15:00",
+                    "created_at": datetime.now()
+                }
+            ],
+            "total_evaluadores": 2,
+            "evaluaciones_completadas": 1,
+            "evaluaciones_pendientes": 1,
+            "fecha_creacion": "2024-03-01",
+            "fecha_limite": "2024-03-31",
+            "created_at": datetime.now()
+        }
+    ]
+    await db.empleado_a_plans.insert_many(empleado_a_plans)
+    print(f"✅ Created {len(empleado_a_plans)} Empleado A evaluation plans")
+    
     print("\n🎉 Database seeded successfully!")
     print("\n📝 Test Credentials:")
     print("   Admin: admin@empresa.com / admin123")
-    print("   Manager: manager@empresa.com / manager123")
-    print("   Empleado: empleado@empresa.com / empleado123")
+    print("   María (Manager): maria@empresa.com / maria123")
+    print("   Juan (Empleado): juan@empresa.com / juan123")
+    print("   Laura (Empleado): laura@empresa.com / laura123")
+    print("   Carlos (Empleado): carlos@empresa.com / carlos123")
+    print("   Ana (Empleado): ana@empresa.com / ana123")
+    print("   Roberto (Empleado): roberto@empresa.com / roberto123")
     
     client.close()
 

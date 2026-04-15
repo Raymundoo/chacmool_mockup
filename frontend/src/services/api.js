@@ -333,3 +333,89 @@ export const eval360API = {
     return response.json();
   }
 };
+
+
+// Empleado A Evaluations API
+export const empleadoAAPI = {
+  // Plans
+  getPlans: async () => {
+    const response = await fetch(`${API_URL}/api/empleado-a/plans`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch Empleado A plans');
+    return response.json();
+  },
+
+  getPlan: async (id) => {
+    const response = await fetch(`${API_URL}/api/empleado-a/plans/${id}`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch Empleado A plan');
+    return response.json();
+  },
+
+  createPlan: async (data) => {
+    const response = await fetch(`${API_URL}/api/empleado-a/plans`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create Empleado A plan');
+    return response.json();
+  },
+
+  deletePlan: async (id) => {
+    const response = await fetch(`${API_URL}/api/empleado-a/plans/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to delete Empleado A plan');
+    return response.json();
+  },
+
+  // Votes
+  submitVote: async (planId, voteData) => {
+    const response = await fetch(`${API_URL}/api/empleado-a/plans/${planId}/vote`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(voteData)
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to submit vote');
+    }
+    return response.json();
+  },
+
+  getMyPendingEvaluations: async () => {
+    const response = await fetch(`${API_URL}/api/empleado-a/my-pending-evaluations`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch pending evaluations');
+    return response.json();
+  },
+
+  // Results
+  getEmployeeResults: async (employeeId, period = null) => {
+    const url = period 
+      ? `${API_URL}/api/empleado-a/results/${employeeId}?period=${period}`
+      : `${API_URL}/api/empleado-a/results/${employeeId}`;
+    const response = await fetch(url, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch employee results');
+    return response.json();
+  },
+
+  getAllResults: async (period = null) => {
+    const url = period 
+      ? `${API_URL}/api/empleado-a/results?period=${period}`
+      : `${API_URL}/api/empleado-a/results`;
+    const response = await fetch(url, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch all results');
+    return response.json();
+  }
+};
+

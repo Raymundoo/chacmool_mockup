@@ -3,8 +3,9 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, NavLink, useLocation, useParams, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './components/LoginPage';
-import { employeesAPI, aciertosAPI, kpisAPI, eval360API } from './services/api';
+import { employeesAPI, aciertosAPI, kpisAPI, eval360API, empleadoAAPI } from './services/api';
 import Dashboard from './pages/Dashboard';
+import EmpleadoAPage from './pages/EmpleadoA';
 import { 
   Users, 
   Target, 
@@ -979,8 +980,7 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
     { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces" },
     { path: "/aciertos-desaciertos", icon: ClipboardList, label: "Aciertos y Desaciertos", description: "Evaluación bilateral" },
     { path: "/kpis", icon: Target, label: "KPIs", description: "Indicadores clave" },
-    { path: "/my-profile", icon: User, label: "Mi Perfil / Resultados", description: "Ver mi evaluación" },
-    { path: "/manual-eval", icon: ClipboardEdit, label: "Evaluación Manual", description: "Override directo" },
+    // "Mi Perfil" y "Evaluación Manual" ocultos - ahora integrados en "Empleado A"
   ];
 
   return (
@@ -3838,7 +3838,7 @@ const AppContent = () => {
         <Layout isAdmin={isAdmin} setIsAdmin={() => {}}>
           <Routes>
             <Route path="/" element={<Dashboard isAdmin={isAdmin} />} />
-            <Route path="/9box" element={<NineBoxGridView isAdmin={isAdmin} />} />
+            <Route path="/9box" element={<EmpleadoAPage isAdmin={isAdmin} />} />
             <Route path="/employees" element={<EmployeeList isAdmin={isAdmin} />} />
             <Route path="/evaluations" element={<EvaluationsView isAdmin={isAdmin} />} />
             <Route path="/aciertos-desaciertos" element={<AciertosDesaciertosView isAdmin={isAdmin} />} />
