@@ -638,6 +638,280 @@ const mockPDIs = [
   }
 ];
 
+// Mock Aciertos y Desaciertos
+const mockAciertosDesaciertos = [
+  {
+    id: "ad-1",
+    evaluatorId: "1",
+    evaluatorName: "María García López",
+    evaluatedId: "4",
+    evaluatedName: "Carlos Mendoza",
+    department: "Tecnología",
+    date: "2024-03-15",
+    month: 3,
+    year: 2024,
+    quarter: "Q1 2024",
+    resultadoVsObjetivo: "Carlos ha mostrado un desempeño superior al esperado este trimestre. Logró completar el proyecto de migración de base de datos 2 semanas antes de lo planeado, con cero incidentes reportados. Sin embargo, identificamos áreas de mejora en la comunicación con stakeholders no técnicos.",
+    aciertosColaborador: [
+      "Excelente capacidad técnica y resolución de problemas complejos",
+      "Proactividad en la identificación de bugs antes de producción",
+      "Mentoría efectiva con desarrolladores junior del equipo",
+      "Cumplimiento anticipado de deadlines en proyecto crítico"
+    ],
+    desaciertosColaborador: [
+      "Falta de comunicación proactiva sobre bloqueos en tareas",
+      "Documentación técnica incompleta en algunos módulos",
+      "Poca participación en reuniones de planificación de equipo"
+    ],
+    aciertosEmpresa: [
+      "Provisión de herramientas y recursos técnicos adecuados",
+      "Flexibilidad en horarios para balance vida-trabajo",
+      "Oportunidades de capacitación técnica continua"
+    ],
+    desaciertosEmpresa: [
+      "Falta de claridad en requisitos al inicio del proyecto",
+      "Cambios frecuentes de prioridades sin aviso previo",
+      "Proceso de aprobación de PRs demasiado lento"
+    ],
+    compromisos: [
+      { tipo: "colaborador", compromiso: "Enviar reportes semanales de progreso al equipo", fecha: "2024-04-01" },
+      { tipo: "colaborador", compromiso: "Completar documentación técnica de módulos desarrollados", fecha: "2024-04-15" },
+      { tipo: "colaborador", compromiso: "Asistir y participar activamente en dailies y plannings", fecha: "2024-04-01" },
+      { tipo: "empresa", compromiso: "Definir requisitos completos antes de iniciar sprints", fecha: "2024-04-01" },
+      { tipo: "empresa", compromiso: "Asignar revisor dedicado para PRs con SLA de 24hrs", fecha: "2024-04-10" }
+    ]
+  },
+  {
+    id: "ad-2",
+    evaluatorId: "director",
+    evaluatorName: "Director Comercial",
+    evaluatedId: "3",
+    evaluatedName: "Laura Sánchez",
+    department: "Ventas",
+    date: "2024-03-20",
+    month: 3,
+    year: 2024,
+    quarter: "Q1 2024",
+    resultadoVsObjetivo: "Laura alcanzó el 85% de su objetivo de ventas del trimestre. Aunque no llegó a la meta, mostró mejora consistente mes a mes. El pipeline está saludable para Q2.",
+    aciertosColaborador: [
+      "Excelente relación con clientes existentes (retención 95%)",
+      "Mejora progresiva en técnicas de cierre",
+      "Actitud positiva y disposición para aprender"
+    ],
+    desaciertosColaborador: [
+      "Dificultad para cerrar ventas de alto valor",
+      "Falta de seguimiento sistemático a prospectos",
+      "Necesita mejorar presentación de propuestas de valor"
+    ],
+    aciertosEmpresa: [
+      "Material de ventas de calidad",
+      "Capacitación en producto completa"
+    ],
+    desaciertosEmpresa: [
+      "Falta de herramientas de CRM actualizadas",
+      "Proceso de aprobación de descuentos muy lento",
+      "Poco apoyo de preventas en deals complejos"
+    ],
+    compromisos: [
+      { tipo: "colaborador", compromiso: "Completar curso de negociación avanzada", fecha: "2024-05-01" },
+      { tipo: "colaborador", compromiso: "Implementar seguimiento semanal a top 10 prospectos", fecha: "2024-04-01" },
+      { tipo: "empresa", compromiso: "Implementar CRM Salesforce para el equipo", fecha: "2024-05-15" },
+      { tipo: "empresa", compromiso: "Asignar ingeniero de preventas para deals >$50k", fecha: "2024-04-15" }
+    ]
+  },
+  {
+    id: "ad-3",
+    evaluatorId: "techlead",
+    evaluatorName: "Tech Lead Senior",
+    evaluatedId: "2",
+    evaluatedName: "Juan Rodríguez",
+    department: "Desarrollo",
+    date: "2024-02-28",
+    month: 2,
+    year: 2024,
+    quarter: "Q1 2024",
+    resultadoVsObjetivo: "Juan cumplió con todos los objetivos técnicos del mes. La calidad de su código es excelente y ha demostrado gran autonomía. Está listo para tomar más responsabilidades de liderazgo.",
+    aciertosColaborador: [
+      "Código limpio y bien documentado",
+      "Resolución rápida de bugs críticos",
+      "Ayuda proactiva a compañeros del equipo",
+      "Ownership completo de sus proyectos"
+    ],
+    desaciertosColaborador: [
+      "A veces sobre-engineerea soluciones simples",
+      "Podría comunicar mejor sus decisiones técnicas"
+    ],
+    aciertosEmpresa: [
+      "Stack tecnológico moderno y actualizado",
+      "Buen ambiente de equipo y colaboración",
+      "Proceso de code review efectivo"
+    ],
+    desaciertosEmpresa: [
+      "Falta de documentación arquitectónica del sistema",
+      "Reuniones demasiado frecuentes que interrumpen el flow"
+    ],
+    compromisos: [
+      { tipo: "colaborador", compromiso: "Aplicar principio KISS en diseño de soluciones", fecha: "2024-03-15" },
+      { tipo: "colaborador", compromiso: "Documentar decisiones técnicas en ADRs", fecha: "2024-03-01" },
+      { tipo: "empresa", compromiso: "Crear documentación arquitectónica del sistema", fecha: "2024-04-01" },
+      { tipo: "empresa", compromiso: "Reducir reuniones a 3 días por semana máximo", fecha: "2024-03-15" }
+    ]
+  },
+  {
+    id: "ad-4",
+    evaluatorId: "1",
+    evaluatorName: "María García López",
+    evaluatedId: "5",
+    evaluatedName: "Ana Martínez",
+    department: "Tecnología",
+    date: "2024-01-30",
+    month: 1,
+    year: 2024,
+    quarter: "Q1 2024",
+    resultadoVsObjetivo: "Ana está en su tercer mes en la empresa. Ha mostrado rápida curva de aprendizaje y buena integración al equipo. Cumplió con objetivos de onboarding.",
+    aciertosColaborador: [
+      "Rápida adaptación a tecnologías nuevas",
+      "Hace muchas preguntas (señal de aprendizaje activo)",
+      "Puntualidad y responsabilidad en entregas"
+    ],
+    desaciertosColaborador: [
+      "Falta de confianza para tomar decisiones independientes",
+      "Necesita más práctica en debugging",
+      "A veces tarda mucho en pedir ayuda cuando está bloqueada"
+    ],
+    aciertosEmpresa: [
+      "Programa de onboarding bien estructurado",
+      "Asignación de mentor dedicado"
+    ],
+    desaciertosEmpresa: [
+      "Documentación interna desactualizada",
+      "Falta de tiempo del equipo para pair programming"
+    ],
+    compromisos: [
+      { tipo: "colaborador", compromiso: "Aplicar regla de 30 minutos: pedir ayuda si está bloqueada >30min", fecha: "2024-02-01" },
+      { tipo: "colaborador", compromiso: "Tomar ownership de al menos 1 feature pequeña por sprint", fecha: "2024-02-15" },
+      { tipo: "empresa", compromiso: "Actualizar documentación de arquitectura y setup", fecha: "2024-02-28" },
+      { tipo: "empresa", compromiso: "Agendar 2hrs/semana de pair programming con senior", fecha: "2024-02-01" }
+    ]
+  },
+  {
+    id: "ad-5",
+    evaluatorId: "director",
+    evaluatorName: "Director Operaciones",
+    evaluatedId: "1",
+    evaluatedName: "María García López",
+    department: "Tecnología",
+    date: "2024-03-10",
+    month: 3,
+    year: 2024,
+    quarter: "Q1 2024",
+    resultadoVsObjetivo: "María superó objetivos del trimestre. El equipo bajo su liderazgo entregó 3 proyectos mayores sin incidentes. La moral del equipo es alta y la rotación es cero.",
+    aciertosColaborador: [
+      "Liderazgo efectivo y empático con el equipo",
+      "Excelente planificación y gestión de proyectos",
+      "Desarrollo de talento junior en el equipo",
+      "Comunicación clara con stakeholders"
+    ],
+    desaciertosColaborador: [
+      "Tiende a involucrarse demasiado en tareas operativas",
+      "Podría delegar más para enfocarse en estrategia",
+      "Necesita mejorar balance vida-trabajo (muchas horas extra)"
+    ],
+    aciertosEmpresa: [
+      "Autonomía y confianza en decisiones técnicas",
+      "Budget adecuado para herramientas y capacitación"
+    ],
+    desaciertosEmpresa: [
+      "Falta de visibilidad de roadmap de producto a largo plazo",
+      "Expectativas de disponibilidad 24/7 no sostenibles"
+    ],
+    compromisos: [
+      { tipo: "colaborador", compromiso: "Delegar tareas operativas y enfocarse en estrategia", fecha: "2024-04-01" },
+      { tipo: "colaborador", compromiso: "Establecer límites claros de horario laboral", fecha: "2024-04-01" },
+      { tipo: "empresa", compromiso: "Compartir roadmap de producto trimestral con tech leads", fecha: "2024-04-15" },
+      { tipo: "empresa", compromiso: "Definir política de on-call rotativo (no solo María)", fecha: "2024-04-10" }
+    ]
+  },
+  {
+    id: "ad-6",
+    evaluatorId: "gerente",
+    evaluatorName: "Gerente RRHH",
+    evaluatedId: "6",
+    evaluatedName: "Roberto Fernández",
+    department: "Operaciones",
+    date: "2024-02-15",
+    month: 2,
+    year: 2024,
+    quarter: "Q1 2024",
+    resultadoVsObjetivo: "Roberto alcanzó el 92% de sus KPIs operativos. Mejoró significativamente la eficiencia de procesos logísticos. Hay oportunidad de crecimiento en gestión de equipo.",
+    aciertosColaborador: [
+      "Optimización de procesos que redujo costos 15%",
+      "Datos y análisis siempre actualizados",
+      "Iniciativa para proponer mejoras"
+    ],
+    desaciertosColaborador: [
+      "Dificultad para dar feedback constructivo al equipo",
+      "Falta de seguimiento a tareas delegadas",
+      "Necesita desarrollar habilidades de gestión de conflictos"
+    ],
+    aciertosEmpresa: [
+      "Inversión en software de gestión operativa",
+      "Apoyo en implementación de mejoras propuestas"
+    ],
+    desaciertosEmpresa: [
+      "Falta de capacitación en liderazgo",
+      "Poco tiempo asignado para desarrollo profesional"
+    ],
+    compromisos: [
+      { tipo: "colaborador", compromiso: "Asistir a taller de liderazgo y gestión de equipos", fecha: "2024-03-30" },
+      { tipo: "colaborador", compromiso: "Implementar reuniones 1-1 semanales con cada miembro", fecha: "2024-03-01" },
+      { tipo: "empresa", compromiso: "Proveer acceso a programa de mentoring de liderazgo", fecha: "2024-03-15" },
+      { tipo: "empresa", compromiso: "Asignar 4hrs/semana para desarrollo profesional", fecha: "2024-03-01" }
+    ]
+  },
+  {
+    id: "ad-7",
+    evaluatorId: "director",
+    evaluatorName: "Director Comercial",
+    evaluatedId: "7",
+    evaluatedName: "Patricia Ruiz",
+    department: "Ventas",
+    date: "2024-01-25",
+    month: 1,
+    year: 2024,
+    quarter: "Q1 2024",
+    resultadoVsObjetivo: "Patricia está teniendo dificultades para alcanzar objetivos (60% de meta). Identificamos gap de habilidades que requiere plan de acción urgente.",
+    aciertosColaborador: [
+      "Actitud positiva ante feedback",
+      "Esfuerzo y dedicación evidentes",
+      "Buena gestión de pipeline en CRM"
+    ],
+    desaciertosColaborador: [
+      "Falta de técnicas de cierre efectivas",
+      "Dificultad para manejar objeciones complejas",
+      "Necesita mejorar conocimiento profundo de producto",
+      "Falta de seguimiento post-reunión con prospectos"
+    ],
+    aciertosEmpresa: [
+      "Soporte del equipo y manager disponible"
+    ],
+    desaciertosEmpresa: [
+      "Onboarding comercial insuficiente",
+      "Falta de capacitación en producto antes de empezar",
+      "No hay programa de shadowing con vendedores senior"
+    ],
+    compromisos: [
+      { tipo: "colaborador", compromiso: "Completar certificación de producto (nivel avanzado)", fecha: "2024-02-28" },
+      { tipo: "colaborador", compromiso: "Practicar manejo de objeciones con manager 2x/semana", fecha: "2024-02-01" },
+      { tipo: "colaborador", compromiso: "Acompañar a top performer en 10 reuniones de ventas", fecha: "2024-03-01" },
+      { tipo: "empresa", compromiso: "Rediseñar programa de onboarding comercial", fecha: "2024-03-31" },
+      { tipo: "empresa", compromiso: "Asignar mentor senior dedicado a Patricia", fecha: "2024-02-01" },
+      { tipo: "empresa", compromiso: "Ajustar meta temporalmente (75%) durante período de mejora", fecha: "2024-02-01" }
+    ]
+  }
+];
+
+
 // Mock KPI templates
 const mockKPITemplates = [
   {
@@ -693,6 +967,7 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
     { path: "/9box", icon: Grid3X3, label: "Empleado A", description: "Empleados A, B, C" },
     { path: "/employees", icon: Users, label: "Empleados", description: "Gestión de personal" },
     { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces" },
+    { path: "/aciertos-desaciertos", icon: ClipboardList, label: "Aciertos y Desaciertos", description: "Evaluación bilateral" },
     { path: "/kpis", icon: Target, label: "KPIs", description: "Indicadores clave" },
     { path: "/my-profile", icon: User, label: "Mi Perfil / Resultados", description: "Ver mi evaluación" },
     { path: "/manual-eval", icon: ClipboardEdit, label: "Evaluación Manual", description: "Override directo" },
@@ -2535,6 +2810,472 @@ const PublicEvaluationForm = () => {
   );
 };
 
+
+// ============================================
+// ACIERTOS Y DESACIERTOS MODULE
+// ============================================
+
+const AciertosDesaciertosView = ({ isAdmin }) => {
+  const [viewMode, setViewMode] = useState('cards');
+  const [filterMonth, setFilterMonth] = useState('all');
+  const [filterYear, setFilterYear] = useState('2024');
+  const [filterDepartment, setFilterDepartment] = useState('all');
+  const [filterEmployee, setFilterEmployee] = useState('all');
+  const [showForm, setShowForm] = useState(false);
+  const [selectedEvaluation, setSelectedEvaluation] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+
+  const filteredEvaluations = mockAciertosDesaciertos.filter(ev => {
+    if (filterMonth !== 'all' && ev.month !== parseInt(filterMonth)) return false;
+    if (filterYear !== 'all' && ev.year !== parseInt(filterYear)) return false;
+    if (filterDepartment !== 'all' && ev.department !== filterDepartment) return false;
+    if (filterEmployee !== 'all' && ev.evaluatedId !== filterEmployee) return false;
+    return true;
+  });
+
+  const groupedByMonth = filteredEvaluations.reduce((acc, ev) => {
+    const key = `${ev.year}-${String(ev.month).padStart(2, '0')}`;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(ev);
+    return acc;
+  }, {});
+
+  const months = [
+    { value: 'all', label: 'Todos los meses' },
+    { value: '1', label: 'Enero' }, { value: '2', label: 'Febrero' }, { value: '3', label: 'Marzo' },
+    { value: '4', label: 'Abril' }, { value: '5', label: 'Mayo' }, { value: '6', label: 'Junio' },
+    { value: '7', label: 'Julio' }, { value: '8', label: 'Agosto' }, { value: '9', label: 'Septiembre' },
+    { value: '10', label: 'Octubre' }, { value: '11', label: 'Noviembre' }, { value: '12', label: 'Diciembre' }
+  ];
+
+  const departments = ['all', ...new Set(mockEmployees.map(e => e.department))];
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
+            Aciertos y Desaciertos
+          </h1>
+          <p className="text-slate-500 mt-1">Evaluación bilateral supervisor-colaborador</p>
+        </div>
+        <button
+          onClick={() => { setShowForm(true); setSelectedEvaluation(null); }}
+          className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Nueva Evaluación
+        </button>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-slate-700">Filtros</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`p-2 rounded-lg ${viewMode === 'cards' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-2 rounded-lg ${viewMode === 'table' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-2">Mes</label>
+            <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm">
+              {months.map(m => (<option key={m.value} value={m.value}>{m.label}</option>))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-2">Año</label>
+            <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm">
+              <option value="all">Todos</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-2">Área</label>
+            <select value={filterDepartment} onChange={(e) => setFilterDepartment(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm">
+              <option value="all">Todas</option>
+              {departments.filter(d => d !== 'all').map(dept => (<option key={dept} value={dept}>{dept}</option>))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-2">Colaborador</label>
+            <select value={filterEmployee} onChange={(e) => setFilterEmployee(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm">
+              <option value="all">Todos</option>
+              {mockEmployees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-4 text-sm text-slate-600">
+          <span className="font-medium">{filteredEvaluations.length} evaluaciones encontradas</span>
+          {(filterMonth !== 'all' || filterYear !== 'all' || filterDepartment !== 'all' || filterEmployee !== 'all') && (
+            <button onClick={() => { setFilterMonth('all'); setFilterYear('2024'); setFilterDepartment('all'); setFilterEmployee('all'); }} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+              <X className="w-3 h-3" />
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+      </div>
+
+      {viewMode === 'cards' && (
+        <div className="space-y-6">
+          {Object.keys(groupedByMonth).sort().reverse().map(monthKey => {
+            const [year, month] = monthKey.split('-');
+            const monthName = months.find(m => m.value === String(parseInt(month)))?.label;
+            const evaluations = groupedByMonth[monthKey];
+            return (
+              <div key={monthKey}>
+                <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  {monthName} {year} ({evaluations.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {evaluations.map(ev => (
+                    <div key={ev.id} onClick={() => { setSelectedEvaluation(ev); setShowDetail(true); }} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-slate-900 hover:ring-2 hover:ring-slate-900/10 cursor-pointer transition-all">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <p className="text-xs text-slate-500 mb-1">{ev.department}</p>
+                          <h4 className="font-semibold text-slate-900 mb-1">{ev.evaluatedName}</h4>
+                          <p className="text-xs text-slate-500">Evaluado por: {ev.evaluatorName}</p>
+                        </div>
+                        <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{new Date(ev.date).toLocaleDateString('es-ES')}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div className="bg-green-50 rounded-lg p-2">
+                          <p className="text-xs text-green-700 font-medium mb-1">Aciertos</p>
+                          <p className="text-lg font-bold text-green-900">{ev.aciertosColaborador.length + ev.aciertosEmpresa.length}</p>
+                        </div>
+                        <div className="bg-red-50 rounded-lg p-2">
+                          <p className="text-xs text-red-700 font-medium mb-1">Desaciertos</p>
+                          <p className="text-lg font-bold text-red-900">{ev.desaciertosColaborador.length + ev.desaciertosEmpresa.length}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>{ev.compromisos.length} compromisos generados</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+          {filteredEvaluations.length === 0 && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+              <ClipboardList className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500">No se encontraron evaluaciones</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {viewMode === 'table' && (
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Fecha</th>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Colaborador</th>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Evaluador</th>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Área</th>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Aciertos</th>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Desaciertos</th>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Compromisos</th>
+                <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredEvaluations.map(ev => (
+                <tr key={ev.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                  <td className="px-6 py-4 text-sm text-slate-600">{new Date(ev.date).toLocaleDateString('es-ES')}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900">{ev.evaluatedName}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{ev.evaluatorName}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{ev.department}</td>
+                  <td className="px-6 py-4"><span className="text-sm font-semibold text-green-700 bg-green-50 px-2 py-1 rounded">{ev.aciertosColaborador.length + ev.aciertosEmpresa.length}</span></td>
+                  <td className="px-6 py-4"><span className="text-sm font-semibold text-red-700 bg-red-50 px-2 py-1 rounded">{ev.desaciertosColaborador.length + ev.desaciertosEmpresa.length}</span></td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{ev.compromisos.length}</td>
+                  <td className="px-6 py-4"><button onClick={() => { setSelectedEvaluation(ev); setShowDetail(true); }} className="text-blue-600 hover:text-blue-800 text-sm font-medium">Ver detalle</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filteredEvaluations.length === 0 && (
+            <div className="p-12 text-center">
+              <ClipboardList className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500">No se encontraron evaluaciones</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {showForm && <AciertosDesaciertosForm onClose={() => setShowForm(false)} evaluation={selectedEvaluation} />}
+      {showDetail && <AciertosDesaciertosDetail evaluation={selectedEvaluation} onClose={() => setShowDetail(false)} onEdit={() => { setShowDetail(false); setShowForm(true); }} />}
+    </div>
+  );
+};
+
+const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
+  const isEditing = !!evaluation;
+  const [formData, setFormData] = useState(evaluation || {
+    evaluatorId: '1', evaluatedId: '', date: new Date().toISOString().split('T')[0],
+    resultadoVsObjetivo: '', aciertosColaborador: [''], desaciertosColaborador: [''],
+    aciertosEmpresa: [''], desaciertosEmpresa: [''], compromisos: [{ tipo: 'colaborador', compromiso: '', fecha: '' }]
+  });
+
+  const addItem = (field) => setFormData(prev => ({ ...prev, [field]: [...prev[field], ''] }));
+  const removeItem = (field, index) => setFormData(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
+  const updateItem = (field, index, value) => setFormData(prev => ({ ...prev, [field]: prev[field].map((item, i) => i === index ? value : item) }));
+  const addCompromiso = () => setFormData(prev => ({ ...prev, compromisos: [...prev.compromisos, { tipo: 'colaborador', compromiso: '', fecha: '' }] }));
+  const removeCompromiso = (index) => setFormData(prev => ({ ...prev, compromisos: prev.compromisos.filter((_, i) => i !== index) }));
+  const updateCompromiso = (index, field, value) => setFormData(prev => ({ ...prev, compromisos: prev.compromisos.map((comp, i) => i === index ? { ...comp, [field]: value } : comp) }));
+  const handleSubmit = () => { alert('Evaluación guardada (demo)'); onClose(); };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-5xl w-full my-8">
+        <div className="sticky top-0 bg-white border-b border-slate-200 rounded-t-2xl px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-xl font-semibold text-slate-900">{isEditing ? 'Editar Evaluación' : 'Nueva Evaluación de Aciertos y Desaciertos'}</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+        </div>
+
+        <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Quién evalúa</label>
+              <select value={formData.evaluatorId} onChange={(e) => setFormData(prev => ({ ...prev, evaluatorId: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2">
+                {mockEmployees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">A quién se evalúa *</label>
+              <select value={formData.evaluatedId} onChange={(e) => setFormData(prev => ({ ...prev, evaluatedId: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2">
+                <option value="">Seleccionar...</option>
+                {mockEmployees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Fecha</label>
+              <input type="date" value={formData.date} onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2" />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Resultado Actual vs Objetivo Trimestre</h3>
+            <textarea rows={4} value={formData.resultadoVsObjetivo} onChange={(e) => setFormData(prev => ({ ...prev, resultadoVsObjetivo: e.target.value }))} placeholder="Describe el desempeño actual vs objetivos del trimestre..." className="w-full border border-slate-200 rounded-xl px-4 py-3 resize-none" />
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Escucha y genera compromisos</h3>
+            <h4 className="text-sm font-semibold text-slate-700 mb-3">Aciertos y Desaciertos - Colaborador</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-green-700">✓ Aciertos</p>
+                  <button onClick={() => addItem('aciertosColaborador')} className="text-xs text-green-600 hover:text-green-800 flex items-center gap-1"><PlusCircle className="w-3 h-3" />Agregar</button>
+                </div>
+                <div className="space-y-2">
+                  {formData.aciertosColaborador.map((item, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input type="text" value={item} onChange={(e) => updateItem('aciertosColaborador', idx, e.target.value)} placeholder="Acierto del colaborador..." className="flex-1 border border-green-200 bg-green-50/30 rounded-lg px-3 py-2 text-sm" />
+                      {formData.aciertosColaborador.length > 1 && (<button onClick={() => removeItem('aciertosColaborador', idx)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-red-700">✗ Desaciertos</p>
+                  <button onClick={() => addItem('desaciertosColaborador')} className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1"><PlusCircle className="w-3 h-3" />Agregar</button>
+                </div>
+                <div className="space-y-2">
+                  {formData.desaciertosColaborador.map((item, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input type="text" value={item} onChange={(e) => updateItem('desaciertosColaborador', idx, e.target.value)} placeholder="Desacierto del colaborador..." className="flex-1 border border-red-200 bg-red-50/30 rounded-lg px-3 py-2 text-sm" />
+                      {formData.desaciertosColaborador.length > 1 && (<button onClick={() => removeItem('desaciertosColaborador', idx)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold text-slate-700 mb-3">Aciertos y Desaciertos - Empresa</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-green-700">✓ Aciertos</p>
+                  <button onClick={() => addItem('aciertosEmpresa')} className="text-xs text-green-600 hover:text-green-800 flex items-center gap-1"><PlusCircle className="w-3 h-3" />Agregar</button>
+                </div>
+                <div className="space-y-2">
+                  {formData.aciertosEmpresa.map((item, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input type="text" value={item} onChange={(e) => updateItem('aciertosEmpresa', idx, e.target.value)} placeholder="Acierto de la empresa..." className="flex-1 border border-green-200 bg-green-50/30 rounded-lg px-3 py-2 text-sm" />
+                      {formData.aciertosEmpresa.length > 1 && (<button onClick={() => removeItem('aciertosEmpresa', idx)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-red-700">✗ Desaciertos</p>
+                  <button onClick={() => addItem('desaciertosEmpresa')} className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1"><PlusCircle className="w-3 h-3" />Agregar</button>
+                </div>
+                <div className="space-y-2">
+                  {formData.desaciertosEmpresa.map((item, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input type="text" value={item} onChange={(e) => updateItem('desaciertosEmpresa', idx, e.target.value)} placeholder="Desacierto de la empresa..." className="flex-1 border border-red-200 bg-red-50/30 rounded-lg px-3 py-2 text-sm" />
+                      {formData.desaciertosEmpresa.length > 1 && (<button onClick={() => removeItem('desaciertosEmpresa', idx)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-slate-900">Compromisos Generados</h3>
+              <button onClick={addCompromiso} className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"><PlusCircle className="w-4 h-4" />Agregar compromiso</button>
+            </div>
+            <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Tipo</th>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Compromiso</th>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Fecha</th>
+                    <th className="w-12"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.compromisos.map((comp, idx) => (
+                    <tr key={idx} className="border-t border-slate-100">
+                      <td className="px-4 py-3">
+                        <select value={comp.tipo} onChange={(e) => updateCompromiso(idx, 'tipo', e.target.value)} className="border border-slate-200 rounded-lg px-2 py-1 text-sm">
+                          <option value="colaborador">Colaborador</option>
+                          <option value="empresa">Empresa</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-3"><input type="text" value={comp.compromiso} onChange={(e) => updateCompromiso(idx, 'compromiso', e.target.value)} placeholder="Descripción del compromiso..." className="w-full border border-slate-200 rounded-lg px-3 py-1 text-sm" /></td>
+                      <td className="px-4 py-3"><input type="date" value={comp.fecha} onChange={(e) => updateCompromiso(idx, 'fecha', e.target.value)} className="border border-slate-200 rounded-lg px-2 py-1 text-sm" /></td>
+                      <td className="px-4 py-3">{formData.compromisos.length > 1 && (<button onClick={() => removeCompromiso(idx)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-200 px-6 py-4 flex gap-3">
+          <button onClick={onClose} className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50">Cancelar</button>
+          <button onClick={handleSubmit} className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800">{isEditing ? 'Actualizar' : 'Guardar'} Evaluación</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AciertosDesaciertosDetail = ({ evaluation, onClose, onEdit }) => {
+  if (!evaluation) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-4xl w-full my-8">
+        <div className="sticky top-0 bg-white border-b border-slate-200 rounded-t-2xl px-6 py-4 flex items-center justify-between z-10">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">Detalle de Evaluación</h2>
+            <p className="text-sm text-slate-500">{new Date(evaluation.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={onEdit} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 flex items-center gap-2"><Edit3 className="w-4 h-4" />Editar</button>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl">
+            <div><p className="text-xs text-slate-500 mb-1">Evaluador</p><p className="font-semibold text-slate-900">{evaluation.evaluatorName}</p></div>
+            <div><p className="text-xs text-slate-500 mb-1">Evaluado</p><p className="font-semibold text-slate-900">{evaluation.evaluatedName}</p></div>
+            <div><p className="text-xs text-slate-500 mb-1">Departamento</p><p className="font-semibold text-slate-900">{evaluation.department}</p></div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Resultado Actual vs Objetivo Trimestre</h3>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4"><p className="text-sm text-slate-700">{evaluation.resultadoVsObjetivo}</p></div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Aciertos y Desaciertos - Colaborador</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Aciertos ({evaluation.aciertosColaborador.length})</h4>
+                <ul className="space-y-2">{evaluation.aciertosColaborador.map((item, idx) => (<li key={idx} className="text-sm text-green-900 flex items-start gap-2"><span className="text-green-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
+              </div>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-red-800 mb-3 flex items-center gap-2"><AlertCircle className="w-4 h-4" />Desaciertos ({evaluation.desaciertosColaborador.length})</h4>
+                <ul className="space-y-2">{evaluation.desaciertosColaborador.map((item, idx) => (<li key={idx} className="text-sm text-red-900 flex items-start gap-2"><span className="text-red-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Aciertos y Desaciertos - Empresa</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Aciertos ({evaluation.aciertosEmpresa.length})</h4>
+                <ul className="space-y-2">{evaluation.aciertosEmpresa.map((item, idx) => (<li key={idx} className="text-sm text-green-900 flex items-start gap-2"><span className="text-green-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
+              </div>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-red-800 mb-3 flex items-center gap-2"><AlertCircle className="w-4 h-4" />Desaciertos ({evaluation.desaciertosEmpresa.length})</h4>
+                <ul className="space-y-2">{evaluation.desaciertosEmpresa.map((item, idx) => (<li key={idx} className="text-sm text-red-900 flex items-start gap-2"><span className="text-red-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Compromisos Generados ({evaluation.compromisos.length})</h3>
+            <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Tipo</th>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Compromiso</th>
+                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Fecha límite</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {evaluation.compromisos.map((comp, idx) => (
+                    <tr key={idx} className="border-t border-slate-100">
+                      <td className="px-4 py-3"><span className={`text-xs font-semibold px-2 py-1 rounded-full ${comp.tipo === 'colaborador' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{comp.tipo === 'colaborador' ? 'Colaborador' : 'Empresa'}</span></td>
+                      <td className="px-4 py-3 text-sm text-slate-700">{comp.compromiso}</td>
+                      <td className="px-4 py-3 text-sm text-slate-600">{new Date(comp.fecha).toLocaleDateString('es-ES')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const KPIsView = ({ isAdmin }) => {
   const [activeTab, setActiveTab] = useState('templates');
   const [showCreateKPI, setShowCreateKPI] = useState(false);
@@ -3124,6 +3865,7 @@ function App() {
               <Route path="/9box" element={<NineBoxGridView isAdmin={isAdmin} />} />
               <Route path="/employees" element={<EmployeeList isAdmin={isAdmin} />} />
               <Route path="/evaluations" element={<EvaluationsView isAdmin={isAdmin} />} />
+              <Route path="/aciertos-desaciertos" element={<AciertosDesaciertosView isAdmin={isAdmin} />} />
               <Route path="/kpis" element={<KPIsView isAdmin={isAdmin} />} />
               <Route path="/my-profile" element={<MyProfileResultsView isAdmin={isAdmin} />} />
               <Route path="/manual-eval" element={<ManualEvaluation />} />
