@@ -11,7 +11,8 @@ import {
   Trash2,
   Users,
   CheckCircle2,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 
 const Evaluations360View = ({ isAdmin }) => {
@@ -22,6 +23,24 @@ const Evaluations360View = ({ isAdmin }) => {
   const [results, setResults] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Estados para crear plantilla
+  const [showCreateTemplate, setShowCreateTemplate] = useState(false);
+  const [newTemplate, setNewTemplate] = useState({
+    name: '',
+    description: '',
+    competencies: [{ title: '', behavior: '' }]
+  });
+  
+  // Estados para crear plan
+  const [showCreatePlan, setShowCreatePlan] = useState(false);
+  const [newPlan, setNewPlan] = useState({
+    employeeId: '',
+    templateId: '',
+    period: 'Q1 2024',
+    dueDate: '',
+    evaluators: []
+  });
 
   useEffect(() => {
     fetchData();
@@ -58,6 +77,44 @@ const Evaluations360View = ({ isAdmin }) => {
     }
   };
 
+  const handleCreateTemplate = async () => {
+    if (!newTemplate.name) {
+      alert('El nombre es obligatorio');
+      return;
+    }
+    try {
+      await eval360API.createTemplate({
+        ...newTemplate,
+        isActive: true
+      });
+      setShowCreateTemplate(false);
+      setNewTemplate({ name: '', description: '', competencies: [{ title: '', behavior: '' }] });
+      fetchData();
+    } catch (error) {
+      alert('Error al crear plantilla: ' + error.message);
+    }
+  };
+
+  const addCompetency = () => {
+    setNewTemplate({
+      ...newTemplate,
+      competencies: [...newTemplate.competencies, { title: '', behavior: '' }]
+    });
+  };
+
+  const updateCompetency = (index, field, value) => {
+    const updated = [...newTemplate.competencies];
+    updated[index][field] = value;
+    setNewTemplate({ ...newTemplate, competencies: updated });
+  };
+
+  const removeCompetency = (index) => {
+    setNewTemplate({
+      ...newTemplate,
+      competencies: newTemplate.competencies.filter((_, i) => i !== index)
+    });
+  };
+
   const handleDeletePlan = async (id) => {
     if (!window.confirm('¿Eliminar este plan?')) return;
     try {
@@ -65,6 +122,21 @@ const Evaluations360View = ({ isAdmin }) => {
       fetchData();
     } catch (error) {
       alert('Error: ' + error.message);
+    }
+  };
+
+  const handleCreatePlan = async () => {
+    if (!newPlan.employeeId || !newPlan.templateId) {
+      alert('Empleado y plantilla son obligatorios');
+      return;
+    }
+    try {
+      await eval360API.createPlan(newPlan);
+      setShowCreatePlan(false);
+      setNewPlan({ employeeId: '', templateId: '', period: 'Q1 2024', dueDate: '', evaluators: [] });
+      fetchData();
+    } catch (error) {
+      alert('Error al crear plan: ' + error.message);
     }
   };
 
@@ -84,6 +156,16 @@ const Evaluations360View = ({ isAdmin }) => {
           Crea plantillas personalizadas con competencias específicas. Define comportamientos observables y escalas de respuesta.
         </p>
       </div>
+
+      {isAdmin && (
+        <button
+          onClick={() => setShowCreateTemplate(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-4"
+        >
+          <Plus className="w-4 h-4" />
+          Crear Nueva Plantilla
+        </button>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {templates.map((template) => (
@@ -139,6 +221,16 @@ const Evaluations360View = ({ isAdmin }) => {
           Asigna evaluadores (superior, pares, subordinados, clientes, autoevaluación) a cada empleado.
         </p>
       </div>
+
+      {isAdmin && (
+        <button
+          onClick={() => setShowCreatePlan(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 mb-4"
+        >
+          <Plus className="w-4 h-4" />
+          Crear Nuevo Plan
+        </button>
+      )}
 
       <div className="space-y-3">
         {plans.map((plan) => (
@@ -304,8 +396,192 @@ const Evaluations360View = ({ isAdmin }) => {
       {activeTab === 'planning' && <PlanningTab />}
       {activeTab === 'stats' && <StatsTab />}
       {activeTab === 'tracking' && <TrackingTab />}
+      
+      {/* Modal: Crear Plantilla */}
+      {showCreateTemplate && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-6">
+              <h2 className="text-xl font-semibold">Crear Nueva Plantilla</h2>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Nombre de la Plantilla *</label>
+                <input
+                  type="text"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                  placeholder="Ej: Evaluación Liderazgo"
+                  value={newTemplate.name}
+                  onChange={(e) => setNewTemplate({...newTemplate, name: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Descripción</label>
+                <textarea
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                  rows="3"
+                  placeholder="Describe el propósito de esta plantilla..."
+                  value={newTemplate.description}
+                  onChange={(e) => setNewTemplate({...newTemplate, description: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">Competencias</label>
+                  <button
+                    onClick={addCompetency}
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    + Agregar Competencia
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {newTemplate.competencies.map((comp, idx) => (
+                    <div key={idx} className="border border-slate-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Competencia {idx + 1}</span>
+                        {newTemplate.competencies.length > 1 && (
+                          <button
+                            onClick={() => removeCompetency(idx)}
+                            className="text-red-500 text-sm"
+                          >
+                            Eliminar
+                          </button>
+                        )}
+                      </div>
+                      
+                      <input
+                        type="text"
+                        className="w-full border border-slate-300 rounded-lg px-3 py-2 mb-2"
+                        placeholder="Título (Ej: Comunicación Efectiva)"
+                        value={comp.title}
+                        onChange={(e) => updateCompetency(idx, 'title', e.target.value)}
+                      />
+                      
+                      <textarea
+                        className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                        rows="2"
+                        placeholder="Comportamiento observable (Ej: Escucha activamente...)"
+                        value={comp.behavior}
+                        onChange={(e) => updateCompetency(idx, 'behavior', e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="border-t border-slate-200 p-6 flex gap-3">
+              <button
+                onClick={() => setShowCreateTemplate(false)}
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateTemplate}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Crear Plantilla
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Crear Plan */}
+      {showCreatePlan && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full">
+            <div className="border-b border-slate-200 p-6">
+              <h2 className="text-xl font-semibold">Crear Nuevo Plan de Evaluación</h2>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Empleado a Evaluar *</label>
+                  <select
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                    value={newPlan.employeeId}
+                    onChange={(e) => setNewPlan({...newPlan, employeeId: e.target.value})}
+                  >
+                    <option value="">Selecciona...</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Plantilla *</label>
+                  <select
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                    value={newPlan.templateId}
+                    onChange={(e) => setNewPlan({...newPlan, templateId: e.target.value})}
+                  >
+                    <option value="">Selecciona...</option>
+                    {templates.map(tmpl => (
+                      <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Periodo</label>
+                  <input
+                    type="text"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                    placeholder="Q1 2024"
+                    value={newPlan.period}
+                    onChange={(e) => setNewPlan({...newPlan, period: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Fecha Límite</label>
+                  <input
+                    type="date"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                    value={newPlan.dueDate}
+                    onChange={(e) => setNewPlan({...newPlan, dueDate: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Nota:</strong> Después de crear el plan, podrás asignar evaluadores específicos (superior, pares, subordinados) en la sección de tracking.
+                </p>
+              </div>
+            </div>
+            
+            <div className="border-t border-slate-200 p-6 flex gap-3">
+              <button
+                onClick={() => setShowCreatePlan(false)}
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreatePlan}
+                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                Crear Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Evaluations360View;
+

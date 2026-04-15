@@ -1,25 +1,30 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Users, Award, Star, AlertTriangle, Link } from 'lucide-react';
-import { employeesAPI } from '../services/api';
+import { employeesAPI, empleadoAAPI } from '../services/api';
 import { classificationMatrix, classificationColors, getClassification } from '../utils/classifications';
 
 const Dashboard = ({ isAdmin }) => {
   const [employees, setEmployees] = useState([]);
+  const [empleadoAResults, setEmpleadoAResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchData = async () => {
       try {
-        const data = await employeesAPI.getAll();
-        setEmployees(data);
+        const [employeesData, resultsData] = await Promise.all([
+          employeesAPI.getAll(),
+          empleadoAAPI.getAllResults().catch(() => [])
+        ]);
+        setEmployees(employeesData);
+        setEmpleadoAResults(resultsData);
       } catch (error) {
-        console.error('Error fetching employees:', error);
+        console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchEmployees();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -30,27 +35,19 @@ const Dashboard = ({ isAdmin }) => {
     );
   }
 
-  // Calcular valores promedio desde los datos reales (asumiendo que los empleados tienen valoresScore y resultadosScore)
-  const avgValores = employees.length > 0 
-    ? Math.round(employees.reduce((a, e) => a + (e.eval_360_score || 0), 0) / employees.length)
+  // Calcular valores promedio desde los resultados de Empleado A
+  const avgValores = empleadoAResults.length > 0 
+    ? Math.round(empleadoAResults.reduce((a, r) => a + (r.promedio_valores || 0), 0) / empleadoAResults.length)
     : 0;
-  const avgResultados = employees.length > 0
-    ? Math.round(employees.reduce((a, e) => a + (e.kpis_score || 0), 0) / employees.length)
+  const avgResultados = empleadoAResults.length > 0
+    ? Math.round(empleadoAResults.reduce((a, r) => a + (r.promedio_resultados || 0), 0) / empleadoAResults.length)
     : 0;
   
-  // Calcular empleados por clasificación
-  const employeesWithScores = employees.map(e => ({
-    ...e,
-    valoresScore: e.eval_360_score || 0,
-    resultadosScore: e.kpis_score || 0
-  }));
+  // Contar empleados por clasificación usando resultados de Empleado A
+  const topPerformers = empleadoAResults.filter(r => r.cuadrante_mayoria === "A").length;
   
-  const topPerformers = employeesWithScores.filter(e => 
-    getClassification(e.valoresScore, e.resultadosScore).code === "A"
-  ).length;
-  
-  const needsAttention = employeesWithScores.filter(e => 
-    ["C1", "C2", "C3"].includes(getClassification(e.valoresScore, e.resultadosScore).code)
+  const needsAttention = empleadoAResults.filter(r => 
+    ["C1", "C2", "C3"].includes(r.cuadrante_mayoria)
   ).length;
 
   return (
@@ -93,9 +90,7 @@ const Dashboard = ({ isAdmin }) => {
             {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
               const config = classificationMatrix[code];
               const colors = classificationColors[config.color];
-              const count = employeesWithScores.filter(e => 
-                getClassification(e.valoresScore, e.resultadosScore).code === code
-              ).length;
+              const count = empleadoAResults.filter(r => r.cuadrante_mayoria === code).length;
               return (
                 <div key={code} className="rounded-xl border-2 p-3 text-center" style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
                   <span className="text-lg font-bold" style={{ color: colors.text }}>{code}</span>
