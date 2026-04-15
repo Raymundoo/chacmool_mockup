@@ -43,7 +43,7 @@ class EmpleadoAEvaluationPlanCreate(BaseModel):
 
 class EmpleadoAVoteCreate(BaseModel):
     """Crear voto/evaluación"""
-    plan_id: str
+    # plan_id is passed as path parameter, not in body
     cuadrante: Literal["A", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4"]
     valores_score: int
     resultados_score: int

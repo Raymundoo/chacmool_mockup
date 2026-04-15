@@ -1513,25 +1513,29 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
   const [showDetail, setShowDetail] = useState(false);
   const [evaluations, setEvaluations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState([]);
 
-  // Fetch evaluations from API
+  // Fetch evaluations and employees from API
   useEffect(() => {
-    fetchEvaluations();
+    fetchData();
   }, [filterMonth, filterYear, filterDepartment, filterEmployee]);
 
-  const fetchEvaluations = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const filters = {
-        month: filterMonth,
-        year: filterYear,
-        department: filterDepartment,
-        employee_id: filterEmployee
-      };
-      const data = await aciertosAPI.getAll(filters);
-      setEvaluations(data);
+      const [evaluationsData, employeesData] = await Promise.all([
+        aciertosAPI.getAll({
+          month: filterMonth,
+          year: filterYear,
+          department: filterDepartment,
+          employee_id: filterEmployee
+        }),
+        employeesAPI.getAll()
+      ]);
+      setEvaluations(evaluationsData);
+      setEmployees(employeesData);
     } catch (error) {
-      console.error('Error fetching evaluations:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
@@ -1576,7 +1580,9 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
     { value: '10', label: 'Octubre' }, { value: '11', label: 'Noviembre' }, { value: '12', label: 'Diciembre' }
   ];
 
-  const departments = ['all', ...new Set(mockEmployees.map(e => e.department))];
+  const departments = employees.length > 0 
+    ? ['all', ...new Set(employees.map(e => e.department || e.area).filter(Boolean))]
+    : ['all'];
 
   return (
     <div className="animate-fade-in">
@@ -1641,7 +1647,7 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
             <label className="block text-xs font-medium text-slate-600 mb-2">Colaborador</label>
             <select value={filterEmployee} onChange={(e) => setFilterEmployee(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm">
               <option value="all">Todos</option>
-              {mockEmployees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
+              {employees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
             </select>
           </div>
         </div>
@@ -1748,16 +1754,17 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
         </div>
       )}
 
-      {showForm && <AciertosDesaciertosForm onClose={() => setShowForm(false)} evaluation={selectedEvaluation} />}
+      {showForm && <AciertosDesaciertosForm onClose={() => { setShowForm(false); setSelectedEvaluation(null); }} evaluation={selectedEvaluation} employees={employees} onSubmit={selectedEvaluation ? handleUpdateEvaluation : handleCreateEvaluation} />}
       {showDetail && <AciertosDesaciertosDetail evaluation={selectedEvaluation} onClose={() => setShowDetail(false)} onEdit={() => { setShowDetail(false); setShowForm(true); }} />}
     </div>
   );
 };
 
-const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
+const AciertosDesaciertosForm = ({ onClose, evaluation, employees, onSubmit }) => {
+  const isEditing = !!evaluation;
 
   const [formData, setFormData] = useState(evaluation || {
-    evaluatorId: '1', evaluatedId: '', date: new Date().toISOString().split('T')[0],
+    evaluatorId: '', evaluatedId: '', date: new Date().toISOString().split('T')[0],
     resultadoVsObjetivo: '', aciertosColaborador: [''], desaciertosColaborador: [''],
     aciertosEmpresa: [''], desaciertosEmpresa: [''], compromisos: [{ tipo: 'colaborador', compromiso: '', fecha: '' }]
   });
@@ -1768,7 +1775,23 @@ const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
   const addCompromiso = () => setFormData(prev => ({ ...prev, compromisos: [...prev.compromisos, { tipo: 'colaborador', compromiso: '', fecha: '' }] }));
   const removeCompromiso = (index) => setFormData(prev => ({ ...prev, compromisos: prev.compromisos.filter((_, i) => i !== index) }));
   const updateCompromiso = (index, field, value) => setFormData(prev => ({ ...prev, compromisos: prev.compromisos.map((comp, i) => i === index ? { ...comp, [field]: value } : comp) }));
-  const handleSubmit = () => { alert('Evaluación guardada (demo)'); onClose(); };
+  
+  const handleSubmit = async () => {
+    if (!formData.evaluatedId) {
+      alert('Debes seleccionar a quién se evalúa');
+      return;
+    }
+    
+    try {
+      if (isEditing) {
+        await onSubmit(evaluation.id, formData);
+      } else {
+        await onSubmit(formData);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -1783,14 +1806,15 @@ const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Quién evalúa</label>
               <select value={formData.evaluatorId} onChange={(e) => setFormData(prev => ({ ...prev, evaluatorId: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2">
-                {mockEmployees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
+                <option value="">Seleccionar...</option>
+                {employees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">A quién se evalúa *</label>
               <select value={formData.evaluatedId} onChange={(e) => setFormData(prev => ({ ...prev, evaluatedId: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2">
                 <option value="">Seleccionar...</option>
-                {mockEmployees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
+                {employees.map(emp => (<option key={emp.id} value={emp.id}>{emp.name}</option>))}
               </select>
             </div>
             <div>
@@ -1806,6 +1830,17 @@ const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
 
           <div>
             <h3 className="text-lg font-semibold text-slate-900 mb-3">Escucha y genera compromisos</h3>
+            
+            {/* Guía para colaborador */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-blue-800 font-medium mb-1">
+                💡 Guía para Colaborador
+              </p>
+              <p className="text-sm text-blue-700">
+                ¿Qué ha salido bien? ¿Qué salió mal y se puede mejorar?
+              </p>
+            </div>
+            
             <h4 className="text-sm font-semibold text-slate-700 mb-3">Aciertos y Desaciertos - Colaborador</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -1841,6 +1876,19 @@ const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
           </div>
 
           <div>
+            {/* Guía para empresa */}
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-purple-800 font-medium mb-1">
+                💼 Guía para Empresa
+              </p>
+              <p className="text-sm text-purple-700 mb-2">
+                <strong>Qué debemos seguir haciendo y qué debemos dejar de hacer</strong>
+              </p>
+              <p className="text-xs text-purple-600">
+                Es importante explicar con claridad los éxitos (lo que la empresa hace bien y debe mantener) y los fracasos (áreas de mejora que impactan el desempeño del colaborador). Sé específico y constructivo.
+              </p>
+            </div>
+            
             <h4 className="text-sm font-semibold text-slate-700 mb-3">Aciertos y Desaciertos - Empresa</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
