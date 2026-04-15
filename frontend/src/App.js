@@ -6,6 +6,8 @@ import LoginPage from './components/LoginPage';
 import { employeesAPI, aciertosAPI, kpisAPI, eval360API, empleadoAAPI } from './services/api';
 import Dashboard from './pages/Dashboard';
 import EmpleadoAPage from './pages/EmpleadoA';
+import KPIsView from './pages/KPIsView';
+import Evaluations360View from './pages/Evaluations360View';
 import { 
   Users, 
   Target, 
@@ -1052,250 +1054,6 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
 // 9-BOX GRID WITH PERCENTAGES INSIDE CELLS
 // ============================================
 
-const NineBoxGridView = ({ isAdmin }) => {
-  const [selectedDepartment, setSelectedDepartment] = useState("all");
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const navigate = useNavigate();
-
-  const filteredEmployees = selectedDepartment === "all" 
-    ? mockEmployees 
-    : mockEmployees.filter(e => e.departmentId === selectedDepartment);
-
-  // Matrix with percentages inside each cell
-  const matrixCells = [
-    { row: 0, col: 0, code: "B3", valoresRange: "81-100%", resultadosRange: "0-60%" },
-    { row: 0, col: 1, code: "B2", valoresRange: "81-100%", resultadosRange: "61-80%" },
-    { row: 0, col: 2, code: "A", valoresRange: "81-100%", resultadosRange: "81-100%" },
-    { row: 1, col: 0, code: "C4", valoresRange: "61-80%", resultadosRange: "0-60%" },
-    { row: 1, col: 1, code: "B1", valoresRange: "61-80%", resultadosRange: "61-80%" },
-    { row: 1, col: 2, code: "B4", valoresRange: "61-80%", resultadosRange: "81-100%" },
-    { row: 2, col: 0, code: "C1", valoresRange: "0-60%", resultadosRange: "0-60%" },
-    { row: 2, col: 1, code: "C2", valoresRange: "0-60%", resultadosRange: "61-80%" },
-    { row: 2, col: 2, code: "C3", valoresRange: "0-60%", resultadosRange: "81-100%" },
-  ];
-
-  const getEmployeesInCell = (code) => {
-    return filteredEmployees.filter(emp => getClassification(emp.valoresScore, emp.resultadosScore).code === code);
-  };
-
-  return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Empleado A
-          </h1>
-          <p className="text-slate-500 mt-1">Clasificación de Empleados A, B y C</p>
-        </div>
-        
-        <select
-          value={selectedDepartment}
-          onChange={(e) => setSelectedDepartment(e.target.value)}
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm"
-        >
-          <option value="all">Todos los departamentos</option>
-          {mockDepartments.map(dept => (
-            <option key={dept.id} value={dept.id}>{dept.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-          <div>
-            <p className="font-medium text-blue-800">Matriz de Clasificación de Empleados</p>
-            <p className="text-sm text-blue-700">
-              <strong>Eje Y:</strong> VALORES (comportamientos y actitudes) | <strong>Eje X:</strong> RESULTADOS (cumplimiento de metas).
-              Los porcentajes dentro de cada celda indican los rangos de clasificación.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Matrix */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
-          <div className="flex">
-            {/* Y-axis */}
-            <div className="flex flex-col justify-center items-center w-12 mr-3">
-              <ArrowUp className="w-4 h-4 text-slate-400 mb-2" />
-              <span className="text-xs font-bold text-slate-600 tracking-wider" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                VALORES
-              </span>
-            </div>
-            
-            <div className="flex-1">
-              {/* Grid */}
-              <div className="grid grid-cols-3 gap-2">
-                {matrixCells.map((cell) => {
-                  const config = classificationMatrix[cell.code];
-                  const colors = classificationColors[config.color];
-                  const cellEmployees = getEmployeesInCell(cell.code);
-                  const isHighlighted = selectedEmployee && getClassification(selectedEmployee.valoresScore, selectedEmployee.resultadosScore).code === cell.code;
-                  
-                  return (
-                    <div
-                      key={cell.code}
-                      className={`rounded-xl border-2 p-3 min-h-[160px] transition-all cursor-pointer hover:scale-[1.01] ${
-                        isHighlighted ? 'ring-2 ring-slate-900 ring-offset-2' : ''
-                      }`}
-                      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
-                    >
-                      {/* Header with code and count */}
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xl font-bold" style={{ color: colors.text }}>{cell.code}</span>
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/70" style={{ color: colors.text }}>
-                          {cellEmployees.length}
-                        </span>
-                      </div>
-                      
-                      {/* Label */}
-                      <p className="text-xs font-semibold mb-1" style={{ color: colors.text }}>{config.label}</p>
-                      
-                      {/* Percentages INSIDE the cell */}
-                      <div className="bg-white/50 rounded-lg px-2 py-1 mb-2">
-                        <p className="text-[10px] font-medium" style={{ color: colors.text }}>
-                          V: {cell.valoresRange}
-                        </p>
-                        <p className="text-[10px] font-medium" style={{ color: colors.text }}>
-                          R: {cell.resultadosRange}
-                        </p>
-                      </div>
-                      
-                      {/* Employee names */}
-                      <div className="space-y-1">
-                        {cellEmployees.slice(0, 3).map((emp) => (
-                          <button
-                            key={emp.id}
-                            onClick={() => setSelectedEmployee(emp)}
-                            className={`w-full flex items-center gap-1.5 p-1 rounded-lg transition-all text-left ${
-                              selectedEmployee?.id === emp.id ? 'bg-white shadow-sm' : 'hover:bg-white/50'
-                            }`}
-                          >
-                            <img src={emp.avatar} alt="" className="w-5 h-5 rounded-full" />
-                            <span className="text-xs font-medium truncate" style={{ color: colors.text }}>
-                              {emp.name.split(' ')[0]}
-                            </span>
-                          </button>
-                        ))}
-                        {cellEmployees.length > 3 && (
-                          <p className="text-xs text-center font-medium" style={{ color: colors.text }}>+{cellEmployees.length - 3} más</p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* X-axis */}
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <span className="text-xs font-bold text-slate-600 tracking-wider">RESULTADOS</span>
-                <ArrowRight className="w-4 h-4 text-slate-400" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Employee Detail */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-            Detalle del Empleado
-          </h2>
-          
-          {selectedEmployee ? (
-            <div className="animate-fade-in">
-              <div className="flex items-center gap-4 mb-4">
-                <img src={selectedEmployee.avatar} alt="" className="w-14 h-14 rounded-xl object-cover" />
-                <div>
-                  <h3 className="font-semibold text-slate-900">{selectedEmployee.name}</h3>
-                  <p className="text-sm text-slate-500">{selectedEmployee.position}</p>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{selectedEmployee.department}</span>
-                </div>
-              </div>
-
-              {/* Classification */}
-              {(() => {
-                const classification = getClassification(selectedEmployee.valoresScore, selectedEmployee.resultadosScore);
-                const colors = classificationColors[classification.color];
-                return (
-                  <div className="rounded-xl p-4 mb-4" style={{ backgroundColor: colors.bg, border: `2px solid ${colors.border}` }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-2xl font-bold" style={{ color: colors.text }}>{classification.code}</span>
-                      <span className="text-sm font-semibold" style={{ color: colors.text }}>{classification.label}</span>
-                    </div>
-                    <p className="text-xs" style={{ color: colors.text }}>{classification.description}</p>
-                    <div className="mt-2 pt-2 border-t" style={{ borderColor: colors.border }}>
-                      <p className="text-xs font-semibold" style={{ color: colors.text }}>Acción: {classification.action}</p>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Scores */}
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-600">Valores</span>
-                  <span className="font-bold text-purple-600">{selectedEmployee.valoresScore}%</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-600">Resultados</span>
-                  <span className="font-bold text-blue-600">{selectedEmployee.resultadosScore}%</span>
-                </div>
-              </div>
-
-              {/* Evaluator counts - Different view for admin vs employee */}
-              <div className="border-t border-slate-100 pt-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-3 flex items-center gap-2">
-                  {isAdmin ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                  {isAdmin ? 'Quiénes evaluaron' : 'Cuántos evaluaron'}
-                </p>
-                <div className="space-y-2">
-                  {evaluatorTypes.filter(t => t.id !== 'autoevaluacion').map((type) => (
-                    <div key={type.id} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-600 flex items-center gap-2">
-                        <type.icon className="w-3 h-3" style={{ color: type.color }} />
-                        {type.name}
-                      </span>
-                      {isAdmin ? (
-                        <span className="text-xs text-slate-500 max-w-[120px] truncate" title={selectedEmployee.evaluatorNames[type.id]?.join(', ')}>
-                          {selectedEmployee.evaluatorNames[type.id]?.slice(0, 2).join(', ')}
-                          {selectedEmployee.evaluatorNames[type.id]?.length > 2 && '...'}
-                        </span>
-                      ) : (
-                        <span className="font-semibold text-slate-700">
-                          {selectedEmployee.evaluatorCounts[type.id]} personas
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <button 
-                onClick={() => navigate('/my-profile', { state: { employee: selectedEmployee } })}
-                className="w-full mt-4 bg-slate-900 text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-slate-800"
-              >
-                Ver Perfil Completo
-              </button>
-            </div>
-          ) : (
-            <div className="text-center py-12 text-slate-400">
-              <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Selecciona un empleado</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================
-// MY PROFILE / RESULTS VIEW (Combined)
-// ============================================
-
 const MyProfileResultsView = ({ isAdmin }) => {
   const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
   const location = useLocation();
@@ -1518,902 +1276,38 @@ const MyProfileResultsView = ({ isAdmin }) => {
 // EVALUATIONS 360 MODULE - REDESIGNED
 // ============================================
 
-const EvaluationsView = ({ isAdmin }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [activeView, setActiveView] = useState('design');
-  
-  // Extract view from URL if present
-  useState(() => {
-    const path = location.pathname.split('/');
-    if (path[2]) setActiveView(path[2]);
-  }, [location]);
+// ============================================
+// REMAINING COMPONENTS (Employees, Manual Eval, Public Form)
+// Dashboard ahora está en /pages/Dashboard.jsx
+// ============================================
 
-  const views = [
-    { id: 'design', label: 'Diseño', icon: FileText, description: 'Crear plantillas' },
-    { id: 'planning', label: 'Planificación', icon: UserPlus, description: 'Asignar evaluadores' },
-    { id: 'stats', label: 'Estadísticas', icon: BarChart2, description: 'Resultados agregados' },
-    { id: 'tracking', label: 'Tracking', icon: Activity, description: 'Estado evaluaciones' },
-    { id: 'pdi', label: 'Resultados y PDI', icon: Award, description: 'Vista 1-1 y PDI' },
-  ];
+const EmployeeList = ({ isAdmin }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredEmployees = mockEmployees.filter(emp => emp.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Evaluaciones 360°
-          </h1>
-          <p className="text-slate-500 mt-1">Sistema completo de evaluaciones</p>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>Empleados</h1>
+          <p className="text-slate-500 mt-1">Gestión del personal</p>
         </div>
+        <button className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          Agregar
+        </button>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex gap-2 mb-8 bg-slate-100 p-1 rounded-xl w-full overflow-x-auto">
-        {views.map((view) => (
-          <button
-            key={view.id}
-            onClick={() => setActiveView(view.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-              activeView === view.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <view.icon className="w-4 h-4" />
-            <span>{view.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* View Content */}
-      {activeView === 'design' && <EvalDesignView isAdmin={isAdmin} />}
-      {activeView === 'planning' && <EvalPlanningView isAdmin={isAdmin} />}
-      {activeView === 'stats' && <EvalStatsView isAdmin={isAdmin} />}
-      {activeView === 'tracking' && <EvalTrackingView isAdmin={isAdmin} />}
-      {activeView === 'pdi' && <EvalResultsPDIView isAdmin={isAdmin} />}
-    </div>
-  );
-};
-
-// Vista 1: Diseño de Evaluaciones
-const EvalDesignView = ({ isAdmin }) => {
-  const [templates, setTemplates] = useState(mockEval360Templates);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [newTemplate, setNewTemplate] = useState({
-    name: '',
-    description: '',
-    generalDescription: '',
-    competencies: []
-  });
-
-  const addCompetency = () => {
-    setNewTemplate(prev => ({
-      ...prev,
-      competencies: [...prev.competencies, {
-        id: `comp-${Date.now()}`,
-        title: '',
-        behavior: '',
-        description: '',
-        responses: [
-          { value: 1, label: '', description: '' },
-          { value: 2, label: '', description: '' },
-          { value: 3, label: '', description: '' },
-          { value: 4, label: '', description: '' },
-          { value: 5, label: '', description: '' }
-        ]
-      }]
-    }));
-  };
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Templates List */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase">Plantillas ({templates.length})</h2>
-          <button 
-            onClick={() => { setIsCreating(true); setNewTemplate({ name: '', description: '', generalDescription: '', competencies: [] }); }}
-            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva
-          </button>
-        </div>
-        
-        {templates.map((template) => (
-          <div
-            key={template.id}
-            onClick={() => { setSelectedTemplate(template); setIsCreating(false); setIsEditing(false); }}
-            className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
-              selectedTemplate?.id === template.id ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${template.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                {template.isActive ? 'Activa' : 'Inactiva'}
-              </span>
-              <span className="text-xs text-slate-400">{template.competencies?.length || 0} competencias</span>
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
-            <p className="text-sm text-slate-500 line-clamp-2">{template.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Template Detail/Editor */}
-      <div className="lg:col-span-2">
-        {isCreating || isEditing ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-slate-900">{isCreating ? 'Crear Nueva Plantilla' : 'Editar Plantilla'}</h2>
-              <button onClick={() => { setIsCreating(false); setIsEditing(false); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nombre de la plantilla *</label>
-                <input 
-                  type="text"
-                  placeholder="Ej: Evaluación 360° Gerentes 2024"
-                  value={newTemplate.name}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Descripción breve *</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Descripción de la evaluación..."
-                  value={newTemplate.description}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Descripción general (cómo se evalúa, cómo se califica)</label>
-                <textarea 
-                  rows={3}
-                  placeholder="Explica el propósito de la evaluación, cómo se califica, qué escala se usa..."
-                  value={newTemplate.generalDescription}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, generalDescription: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
-                />
-              </div>
-
-              {/* Competencies */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-slate-700">Competencias</h3>
-                  <button 
-                    onClick={addCompetency}
-                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    Agregar competencia
-                  </button>
-                </div>
-
-                {newTemplate.competencies.length === 0 && (
-                  <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl">
-                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Agrega competencias a evaluar</p>
-                  </div>
-                )}
-
-                {newTemplate.competencies.map((comp, idx) => (
-                  <div key={comp.id} className="border border-slate-200 rounded-xl p-4 mb-4 bg-slate-50">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-700">Competencia {idx + 1}</h4>
-                      <button 
-                        onClick={() => setNewTemplate(prev => ({ ...prev, competencies: prev.competencies.filter(c => c.id !== comp.id) }))}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      <input 
-                        type="text"
-                        placeholder="Título de la competencia (ej: Trabajo en Equipo)"
-                        value={comp.title}
-                        onChange={(e) => {
-                          const updated = [...newTemplate.competencies];
-                          updated[idx].title = e.target.value;
-                          setNewTemplate(prev => ({ ...prev, competencies: updated }));
-                        }}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
-                      />
-
-                      <input 
-                        type="text"
-                        placeholder="Comportamiento (ej: Colabora y participa activamente...)"
-                        value={comp.behavior}
-                        onChange={(e) => {
-                          const updated = [...newTemplate.competencies];
-                          updated[idx].behavior = e.target.value;
-                          setNewTemplate(prev => ({ ...prev, competencies: updated }));
-                        }}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
-                      />
-
-                      <textarea 
-                        rows={2}
-                        placeholder="Descripción de la competencia (opcional)"
-                        value={comp.description}
-                        onChange={(e) => {
-                          const updated = [...newTemplate.competencies];
-                          updated[idx].description = e.target.value;
-                          setNewTemplate(prev => ({ ...prev, competencies: updated }));
-                        }}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white resize-none"
-                      />
-
-                      <div className="mt-3">
-                        <p className="text-xs font-semibold text-slate-600 mb-2">Escala de respuestas (1-5)</p>
-                        {comp.responses.map((resp, respIdx) => (
-                          <div key={respIdx} className="flex gap-2 mb-2 items-start">
-                            <span className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-xs font-bold text-slate-700 mt-1">
-                              {resp.value}
-                            </span>
-                            <div className="flex-1 space-y-1">
-                              <input 
-                                type="text"
-                                placeholder={`Etiqueta nivel ${resp.value}`}
-                                value={resp.label}
-                                onChange={(e) => {
-                                  const updated = [...newTemplate.competencies];
-                                  updated[idx].responses[respIdx].label = e.target.value;
-                                  setNewTemplate(prev => ({ ...prev, competencies: updated }));
-                                }}
-                                className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white"
-                              />
-                              <input 
-                                type="text"
-                                placeholder={`Descripción nivel ${resp.value}`}
-                                value={resp.description}
-                                onChange={(e) => {
-                                  const updated = [...newTemplate.competencies];
-                                  updated[idx].responses[respIdx].description = e.target.value;
-                                  setNewTemplate(prev => ({ ...prev, competencies: updated }));
-                                }}
-                                className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white"
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t">
-                <button
-                  onClick={() => { setIsCreating(false); setIsEditing(false); }}
-                  className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => { alert('Plantilla guardada (demo)'); setIsCreating(false); setIsEditing(false); }}
-                  className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Guardar Plantilla
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : selectedTemplate ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900">{selectedTemplate.name}</h2>
-                <p className="text-sm text-slate-500">{selectedTemplate.description}</p>
-              </div>
-              <button
-                onClick={() => { setIsEditing(true); setNewTemplate(selectedTemplate); }}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 flex items-center gap-2"
-              >
-                <Edit3 className="w-4 h-4" />
-                Editar
-              </button>
-            </div>
-
-            {selectedTemplate.generalDescription && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                <p className="text-xs font-semibold text-blue-700 mb-1">DESCRIPCIÓN GENERAL</p>
-                <p className="text-sm text-blue-800">{selectedTemplate.generalDescription}</p>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              {selectedTemplate.competencies.map((comp, idx) => (
-                <div key={comp.id} className="border border-slate-200 rounded-xl p-4">
-                  <div className="mb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-slate-900 mb-1">{comp.title}</h3>
-                        <p className="text-sm text-slate-600 italic mb-2">{comp.behavior}</p>
-                        {comp.description && <p className="text-xs text-slate-500">{comp.description}</p>}
-                      </div>
-                      <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">#{idx + 1}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 pl-4 border-l-2 border-slate-100">
-                    {comp.responses.map((resp) => (
-                      <div key={resp.value} className="flex gap-3">
-                        <span className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-xs font-bold text-slate-700">
-                          {resp.value}
-                        </span>
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">{resp.label}</p>
-                          <p className="text-xs text-slate-500">{resp.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500 mb-4">Selecciona una plantilla o crea una nueva</p>
-            <button 
-              onClick={() => setIsCreating(true)}
-              className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 inline-flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Nueva Plantilla
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Vista 2: Planificación de Evaluaciones
-const EvalPlanningView = ({ isAdmin }) => {
-  const [plans, setPlans] = useState(mockEvaluationPlans);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [showCreatePlan, setShowCreatePlan] = useState(false);
-  const [newPlan, setNewPlan] = useState({
-    employeeId: '',
-    templateId: '',
-    period: 'Q1 2024',
-    evaluators: []
-  });
-  const [showAddEvaluator, setShowAddEvaluator] = useState(false);
-  const [newEvaluator, setNewEvaluator] = useState({ type: 'lider', name: '', email: '' });
-
-  const addEvaluatorToPlan = () => {
-    const evaluator = {
-      id: `ev-${Date.now()}`,
-      ...newEvaluator,
-      status: 'pendiente',
-      link: `eval/${Math.random().toString(36).substring(7)}`,
-      completedDate: null
-    };
-    setNewPlan(prev => ({ ...prev, evaluators: [...prev.evaluators, evaluator] }));
-    setNewEvaluator({ type: 'lider', name: '', email: '' });
-    setShowAddEvaluator(false);
-  };
-
-  const simulateEmail = (evaluator) => {
-    alert(`Email simulado enviado a: ${evaluator.email}\nAsunto: Evaluación 360°\nLink: ${window.location.origin}/${evaluator.link}`);
-  };
-
-  const copyLink = (link) => {
-    navigator.clipboard.writeText(`${window.location.origin}/${link}`);
-    alert('Link copiado al portapapeles');
-  };
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Plans List */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase">Planes ({plans.length})</h2>
-          <button 
-            onClick={() => setShowCreatePlan(true)}
-            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo Plan
-          </button>
-        </div>
-
-        {plans.map((plan) => {
-          const completed = plan.evaluators.filter(e => e.status === 'completado').length;
-          const total = plan.evaluators.length;
-          const progress = (completed / total) * 100;
-          
-          return (
-            <div
-              key={plan.id}
-              onClick={() => setSelectedPlan(plan)}
-              className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
-                selectedPlan?.id === plan.id ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <h3 className="font-semibold text-slate-900 mb-1">{plan.employeeName}</h3>
-              <p className="text-xs text-slate-500 mb-2">{plan.templateName} · {plan.period}</p>
-              <div className="flex items-center gap-2 text-xs text-slate-600 mb-2">
-                <Users className="w-3 h-3" />
-                <span>{completed}/{total} completadas</span>
-              </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Plan Detail */}
-      <div className="lg:col-span-2">
-        {showCreatePlan ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-slate-900">Crear Plan de Evaluación</h2>
-              <button onClick={() => setShowCreatePlan(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Empleado a evaluar *</label>
-                <select 
-                  value={newPlan.employeeId}
-                  onChange={(e) => setNewPlan(prev => ({ ...prev, employeeId: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
-                >
-                  <option value="">Seleccionar empleado...</option>
-                  {mockEmployees.map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.name} - {emp.position}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Plantilla de evaluación *</label>
-                <select 
-                  value={newPlan.templateId}
-                  onChange={(e) => setNewPlan(prev => ({ ...prev, templateId: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
-                >
-                  <option value="">Seleccionar plantilla...</option>
-                  {mockEval360Templates.map(tmpl => (
-                    <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Período *</label>
-                <select 
-                  value={newPlan.period}
-                  onChange={(e) => setNewPlan(prev => ({ ...prev, period: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5"
-                >
-                  <option value="Q1 2024">Q1 2024</option>
-                  <option value="Q2 2024">Q2 2024</option>
-                  <option value="Q3 2024">Q3 2024</option>
-                  <option value="Q4 2024">Q4 2024</option>
-                </select>
-              </div>
-
-              {/* Evaluators */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-slate-700">Evaluadores Asignados ({newPlan.evaluators.length})</h3>
-                  <button 
-                    onClick={() => setShowAddEvaluator(true)}
-                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    Agregar evaluador
-                  </button>
-                </div>
-
-                {newPlan.evaluators.length === 0 && (
-                  <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl">
-                    <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Agrega evaluadores para este empleado</p>
-                  </div>
-                )}
-
-                {newPlan.evaluators.map((ev) => {
-                  const evType = evaluatorTypes360.find(t => t.id === ev.type);
-                  return (
-                    <div key={ev.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl mb-2">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${evType.color}20` }}>
-                          {evType.id === 'lider' && <Shield className="w-4 h-4" style={{ color: evType.color }} />}
-                          {evType.id === 'igual' && <Users2 className="w-4 h-4" style={{ color: evType.color }} />}
-                          {evType.id === 'subordinado' && <User className="w-4 h-4" style={{ color: evType.color }} />}
-                          {evType.id === 'cliente' && <Briefcase className="w-4 h-4" style={{ color: evType.color }} />}
-                          {evType.id === 'autoevaluacion' && <UserCheck className="w-4 h-4" style={{ color: evType.color }} />}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">{ev.name}</p>
-                          <p className="text-xs text-slate-500">{evType.name} · {ev.email}</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => setNewPlan(prev => ({ ...prev, evaluators: prev.evaluators.filter(e => e.id !== ev.id) }))}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {showAddEvaluator && (
-                  <div className="border-2 border-blue-200 bg-blue-50 rounded-xl p-4 mb-2">
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Tipo de evaluador</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {evaluatorTypes360.map((type) => (
-                            <button
-                              key={type.id}
-                              onClick={() => setNewEvaluator(prev => ({ ...prev, type: type.id }))}
-                              className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all text-left ${
-                                newEvaluator.type === type.id ? 'border-slate-900 bg-white' : 'border-slate-200 bg-white/50'
-                              }`}
-                            >
-                              {type.id === 'lider' && <Shield className="w-4 h-4" style={{ color: type.color }} />}
-                              {type.id === 'igual' && <Users2 className="w-4 h-4" style={{ color: type.color }} />}
-                              {type.id === 'subordinado' && <User className="w-4 h-4" style={{ color: type.color }} />}
-                              {type.id === 'cliente' && <Briefcase className="w-4 h-4" style={{ color: type.color }} />}
-                              {type.id === 'autoevaluacion' && <UserCheck className="w-4 h-4" style={{ color: type.color }} />}
-                              <span className="text-xs font-medium">{type.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <input 
-                        type="text"
-                        placeholder="Nombre del evaluador"
-                        value={newEvaluator.name}
-                        onChange={(e) => setNewEvaluator(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                      />
-
-                      <input 
-                        type="email"
-                        placeholder="Email del evaluador"
-                        value={newEvaluator.email}
-                        onChange={(e) => setNewEvaluator(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                      />
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => { setShowAddEvaluator(false); setNewEvaluator({ type: 'lider', name: '', email: '' }); }}
-                          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-white"
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          onClick={addEvaluatorToPlan}
-                          disabled={!newEvaluator.name || !newEvaluator.email}
-                          className="flex-1 bg-slate-900 text-white rounded-lg px-3 py-2 text-sm font-medium disabled:opacity-50"
-                        >
-                          Agregar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4 border-t">
-              <button
-                onClick={() => setShowCreatePlan(false)}
-                className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-medium hover:bg-slate-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => { alert('Plan creado (demo)'); setShowCreatePlan(false); }}
-                className="flex-1 bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800"
-              >
-                Crear Plan
-              </button>
-            </div>
-          </div>
-        ) : selectedPlan ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-slate-900">{selectedPlan.employeeName}</h2>
-              <p className="text-sm text-slate-500">{selectedPlan.templateName} · {selectedPlan.period}</p>
-            </div>
-
-            <div className="space-y-3">
-              {selectedPlan.evaluators.map((ev) => {
-                const evType = evaluatorTypes360.find(t => t.id === ev.type);
-                const statusColors = {
-                  pendiente: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200' },
-                  enviado: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
-                  completado: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' }
-                };
-                const statusColor = statusColors[ev.status];
-
-                return (
-                  <div key={ev.id} className={`border-2 ${statusColor.border} rounded-xl p-4`}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${evType.color}20` }}>
-                          {evType.id === 'lider' && <Shield className="w-5 h-5" style={{ color: evType.color }} />}
-                          {evType.id === 'igual' && <Users2 className="w-5 h-5" style={{ color: evType.color }} />}
-                          {evType.id === 'subordinado' && <User className="w-5 h-5" style={{ color: evType.color }} />}
-                          {evType.id === 'cliente' && <Briefcase className="w-5 h-5" style={{ color: evType.color }} />}
-                          {evType.id === 'autoevaluacion' && <UserCheck className="w-5 h-5" style={{ color: evType.color }} />}
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-900">{ev.name}</p>
-                          <p className="text-xs text-slate-500">{evType.name}</p>
-                          <p className="text-xs text-slate-400">{ev.email}</p>
-                        </div>
-                      </div>
-                      <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor.bg} ${statusColor.text}`}>
-                        {ev.status === 'pendiente' && '🟡 Pendiente'}
-                        {ev.status === 'enviado' && '🔵 Enviado'}
-                        {ev.status === 'completado' && '🟢 Completado'}
-                      </span>
-                    </div>
-
-                    {ev.status !== 'completado' && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => copyLink(ev.link)}
-                          className="flex-1 bg-slate-100 text-slate-700 rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-200 flex items-center justify-center gap-2"
-                        >
-                          <Copy className="w-4 h-4" />
-                          Copiar Link
-                        </button>
-                        <button
-                          onClick={() => simulateEmail(ev)}
-                          className="flex-1 bg-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2"
-                        >
-                          <Mail className="w-4 h-4" />
-                          Enviar Email
-                        </button>
-                      </div>
-                    )}
-
-                    {ev.status === 'completado' && ev.completedDate && (
-                      <p className="text-xs text-green-600 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Completado el {ev.completedDate}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-            <UserPlus className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500 mb-4">Selecciona un plan o crea uno nuevo</p>
-            <button 
-              onClick={() => setShowCreatePlan(true)}
-              className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 inline-flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Nuevo Plan
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Vista 3: Estadísticas
-const EvalStatsView = ({ isAdmin }) => {
-  const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
-  const results = mockEvaluationResults.find(r => r.employeeId === selectedEmployee.id);
-  const plan = mockEvaluationPlans.find(p => p.employeeId === selectedEmployee.id);
-  
-  if (!results || !plan) {
-    return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-        <BarChart2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-        <p className="text-slate-500">No hay resultados disponibles</p>
-      </div>
-    );
-  }
-
-  const template = mockEval360Templates.find(t => t.id === plan.templateId);
-  const completed = plan.evaluators.filter(e => e.status === 'completado').length;
-  const pending = plan.evaluators.length - completed;
-
-  return (
-    <div>
-      <div className="mb-6">
-        <select 
-          value={selectedEmployee.id}
-          onChange={(e) => setSelectedEmployee(mockEmployees.find(emp => emp.id === e.target.value))}
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5"
-        >
-          {mockEmployees.map(emp => (
-            <option key={emp.id} value={emp.id}>{emp.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
-          <CheckCircle2 className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{completed}</p>
-          <p className="text-sm opacity-80">Completadas</p>
-        </div>
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl p-5 text-white">
-          <Clock className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{pending}</p>
-          <p className="text-sm opacity-80">Pendientes</p>
-        </div>
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
-          <Award className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{Math.round((completed / plan.evaluators.length) * 100)}%</p>
-          <p className="text-sm opacity-80">Progreso</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {template.competencies.map((comp) => {
-          const compResults = results.results[comp.id];
-          if (!compResults) return null;
-
-          const responseCounts = [0, 0, 0, 0, 0];
-          compResults.responses.forEach(r => {
-            responseCounts[r.score - 1]++;
-          });
-
-          const pieData = responseCounts.map((count, idx) => ({
-            name: comp.responses[idx].label,
-            value: count,
-            color: ['#EF4444', '#F59E0B', '#EAB308', '#84CC16', '#22C55E'][idx]
-          }));
-
-          return (
-            <div key={comp.id} className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h3 className="font-semibold text-slate-900 mb-1">{comp.title}</h3>
-              <p className="text-sm text-slate-500 mb-4">{comp.behavior}</p>
-
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-slate-500">Promedio</span>
-                  <span className="text-2xl font-bold text-slate-900">{compResults.average.toFixed(1)}</span>
-                </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${(compResults.average / 5) * 100}%` }} />
-                </div>
-              </div>
-
-              <div className="h-48 mb-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPie>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={(entry) => `${entry.value}`}
-                      outerRadius={60}
-                      dataKey="value"
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </RechartsPie>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="space-y-2">
-                {comp.responses.map((resp, idx) => (
-                  <div key={resp.value} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: pieData[idx].color }} />
-                      <span className="text-slate-600">{resp.label}</span>
-                    </div>
-                    <span className="font-semibold text-slate-900">{responseCounts[idx]} votos</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// Vista 4: Tracking
-const EvalTrackingView = ({ isAdmin }) => {
-  const [filterStatus, setFilterStatus] = useState('all');
-  const allEvaluations = mockEvaluationPlans.flatMap(plan => 
-    plan.evaluators.map(ev => ({
-      ...ev,
-      employeeName: plan.employeeName,
-      planId: plan.id,
-      period: plan.period
-    }))
-  );
-
-  const filtered = filterStatus === 'all' 
-    ? allEvaluations 
-    : allEvaluations.filter(ev => ev.status === filterStatus);
-
-  const stats = {
-    pendiente: allEvaluations.filter(e => e.status === 'pendiente').length,
-    enviado: allEvaluations.filter(e => e.status === 'enviado').length,
-    completado: allEvaluations.filter(e => e.status === 'completado').length
-  };
-
-  return (
-    <div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div 
-          onClick={() => setFilterStatus('all')}
-          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
-            filterStatus === 'all' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
-          }`}
-        >
-          <Activity className="w-6 h-6 text-slate-400 mb-2" />
-          <p className="text-2xl font-bold text-slate-900">{allEvaluations.length}</p>
-          <p className="text-sm text-slate-500">Total</p>
-        </div>
-        <div 
-          onClick={() => setFilterStatus('pendiente')}
-          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
-            filterStatus === 'pendiente' ? 'border-yellow-500 ring-2 ring-yellow-500/10' : 'border-slate-200 hover:border-yellow-300'
-          }`}
-        >
-          <Clock className="w-6 h-6 text-yellow-500 mb-2" />
-          <p className="text-2xl font-bold text-slate-900">{stats.pendiente}</p>
-          <p className="text-sm text-slate-500">Pendientes</p>
-        </div>
-        <div 
-          onClick={() => setFilterStatus('enviado')}
-          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
-            filterStatus === 'enviado' ? 'border-blue-500 ring-2 ring-blue-500/10' : 'border-slate-200 hover:border-blue-300'
-          }`}
-        >
-          <Send className="w-6 h-6 text-blue-500 mb-2" />
-          <p className="text-2xl font-bold text-slate-900">{stats.enviado}</p>
-          <p className="text-sm text-slate-500">Enviados</p>
-        </div>
-        <div 
-          onClick={() => setFilterStatus('completado')}
-          className={`bg-white border-2 rounded-2xl p-4 cursor-pointer transition-all ${
-            filterStatus === 'completado' ? 'border-green-500 ring-2 ring-green-500/10' : 'border-slate-200 hover:border-green-300'
-          }`}
-        >
-          <CheckCircle2 className="w-6 h-6 text-green-500 mb-2" />
-          <p className="text-2xl font-bold text-slate-900">{stats.completado}</p>
-          <p className="text-sm text-slate-500">Completados</p>
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Buscar empleado..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
+          />
         </div>
       </div>
 
@@ -2422,30 +1316,36 @@ const EvalTrackingView = ({ isAdmin }) => {
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
               <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Empleado</th>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Evaluador</th>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Tipo</th>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Estado</th>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Período</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Valores</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Resultados</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Clasificación</th>
+              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Evaluadores</th>
             </tr>
           </thead>
-          <tbody>
-            {filtered.map((ev, idx) => {
-              const evType = evaluatorTypes360.find(t => t.id === ev.type);
+          <tbody className="divide-y divide-slate-100">
+            {filteredEmployees.map((emp) => {
+              const classification = getClassification(emp.valoresScore, emp.resultadosScore);
+              const colors = classificationColors[classification.color];
+              const totalEvaluators = Object.values(emp.evaluatorCounts).reduce((a, b) => a + b, 0);
               return (
-                <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">{ev.employeeName}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{ev.name}</td>
+                <tr key={emp.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4">
-                    <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ backgroundColor: `${evType.color}20`, color: evType.color }}>
-                      {evType.name}
+                    <div className="flex items-center gap-3">
+                      <img src={emp.avatar} alt="" className="w-10 h-10 rounded-full" />
+                      <div>
+                        <p className="font-medium text-slate-900">{emp.name}</p>
+                        <p className="text-sm text-slate-500">{emp.position}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center font-semibold text-purple-600">{emp.valoresScore}%</td>
+                  <td className="px-6 py-4 text-center font-semibold text-blue-600">{emp.resultadosScore}%</td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="px-3 py-1 rounded-lg font-bold text-sm" style={{ backgroundColor: colors.bg, color: colors.text }}>
+                      {classification.code}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    {ev.status === 'pendiente' && <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">🟡 Pendiente</span>}
-                    {ev.status === 'enviado' && <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-700">🔵 Enviado</span>}
-                    {ev.status === 'completado' && <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">🟢 Completado</span>}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{ev.period}</td>
+                  <td className="px-6 py-4 text-center text-sm text-slate-600">{totalEvaluators} personas</td>
                 </tr>
               );
             })}
@@ -2456,368 +1356,151 @@ const EvalTrackingView = ({ isAdmin }) => {
   );
 };
 
-// Vista 5: Resultados y PDI
-const EvalResultsPDIView = ({ isAdmin }) => {
-  const [selectedEmployee, setSelectedEmployee] = useState(mockEmployees[0]);
-  const results = mockEvaluationResults.find(r => r.employeeId === selectedEmployee.id);
-  const plan = mockEvaluationPlans.find(p => p.employeeId === selectedEmployee.id);
-  const pdi = mockPDIs.find(p => p.employeeId === selectedEmployee.id) || {
-    employeeName: selectedEmployee.name,
-    department: selectedEmployee.department,
-    leader: "Director",
-    reviewer: "CEO",
-    quarters: [{ quarter: "Q1 2024", meta: "", realidad: "", aprendizajeFormal: "", aprendizajeSocial: "", aprendizajeAplicado: "", voluntad: "", evaluaciones: "" }]
-  };
-
-  const [pdiData, setPdiData] = useState(pdi.quarters[0]);
-
-  if (!results || !plan) {
-    return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-        <Award className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-        <p className="text-slate-500">Selecciona un empleado con resultados</p>
-      </div>
-    );
-  }
-
-  const template = mockEval360Templates.find(t => t.id === plan.templateId);
+const ManualEvaluation = () => {
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedCode, setSelectedCode] = useState(null);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <select 
-          value={selectedEmployee.id}
-          onChange={(e) => setSelectedEmployee(mockEmployees.find(emp => emp.id === e.target.value))}
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5"
-        >
-          {mockEmployees.map(emp => (
-            <option key={emp.id} value={emp.id}>{emp.name}</option>
-          ))}
-        </select>
+    <div className="animate-fade-in">
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>Evaluación Manual</h1>
+        <p className="text-slate-500 mt-1">Asigna directamente un cuadrante del 9-Box</p>
       </div>
 
-      {/* Parte 1: Resultados 1 a 1 */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">📊 Resultados de Evaluación 360°</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {template.competencies.map((comp) => {
-            const compResults = results.results[comp.id];
-            if (!compResults) return null;
-
-            return (
-              <div key={comp.id} className="border border-slate-200 rounded-xl p-4">
-                <h3 className="font-semibold text-slate-900 mb-2">{comp.title}</h3>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-500">Promedio</span>
-                  <span className="text-2xl font-bold text-green-600">{compResults.average.toFixed(1)}/5</span>
-                </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${(compResults.average / 5) * 100}%` }} />
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Más elegida: {comp.responses[compResults.mostCommon - 1].label}</p>
-              </div>
-            );
-          })}
-        </div>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
+        <p className="text-sm text-amber-700"><AlertTriangle className="w-4 h-4 inline mr-2" />Esta clasificación sobrescribirá el resultado calculado.</p>
       </div>
 
-      {/* Parte 2: PDI */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-slate-900 mb-1">📝 Plan de Desarrollo Individual (PDI)</h2>
-          <p className="text-sm text-slate-500">Basado en resultados de la evaluación 360°</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase mb-4">1. Seleccionar Empleado</h2>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {mockEmployees.map((emp) => {
+              const classification = getClassification(emp.valoresScore, emp.resultadosScore);
+              const colors = classificationColors[classification.color];
+              return (
+                <button
+                  key={emp.id}
+                  onClick={() => setSelectedEmployee(emp)}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left ${selectedEmployee?.id === emp.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200'}`}
+                >
+                  <img src={emp.avatar} alt="" className="w-12 h-12 rounded-full" />
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">{emp.name}</p>
+                    <p className="text-sm text-slate-500">{emp.position}</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-lg font-bold text-sm" style={{ backgroundColor: colors.bg, color: colors.text }}>{classification.code}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-slate-50 rounded-xl">
-          <div>
-            <p className="text-xs text-slate-500">Evaluado</p>
-            <p className="font-semibold text-slate-900">{pdi.employeeName}</p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Departamento</p>
-            <p className="font-semibold text-slate-900">{pdi.department}</p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Líder que Reporta</p>
-            <p className="font-semibold text-slate-900">{pdi.leader}</p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Quien Revisa</p>
-            <p className="font-semibold text-slate-900">{pdi.reviewer}</p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Meta - ¿Qué quieres lograr en este trimestre?</label>
-            <textarea 
-              rows={2}
-              value={pdiData.meta}
-              onChange={(e) => setPdiData(prev => ({ ...prev, meta: e.target.value }))}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
-              placeholder="Describe tu meta principal para este trimestre..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Realidad - Situación actual y obstáculos</label>
-            <textarea 
-              rows={2}
-              value={pdiData.realidad}
-              onChange={(e) => setPdiData(prev => ({ ...prev, realidad: e.target.value }))}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
-              placeholder="Describe tu situación actual y los obstáculos que enfrentas..."
-            />
-          </div>
-
-          <div className="border-t pt-4">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3">OPCIONES DE DESARROLLO</h3>
-            
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Aprendizaje Formal</label>
-                <input 
-                  type="text"
-                  value={pdiData.aprendizajeFormal}
-                  onChange={(e) => setPdiData(prev => ({ ...prev, aprendizajeFormal: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Cursos, certificaciones, talleres..."
-                />
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase mb-4">2. Seleccionar Clasificación</h2>
+          {selectedEmployee ? (
+            <>
+              <div className="grid grid-cols-3 gap-2 mb-6">
+                {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
+                  const config = classificationMatrix[code];
+                  const colors = classificationColors[config.color];
+                  return (
+                    <button
+                      key={code}
+                      onClick={() => setSelectedCode(code)}
+                      className={`rounded-xl border-2 p-3 text-center ${selectedCode === code ? 'ring-2 ring-slate-900' : ''}`}
+                      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+                    >
+                      <span className="text-xl font-bold" style={{ color: colors.text }}>{code}</span>
+                      <p className="text-xs mt-1" style={{ color: colors.text }}>{config.label}</p>
+                    </button>
+                  );
+                })}
               </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Aprendizaje Social</label>
-                <input 
-                  type="text"
-                  value={pdiData.aprendizajeSocial}
-                  onChange={(e) => setPdiData(prev => ({ ...prev, aprendizajeSocial: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Mentoría, coaching, networking..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Aprendizaje Aplicado</label>
-                <input 
-                  type="text"
-                  value={pdiData.aprendizajeAplicado}
-                  onChange={(e) => setPdiData(prev => ({ ...prev, aprendizajeAplicado: e.target.value }))}
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Proyectos, práctica en el trabajo..."
-                />
-              </div>
+              {selectedCode && (
+                <>
+                  <textarea rows={3} placeholder="Justificación..." className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-4" />
+                  <button className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium">Aplicar Override</button>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12 text-slate-400">
+              <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Selecciona un empleado primero</p>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Voluntad - Compromiso y actividades específicas</label>
-            <textarea 
-              rows={2}
-              value={pdiData.voluntad}
-              onChange={(e) => setPdiData(prev => ({ ...prev, voluntad: e.target.value }))}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
-              placeholder="¿A qué te comprometes? ¿Qué actividades específicas harás?"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Evaluaciones - Cómo se evidenciará el resultado</label>
-            <textarea 
-              rows={2}
-              value={pdiData.evaluaciones}
-              onChange={(e) => setPdiData(prev => ({ ...prev, evaluaciones: e.target.value }))}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 resize-none"
-              placeholder="¿Cómo se medirá el progreso y los resultados?"
-            />
-          </div>
-
-          <button
-            onClick={() => alert('PDI guardado (demo)')}
-            className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium hover:bg-slate-800 flex items-center justify-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            Guardar PDI
-          </button>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-// Vista 6: Formulario Público de Evaluación
-const PublicEvaluationForm = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [token] = useState('abc123'); // Simulated from URL
-  const [loading, setLoading] = useState(true);
-  const [submitted, setSubmitted] = useState(false);
-  const [evaluationData, setEvaluationData] = useState(null);
-  const [responses, setResponses] = useState({});
+// ============================================
+// MAIN APP
+// ============================================
 
-  // Simulate loading evaluation data
-  useState(() => {
-    setTimeout(() => {
-      // Find evaluation by token (simulated)
-      const plan = mockEvaluationPlans[0];
-      const template = mockEval360Templates.find(t => t.id === plan.templateId);
-      setEvaluationData({
-        employeeName: plan.employeeName,
-        templateName: template.name,
-        description: template.generalDescription,
-        competencies: template.competencies
-      });
-      setLoading(false);
-    }, 1000);
-  }, []);
+const Layout = ({ children, isAdmin, setIsAdmin }) => (
+  <div className="flex min-h-screen bg-[#FAFAFA]">
+    <Sidebar isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
+    <main className="flex-1 p-8 overflow-auto">
+      <div className="max-w-6xl mx-auto">{children}</div>
+    </main>
+  </div>
+);
 
-  const handleSubmit = () => {
-    // Validate all responses
-    const allAnswered = evaluationData.competencies.every(comp => responses[comp.id]);
-    if (!allAnswered) {
-      alert('Por favor responde todas las competencias');
-      return;
-    }
-    setSubmitted(true);
-  };
+const AppContent = () => {
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Cargando evaluación...</p>
+          <p className="text-slate-600">Cargando...</p>
         </div>
       </div>
     );
   }
 
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-12 h-12 text-green-600" />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-4">¡Evaluación Completada!</h1>
-          <p className="text-slate-600 mb-8">
-            Gracias por tomarte el tiempo de completar esta evaluación. 
-            Tus respuestas han sido registradas exitosamente.
-          </p>
-          <p className="text-sm text-slate-400">
-            Este link ya ha sido utilizado y no puede volver a usarse.
-          </p>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return <LoginPage />;
   }
+
+  const isAdmin = user.role === 'admin';
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-6">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-sm p-8 mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
-              <FileText className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">{evaluationData.templateName}</h1>
-              <p className="text-sm text-slate-500">Evaluando a: {evaluationData.employeeName}</p>
-            </div>
-          </div>
-
-          {evaluationData.description && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4">
-              <p className="text-sm text-blue-800">{evaluationData.description}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Competencies Form */}
-        <div className="space-y-6">
-          {evaluationData.competencies.map((comp, idx) => (
-            <div key={comp.id} className="bg-white rounded-2xl shadow-sm p-6">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-sm">{idx + 1}</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-1">{comp.title}</h3>
-                  <p className="text-sm text-slate-600 italic mb-2">{comp.behavior}</p>
-                  {comp.description && (
-                    <p className="text-xs text-slate-500 bg-slate-50 rounded-lg p-2">{comp.description}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2 pl-11">
-                {comp.responses.map((resp) => (
-                  <label
-                    key={resp.value}
-                    className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-slate-50 ${
-                      responses[comp.id] === resp.value
-                        ? 'border-slate-900 bg-slate-50 ring-2 ring-slate-900/10'
-                        : 'border-slate-200'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={comp.id}
-                      value={resp.value}
-                      checked={responses[comp.id] === resp.value}
-                      onChange={() => setResponses(prev => ({ ...prev, [comp.id]: resp.value }))}
-                      className="mt-1 w-4 h-4 text-slate-900"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-xs font-bold text-slate-700">
-                          {resp.value}
-                        </span>
-                        <span className="font-medium text-slate-900">{resp.label}</span>
-                      </div>
-                      <p className="text-sm text-slate-600">{resp.description}</p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Submit Button */}
-        <div className="mt-8 bg-white rounded-2xl shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-slate-600">
-              <p className="font-medium">Progreso: {Object.keys(responses).length} / {evaluationData.competencies.length}</p>
-              <p className="text-xs text-slate-400 mt-1">Por favor completa todas las competencias antes de enviar</p>
-            </div>
-            <button
-              onClick={handleSubmit}
-              disabled={Object.keys(responses).length !== evaluationData.competencies.length}
-              className="bg-slate-900 text-white rounded-xl px-8 py-3 font-semibold hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
-            >
-              <Send className="w-4 h-4" />
-              Enviar Evaluación
-            </button>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-xs text-slate-400">
-            Esta evaluación es confidencial. Tus respuestas ayudarán en el desarrollo profesional del evaluado.
-          </p>
-        </div>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/evaluate/:token" element={<PublicEvaluationForm />} />
+      <Route path="*" element={
+        <Layout isAdmin={isAdmin} setIsAdmin={() => {}}>
+          <Routes>
+            <Route path="/" element={<Dashboard isAdmin={isAdmin} />} />
+            <Route path="/9box" element={<EmpleadoAPage isAdmin={isAdmin} />} />
+            <Route path="/employees" element={<EmployeeList isAdmin={isAdmin} />} />
+            <Route path="/evaluations" element={<Evaluations360View isAdmin={isAdmin} />} />
+            <Route path="/aciertos-desaciertos" element={<AciertosDesaciertosView isAdmin={isAdmin} />} />
+            <Route path="/kpis" element={<KPIsView isAdmin={isAdmin} />} />
+            <Route path="/my-profile" element={<MyProfileResultsView isAdmin={isAdmin} />} />
+            <Route path="/manual-eval" element={<ManualEvaluation />} />
+          </Routes>
+        </Layout>
+      } />
+    </Routes>
   );
 };
 
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
 
-// ============================================
-// ACIERTOS Y DESACIERTOS MODULE
-// ============================================
+export default App;
 
 const AciertosDesaciertosView = ({ isAdmin }) => {
   const [viewMode, setViewMode] = useState('cards');
@@ -3072,7 +1755,7 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
 };
 
 const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
-  const isEditing = !!evaluation;
+
   const [formData, setFormData] = useState(evaluation || {
     evaluatorId: '1', evaluatedId: '', date: new Date().toISOString().split('T')[0],
     resultadoVsObjetivo: '', aciertosColaborador: [''], desaciertosColaborador: [''],
@@ -3236,630 +1919,15 @@ const AciertosDesaciertosForm = ({ onClose, evaluation }) => {
   );
 };
 
-const AciertosDesaciertosDetail = ({ evaluation, onClose, onEdit }) => {
-  if (!evaluation) return null;
+
+// Placeholder para PublicEvaluationForm (evaluación pública vía link)
+const PublicEvaluationForm = () => {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-4xl w-full my-8">
-        <div className="sticky top-0 bg-white border-b border-slate-200 rounded-t-2xl px-6 py-4 flex items-center justify-between z-10">
-          <div>
-            <h2 className="text-xl font-semibold text-slate-900">Detalle de Evaluación</h2>
-            <p className="text-sm text-slate-500">{new Date(evaluation.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={onEdit} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 flex items-center gap-2"><Edit3 className="w-4 h-4" />Editar</button>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl">
-            <div><p className="text-xs text-slate-500 mb-1">Evaluador</p><p className="font-semibold text-slate-900">{evaluation.evaluatorName}</p></div>
-            <div><p className="text-xs text-slate-500 mb-1">Evaluado</p><p className="font-semibold text-slate-900">{evaluation.evaluatedName}</p></div>
-            <div><p className="text-xs text-slate-500 mb-1">Departamento</p><p className="font-semibold text-slate-900">{evaluation.department}</p></div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">Resultado Actual vs Objetivo Trimestre</h3>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4"><p className="text-sm text-slate-700">{evaluation.resultadoVsObjetivo}</p></div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">Aciertos y Desaciertos - Colaborador</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Aciertos ({evaluation.aciertosColaborador.length})</h4>
-                <ul className="space-y-2">{evaluation.aciertosColaborador.map((item, idx) => (<li key={idx} className="text-sm text-green-900 flex items-start gap-2"><span className="text-green-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
-              </div>
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <h4 className="text-sm font-semibold text-red-800 mb-3 flex items-center gap-2"><AlertCircle className="w-4 h-4" />Desaciertos ({evaluation.desaciertosColaborador.length})</h4>
-                <ul className="space-y-2">{evaluation.desaciertosColaborador.map((item, idx) => (<li key={idx} className="text-sm text-red-900 flex items-start gap-2"><span className="text-red-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">Aciertos y Desaciertos - Empresa</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Aciertos ({evaluation.aciertosEmpresa.length})</h4>
-                <ul className="space-y-2">{evaluation.aciertosEmpresa.map((item, idx) => (<li key={idx} className="text-sm text-green-900 flex items-start gap-2"><span className="text-green-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
-              </div>
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <h4 className="text-sm font-semibold text-red-800 mb-3 flex items-center gap-2"><AlertCircle className="w-4 h-4" />Desaciertos ({evaluation.desaciertosEmpresa.length})</h4>
-                <ul className="space-y-2">{evaluation.desaciertosEmpresa.map((item, idx) => (<li key={idx} className="text-sm text-red-900 flex items-start gap-2"><span className="text-red-500 mt-0.5">•</span><span>{item}</span></li>))}</ul>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">Compromisos Generados ({evaluation.compromisos.length})</h3>
-            <div className="border border-slate-200 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Tipo</th>
-                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Compromiso</th>
-                    <th className="text-left text-xs font-semibold text-slate-600 px-4 py-3">Fecha límite</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {evaluation.compromisos.map((comp, idx) => (
-                    <tr key={idx} className="border-t border-slate-100">
-                      <td className="px-4 py-3"><span className={`text-xs font-semibold px-2 py-1 rounded-full ${comp.tipo === 'colaborador' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{comp.tipo === 'colaborador' ? 'Colaborador' : 'Empresa'}</span></td>
-                      <td className="px-4 py-3 text-sm text-slate-700">{comp.compromiso}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{new Date(comp.fecha).toLocaleDateString('es-ES')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center">
+        <h1 className="text-2xl font-bold mb-4">Formulario Público de Evaluación</h1>
+        <p className="text-slate-600">Esta funcionalidad estará disponible próximamente.</p>
       </div>
     </div>
   );
 };
-
-const KPIsView = ({ isAdmin }) => {
-  const [activeTab, setActiveTab] = useState('templates');
-  const [showCreateKPI, setShowCreateKPI] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedKPITemplate, setSelectedKPITemplate] = useState(null);
-
-  const tabs = [
-    { id: 'templates', label: 'Plantillas KPI', icon: FileText },
-    { id: 'assign', label: 'Asignar a Empleados', icon: UserPlus },
-    { id: 'evaluate', label: 'Evaluar KPIs', icon: ClipboardEdit },
-    { id: 'compare', label: 'Comparativa', icon: BarChart2 },
-  ];
-
-  return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
-            Gestión de KPIs
-          </h1>
-          <p className="text-slate-500 mt-1">Crea, asigna y evalúa indicadores clave</p>
-        </div>
-        <button 
-          onClick={() => setShowCreateKPI(true)}
-          className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-slate-800 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Crear KPI
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 mb-8 bg-slate-100 p-1 rounded-xl w-fit">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Templates Tab */}
-      {activeTab === 'templates' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {mockKPITemplates.map((template) => (
-            <div key={template.id} className="bg-white border border-slate-200 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-slate-900">{template.name}</h3>
-                  <p className="text-sm text-slate-500">{template.description}</p>
-                </div>
-                <div className="flex gap-2">
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => { setSelectedKPITemplate(template); setShowAssignModal(true); }}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              
-              <p className="text-xs text-slate-400 mb-3">Asignado a: {template.assignedDepartments.join(', ')}</p>
-              
-              <div className="space-y-2">
-                {template.kpis.map((kpi) => (
-                  <div key={kpi.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                    <div>
-                      <p className="text-sm font-medium text-slate-700">{kpi.name}</p>
-                      <p className="text-xs text-slate-400">Meta: {kpi.target} {kpi.unit}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-red-400" title={`<${kpi.thresholds.red}%`} />
-                      <span className="w-3 h-3 rounded-full bg-yellow-400" title={`${kpi.thresholds.red}-${kpi.thresholds.yellow}%`} />
-                      <span className="w-3 h-3 rounded-full bg-green-400" title={`>${kpi.thresholds.green}%`} />
-                      <span className="text-sm font-semibold text-slate-600 ml-2">{kpi.weight}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Assign Tab */}
-      {activeTab === 'assign' && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6">Asignar Plantilla KPI a Empleados</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Plantilla KPI</label>
-              <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5">
-                <option value="">Seleccionar plantilla...</option>
-                {mockKPITemplates.map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Período</label>
-              <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5">
-                <option value="2024-Q1">Q1 2024</option>
-                <option value="2024-Q2">Q2 2024</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Seleccionar Empleados</label>
-            <div className="border border-slate-200 rounded-xl p-4 max-h-64 overflow-y-auto">
-              {mockEmployees.map((emp) => (
-                <label key={emp.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded border-slate-300" />
-                  <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full" />
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{emp.name}</p>
-                    <p className="text-xs text-slate-500">{emp.department}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-          
-          <button className="bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800 flex items-center gap-2">
-            <Check className="w-4 h-4" />
-            Asignar KPIs
-          </button>
-        </div>
-      )}
-
-      {/* Evaluate Tab */}
-      {activeTab === 'evaluate' && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6">Evaluar KPIs de Empleados</h2>
-          
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Seleccionar Empleado</label>
-            <select className="w-full max-w-md border border-slate-200 rounded-xl px-4 py-2.5">
-              <option value="">Seleccionar...</option>
-              {mockEmployees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name} - {emp.department}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Example KPI entries */}
-          <div className="space-y-4">
-            {mockKPITemplates[0].kpis.map((kpi) => (
-              <div key={kpi.id} className="border border-slate-200 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h4 className="font-medium text-slate-900">{kpi.name}</h4>
-                    <p className="text-sm text-slate-500">Meta: {kpi.target} {kpi.unit} | Peso: {kpi.weight}%</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <span className="w-4 h-4 rounded-full bg-red-400" />
-                    <span className="w-4 h-4 rounded-full bg-yellow-400" />
-                    <span className="w-4 h-4 rounded-full bg-green-400" />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Valor alcanzado</label>
-                    <input type="number" placeholder={`Ej: ${Math.round(kpi.target * 0.85)}`} className="w-full border border-slate-200 rounded-lg px-3 py-2" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">% Cumplimiento</label>
-                    <input type="text" readOnly value="85%" className="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <button className="mt-6 bg-slate-900 text-white rounded-xl px-6 py-3 font-medium hover:bg-slate-800 flex items-center gap-2">
-            <Save className="w-4 h-4" />
-            Guardar Evaluación
-          </button>
-        </div>
-      )}
-
-      {/* Compare Tab */}
-      {activeTab === 'compare' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-6">Rendimiento por Equipo</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={mockDepartments.map(d => ({
-                name: d.name.substring(0, 6),
-                valor: Math.round(60 + Math.random() * 35)
-              }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Bar dataKey="valor" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-6">Evolución Temporal</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={[
-                { mes: 'Ene', prom: 65 }, { mes: 'Feb', prom: 68 }, { mes: 'Mar', prom: 72 },
-                { mes: 'Abr', prom: 70 }, { mes: 'May', prom: 75 }, { mes: 'Jun', prom: 78 },
-              ]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="prom" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* Create KPI Modal */}
-      {showCreateKPI && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Crear Nuevo KPI</h3>
-              <button onClick={() => setShowCreateKPI(false)} className="text-slate-400">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nombre</label>
-                <input type="text" placeholder="Ej: Ventas mensuales" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Meta</label>
-                  <input type="number" placeholder="100" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Unidad</label>
-                  <input type="text" placeholder="$, %, etc" className="w-full border border-slate-200 rounded-xl px-4 py-2.5" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Umbrales</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-red-50 p-3 rounded-xl">
-                    <p className="text-xs text-red-600 mb-1">Rojo {"<"}</p>
-                    <input type="number" placeholder="60" className="w-full border border-red-200 rounded-lg px-2 py-1 text-sm" />
-                  </div>
-                  <div className="bg-yellow-50 p-3 rounded-xl">
-                    <p className="text-xs text-yellow-600 mb-1">Amarillo</p>
-                    <input type="number" placeholder="80" className="w-full border border-yellow-200 rounded-lg px-2 py-1 text-sm" />
-                  </div>
-                  <div className="bg-green-50 p-3 rounded-xl">
-                    <p className="text-xs text-green-600 mb-1">Verde {">"}</p>
-                    <input type="number" placeholder="90" className="w-full border border-green-200 rounded-lg px-2 py-1 text-sm" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <button 
-              onClick={() => { setShowCreateKPI(false); alert('KPI creado (demo)'); }}
-              className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium"
-            >
-              Guardar KPI
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Assign Modal */}
-      {showAssignModal && selectedKPITemplate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Asignar: {selectedKPITemplate.name}</h3>
-              <button onClick={() => setShowAssignModal(false)} className="text-slate-400">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="max-h-64 overflow-y-auto mb-6">
-              {mockEmployees.map((emp) => (
-                <label key={emp.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded" />
-                  <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full" />
-                  <span className="text-sm">{emp.name}</span>
-                </label>
-              ))}
-            </div>
-            
-            <button 
-              onClick={() => { setShowAssignModal(false); alert('Asignado (demo)'); }}
-              className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium"
-            >
-              Asignar
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ============================================
-// REMAINING COMPONENTS (Employees, Manual Eval, Public Form)
-// Dashboard ahora está en /pages/Dashboard.jsx
-// ============================================
-
-const EmployeeList = ({ isAdmin }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const filteredEmployees = mockEmployees.filter(emp => emp.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
-  return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>Empleados</h1>
-          <p className="text-slate-500 mt-1">Gestión del personal</p>
-        </div>
-        <button className="bg-slate-900 text-white rounded-xl px-4 py-2.5 font-medium flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Agregar
-        </button>
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Buscar empleado..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
-          />
-        </div>
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="text-left text-xs font-semibold text-slate-500 uppercase px-6 py-4">Empleado</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Valores</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Resultados</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Clasificación</th>
-              <th className="text-center text-xs font-semibold text-slate-500 uppercase px-6 py-4">Evaluadores</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredEmployees.map((emp) => {
-              const classification = getClassification(emp.valoresScore, emp.resultadosScore);
-              const colors = classificationColors[classification.color];
-              const totalEvaluators = Object.values(emp.evaluatorCounts).reduce((a, b) => a + b, 0);
-              return (
-                <tr key={emp.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img src={emp.avatar} alt="" className="w-10 h-10 rounded-full" />
-                      <div>
-                        <p className="font-medium text-slate-900">{emp.name}</p>
-                        <p className="text-sm text-slate-500">{emp.position}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center font-semibold text-purple-600">{emp.valoresScore}%</td>
-                  <td className="px-6 py-4 text-center font-semibold text-blue-600">{emp.resultadosScore}%</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="px-3 py-1 rounded-lg font-bold text-sm" style={{ backgroundColor: colors.bg, color: colors.text }}>
-                      {classification.code}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center text-sm text-slate-600">{totalEvaluators} personas</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-const ManualEvaluation = () => {
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [selectedCode, setSelectedCode] = useState(null);
-
-  return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>Evaluación Manual</h1>
-        <p className="text-slate-500 mt-1">Asigna directamente un cuadrante del 9-Box</p>
-      </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
-        <p className="text-sm text-amber-700"><AlertTriangle className="w-4 h-4 inline mr-2" />Esta clasificación sobrescribirá el resultado calculado.</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase mb-4">1. Seleccionar Empleado</h2>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {mockEmployees.map((emp) => {
-              const classification = getClassification(emp.valoresScore, emp.resultadosScore);
-              const colors = classificationColors[classification.color];
-              return (
-                <button
-                  key={emp.id}
-                  onClick={() => setSelectedEmployee(emp)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left ${selectedEmployee?.id === emp.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200'}`}
-                >
-                  <img src={emp.avatar} alt="" className="w-12 h-12 rounded-full" />
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-900">{emp.name}</p>
-                    <p className="text-sm text-slate-500">{emp.position}</p>
-                  </div>
-                  <span className="px-3 py-1 rounded-lg font-bold text-sm" style={{ backgroundColor: colors.bg, color: colors.text }}>{classification.code}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase mb-4">2. Seleccionar Clasificación</h2>
-          {selectedEmployee ? (
-            <>
-              <div className="grid grid-cols-3 gap-2 mb-6">
-                {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
-                  const config = classificationMatrix[code];
-                  const colors = classificationColors[config.color];
-                  return (
-                    <button
-                      key={code}
-                      onClick={() => setSelectedCode(code)}
-                      className={`rounded-xl border-2 p-3 text-center ${selectedCode === code ? 'ring-2 ring-slate-900' : ''}`}
-                      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
-                    >
-                      <span className="text-xl font-bold" style={{ color: colors.text }}>{code}</span>
-                      <p className="text-xs mt-1" style={{ color: colors.text }}>{config.label}</p>
-                    </button>
-                  );
-                })}
-              </div>
-              {selectedCode && (
-                <>
-                  <textarea rows={3} placeholder="Justificación..." className="w-full border border-slate-200 rounded-xl px-4 py-3 mb-4" />
-                  <button className="w-full bg-slate-900 text-white rounded-xl px-4 py-3 font-medium">Aplicar Override</button>
-                </>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-12 text-slate-400">
-              <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Selecciona un empleado primero</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================
-// MAIN APP
-// ============================================
-
-const Layout = ({ children, isAdmin, setIsAdmin }) => (
-  <div className="flex min-h-screen bg-[#FAFAFA]">
-    <Sidebar isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
-    <main className="flex-1 p-8 overflow-auto">
-      <div className="max-w-6xl mx-auto">{children}</div>
-    </main>
-  </div>
-);
-
-const AppContent = () => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Cargando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  const isAdmin = user.role === 'admin';
-
-  return (
-    <Routes>
-      <Route path="/evaluate/:token" element={<PublicEvaluationForm />} />
-      <Route path="*" element={
-        <Layout isAdmin={isAdmin} setIsAdmin={() => {}}>
-          <Routes>
-            <Route path="/" element={<Dashboard isAdmin={isAdmin} />} />
-            <Route path="/9box" element={<EmpleadoAPage isAdmin={isAdmin} />} />
-            <Route path="/employees" element={<EmployeeList isAdmin={isAdmin} />} />
-            <Route path="/evaluations" element={<EvaluationsView isAdmin={isAdmin} />} />
-            <Route path="/aciertos-desaciertos" element={<AciertosDesaciertosView isAdmin={isAdmin} />} />
-            <Route path="/kpis" element={<KPIsView isAdmin={isAdmin} />} />
-            <Route path="/my-profile" element={<MyProfileResultsView isAdmin={isAdmin} />} />
-            <Route path="/manual-eval" element={<ManualEvaluation />} />
-          </Routes>
-        </Layout>
-      } />
-    </Routes>
-  );
-};
-
-function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </AuthProvider>
-  );
-}
-
-export default App;
