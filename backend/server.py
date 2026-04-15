@@ -24,11 +24,15 @@ app.add_middleware(
 from routes.auth import router as auth_router
 from routes.employees import router as employees_router
 from routes.aciertos_desaciertos import router as aciertos_router
+from routes.evaluations360 import router as evaluations360_router
+from routes.kpis import router as kpis_router
 
 # Include routers
 app.include_router(auth_router)
 app.include_router(employees_router)
 app.include_router(aciertos_router)
+app.include_router(evaluations360_router)
+app.include_router(kpis_router)
 
 @app.get("/api/health")
 async def health_check():

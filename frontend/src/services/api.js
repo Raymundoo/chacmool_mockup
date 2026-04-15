@@ -114,3 +114,222 @@ export const aciertosAPI = {
     return response.json();
   }
 };
+
+// KPIs API
+export const kpisAPI = {
+  // Templates
+  getTemplates: async () => {
+    const response = await fetch(`${API_URL}/api/kpis/templates`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch KPI templates');
+    return response.json();
+  },
+
+  getTemplate: async (id) => {
+    const response = await fetch(`${API_URL}/api/kpis/templates/${id}`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch KPI template');
+    return response.json();
+  },
+
+  createTemplate: async (data) => {
+    const response = await fetch(`${API_URL}/api/kpis/templates`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create KPI template');
+    return response.json();
+  },
+
+  updateTemplate: async (id, data) => {
+    const response = await fetch(`${API_URL}/api/kpis/templates/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to update KPI template');
+    return response.json();
+  },
+
+  deleteTemplate: async (id) => {
+    const response = await fetch(`${API_URL}/api/kpis/templates/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to delete KPI template');
+    return response.json();
+  },
+
+  // Assignments
+  getAssignments: async () => {
+    const response = await fetch(`${API_URL}/api/kpis/assignments`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch KPI assignments');
+    return response.json();
+  },
+
+  createAssignment: async (data) => {
+    const response = await fetch(`${API_URL}/api/kpis/assignments`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create KPI assignment');
+    return response.json();
+  },
+
+  deleteAssignment: async (id) => {
+    const response = await fetch(`${API_URL}/api/kpis/assignments/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to delete KPI assignment');
+    return response.json();
+  },
+
+  // Evaluations
+  getEvaluations: async () => {
+    const response = await fetch(`${API_URL}/api/kpis/evaluations`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch KPI evaluations');
+    return response.json();
+  },
+
+  createEvaluation: async (data) => {
+    const response = await fetch(`${API_URL}/api/kpis/evaluations`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create KPI evaluation');
+    return response.json();
+  }
+};
+
+// Evaluations 360 API
+export const eval360API = {
+  // Templates
+  getTemplates: async () => {
+    const response = await fetch(`${API_URL}/api/evaluations360/templates`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch Eval360 templates');
+    return response.json();
+  },
+
+  getTemplate: async (id) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/templates/${id}`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch Eval360 template');
+    return response.json();
+  },
+
+  createTemplate: async (data) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/templates`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create Eval360 template');
+    return response.json();
+  },
+
+  updateTemplate: async (id, data) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/templates/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to update Eval360 template');
+    return response.json();
+  },
+
+  deleteTemplate: async (id) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/templates/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to delete Eval360 template');
+    return response.json();
+  },
+
+  // Plans
+  getPlans: async () => {
+    const response = await fetch(`${API_URL}/api/evaluations360/plans`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch evaluation plans');
+    return response.json();
+  },
+
+  createPlan: async (data) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/plans`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create evaluation plan');
+    return response.json();
+  },
+
+  getPlan: async (id) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/plans/${id}`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch evaluation plan');
+    return response.json();
+  },
+
+  deletePlan: async (id) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/plans/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to delete evaluation plan');
+    return response.json();
+  },
+
+  // Results
+  getResults: async () => {
+    const response = await fetch(`${API_URL}/api/evaluations360/results`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch evaluation results');
+    return response.json();
+  },
+
+  // PDIs
+  getPDIs: async () => {
+    const response = await fetch(`${API_URL}/api/evaluations360/pdis`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch PDIs');
+    return response.json();
+  },
+
+  createPDI: async (data) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/pdis`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create PDI');
+    return response.json();
+  },
+
+  updatePDI: async (id, data) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/pdis/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to update PDI');
+    return response.json();
+  }
+};

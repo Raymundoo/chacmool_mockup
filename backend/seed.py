@@ -31,6 +31,13 @@ async def seed_database():
     await db.users.delete_many({})
     await db.employees.delete_many({})
     await db.aciertos_desaciertos.delete_many({})
+    await db.kpi_templates.delete_many({})
+    await db.kpi_assignments.delete_many({})
+    await db.kpi_evaluations.delete_many({})
+    await db.eval360_templates.delete_many({})
+    await db.evaluation_plans.delete_many({})
+    await db.evaluation_results.delete_many({})
+    await db.pdis.delete_many({})
     
     # Seed Users
     print("Creating users...")
@@ -100,6 +107,153 @@ async def seed_database():
     ]
     await db.aciertos_desaciertos.insert_many(aciertos_data)
     print(f"✅ Created {len(aciertos_data)} Aciertos y Desaciertos evaluations")
+    
+    # Seed KPI Templates
+    print("Creating KPI templates...")
+    kpi_templates = [
+        {
+            "id": "kpi-template-1",
+            "nombre": "KPIs Comerciales",
+            "descripcion": "Para el área de ventas",
+            "area": "ventas",
+            "metricas": [
+                {"id": "m1", "nombre": "Ventas mensuales", "descripcion": "Meta: 100000 $", "peso": 40, "umbralRojo": 60, "umbralAmarillo": 80, "umbralVerde": 100},
+                {"id": "m2", "nombre": "Clientes nuevos", "descripcion": "Meta: 10 clientes", "peso": 30, "umbralRojo": 60, "umbralAmarillo": 80, "umbralVerde": 95},
+                {"id": "m3", "nombre": "Retención", "descripcion": "Meta: 95 %", "peso": 30, "umbralRojo": 60, "umbralAmarillo": 80, "umbralVerde": 95}
+            ],
+            "created_at": datetime.now()
+        },
+        {
+            "id": "kpi-template-2",
+            "nombre": "KPIs Soporte",
+            "descripcion": "Para el área de soporte técnico",
+            "area": "soporte",
+            "metricas": [
+                {"id": "m1", "nombre": "Tickets resueltos", "descripcion": "Meta: 100 tickets", "peso": 40, "umbralRojo": 60, "umbralAmarillo": 80, "umbralVerde": 100},
+                {"id": "m2", "nombre": "Tiempo promedio resolución", "descripcion": "Meta: 4 hrs", "peso": 35, "umbralRojo": 60, "umbralAmarillo": 80, "umbralVerde": 100},
+                {"id": "m3", "nombre": "Satisfacción cliente", "descripcion": "Meta: 90 %", "peso": 25, "umbralRojo": 60, "umbralAmarillo": 80, "umbralVerde": 90}
+            ],
+            "created_at": datetime.now()
+        }
+    ]
+    await db.kpi_templates.insert_many(kpi_templates)
+    print(f"✅ Created {len(kpi_templates)} KPI templates")
+    
+    # Seed Evaluation 360 Templates
+    print("Creating Evaluation 360 templates...")
+    eval360_templates = [
+        {
+            "id": "eval360-template-1",
+            "name": "Evaluación de Liderazgo",
+            "description": "Para jefes y gerentes",
+            "generalDescription": "Esta evaluación mide competencias de liderazgo",
+            "isActive": True,
+            "assignedPositions": ["Tech Lead", "Manager", "Director"],
+            "competencies": [
+                {
+                    "id": "comp1",
+                    "title": "Comunicación efectiva",
+                    "behavior": "Se comunica de forma clara y oportuna",
+                    "description": "Capacidad para transmitir información",
+                    "responses": [
+                        {"value": 1, "label": "Nunca", "description": "No cumple"},
+                        {"value": 2, "label": "A veces", "description": "Cumple parcialmente"},
+                        {"value": 3, "label": "Frecuentemente", "description": "Cumple"},
+                        {"value": 4, "label": "Siempre", "description": "Supera expectativas"}
+                    ]
+                },
+                {
+                    "id": "comp2",
+                    "title": "Toma de decisiones",
+                    "behavior": "Toma decisiones informadas y oportunas",
+                    "description": "Capacidad para decidir bajo presión",
+                    "responses": [
+                        {"value": 1, "label": "Nunca", "description": "No cumple"},
+                        {"value": 2, "label": "A veces", "description": "Cumple parcialmente"},
+                        {"value": 3, "label": "Frecuentemente", "description": "Cumple"},
+                        {"value": 4, "label": "Siempre", "description": "Supera expectativas"}
+                    ]
+                }
+            ],
+            "created_at": datetime.now()
+        },
+        {
+            "id": "eval360-template-2",
+            "name": "Evaluación de Desempeño General",
+            "description": "Para todos los empleados",
+            "generalDescription": "Evaluación general de competencias",
+            "isActive": True,
+            "assignedPositions": ["Developer", "Designer", "Sales"],
+            "competencies": [
+                {
+                    "id": "comp1",
+                    "title": "Trabajo en equipo",
+                    "behavior": "Colabora efectivamente con otros",
+                    "description": "",
+                    "responses": [
+                        {"value": 1, "label": "Nunca", "description": "No cumple"},
+                        {"value": 2, "label": "A veces", "description": "Cumple parcialmente"},
+                        {"value": 3, "label": "Frecuentemente", "description": "Cumple"},
+                        {"value": 4, "label": "Siempre", "description": "Supera expectativas"}
+                    ]
+                },
+                {
+                    "id": "comp2",
+                    "title": "Orientación a resultados",
+                    "behavior": "Cumple con objetivos establecidos",
+                    "description": "",
+                    "responses": [
+                        {"value": 1, "label": "Nunca", "description": "No cumple"},
+                        {"value": 2, "label": "A veces", "description": "Cumple parcialmente"},
+                        {"value": 3, "label": "Frecuentemente", "description": "Cumple"},
+                        {"value": 4, "label": "Siempre", "description": "Supera expectativas"}
+                    ]
+                }
+            ],
+            "created_at": datetime.now()
+        }
+    ]
+    await db.eval360_templates.insert_many(eval360_templates)
+    print(f"✅ Created {len(eval360_templates)} Evaluation 360 templates")
+    
+    # Seed PDIs
+    print("Creating PDIs...")
+    pdis = [
+        {
+            "id": "pdi-1",
+            "employeeId": "1",
+            "employeeName": "María García López",
+            "department": "Tecnología",
+            "leader": "Director Operaciones",
+            "reviewer": "RRHH",
+            "period": "2024",
+            "quarters": [
+                {
+                    "quarter": "Q1",
+                    "meta": "Mejorar habilidades de delegación",
+                    "realidad": "Actualmente maneja demasiadas tareas operativas",
+                    "aprendizajeFormal": "Curso de liderazgo avanzado",
+                    "aprendizajeSocial": "Mentoring con otros líderes",
+                    "aprendizajeAplicado": "Aplicar técnicas en proyectos reales",
+                    "voluntad": "Alta",
+                    "evaluaciones": "En progreso"
+                },
+                {
+                    "quarter": "Q2",
+                    "meta": "Desarrollar visión estratégica",
+                    "realidad": "Foco actual en tácticas",
+                    "aprendizajeFormal": "MBA módulo estrategia",
+                    "aprendizajeSocial": "Sesiones con C-level",
+                    "aprendizajeAplicado": "Crear roadmap anual",
+                    "voluntad": "Alta",
+                    "evaluaciones": "Pendiente"
+                }
+            ],
+            "created_at": datetime.now()
+        }
+    ]
+    await db.pdis.insert_many(pdis)
+    print(f"✅ Created {len(pdis)} PDIs")
     
     print("\n🎉 Database seeded successfully!")
     print("\n📝 Test Credentials:")
