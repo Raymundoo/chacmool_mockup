@@ -417,7 +417,7 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
   
   const navItems = [
     { path: "/", icon: LayoutDashboard, label: "Dashboard", description: "Vista general" },
-    { path: "/9box", icon: Grid3X3, label: "Matriz 9-Box", description: "Empleados A, B, C" },
+    { path: "/9box", icon: Grid3X3, label: "Empleado A", description: "Empleados A, B, C" },
     { path: "/employees", icon: Users, label: "Empleados", description: "Gestión de personal" },
     { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces" },
     { path: "/kpis", icon: Target, label: "KPIs", description: "Indicadores clave" },
