@@ -462,6 +462,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
   const PlanificacionTab = () => {
     const currentYear = new Date().getFullYear();
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [editingPlan, setEditingPlan] = useState(null);
     const [filterPeriodo, setFilterPeriodo] = useState('all');
     const [filterYear, setFilterYear] = useState(currentYear.toString());
     const [newPlan, setNewPlan] = useState({
