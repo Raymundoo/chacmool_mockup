@@ -83,10 +83,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
 
   // Tab: Matriz (Grid 9-Box con miniaturas de evaluadores)
   const MatrizTab = () => {
-    const currentYear = new Date().getFullYear();
     const [filterDepartment, setFilterDepartment] = useState('all');
-    const [filterYear, setFilterYear] = useState(currentYear.toString());
-    const [filterPeriod, setFilterPeriod] = useState('all');
     
     const handleEmployeeSelect = async (emp) => {
       setSelectedEmployee(emp);
@@ -122,46 +119,10 @@ const EmpleadoAPage = ({ isAdmin }) => {
           </div>
         </div>
 
-        {/* Filtros de Año, Periodo y Departamento */}
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Filtro de Año */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Filtrar por Año
-              </label>
-              <select
-                className="w-full border border-slate-300 rounded-lg px-4 py-2"
-                value={filterYear}
-                onChange={(e) => setFilterYear(e.target.value)}
-              >
-                <option value="all">Todos los años</option>
-                <option value={currentYear}>{currentYear}</option>
-                <option value={currentYear - 1}>{currentYear - 1}</option>
-                <option value={currentYear - 2}>{currentYear - 2}</option>
-              </select>
-            </div>
-            
-            {/* Filtro de Periodo */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Filtrar por Periodo
-              </label>
-              <select
-                className="w-full border border-slate-300 rounded-lg px-4 py-2"
-                value={filterPeriod}
-                onChange={(e) => setFilterPeriod(e.target.value)}
-              >
-                <option value="all">Todos los periodos</option>
-                <option value="Q1">Q1 (Enero - Marzo)</option>
-                <option value="Q2">Q2 (Abril - Junio)</option>
-                <option value="Q3">Q3 (Julio - Septiembre)</option>
-                <option value="Q4">Q4 (Octubre - Diciembre)</option>
-              </select>
-            </div>
-
-            {/* Filtro de Departamento - SOLO ADMIN */}
-            {isAdmin && (
+        {/* Selector de empleado y departamento - SOLO VISIBLE PARA ADMIN */}
+        {isAdmin && (
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Filtrar por Departamento
@@ -177,29 +138,26 @@ const EmpleadoAPage = ({ isAdmin }) => {
                   ))}
                 </select>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Selector de empleado - SOLO VISIBLE PARA ADMIN */}
-        {isAdmin && (
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Ver Empleado
-            </label>
-            <select
-              className="w-full border border-slate-300 rounded-lg px-4 py-2"
-              onChange={(e) => {
-                const emp = filteredEmployees.find(emp => emp.id === e.target.value);
-                if (emp) handleEmployeeSelect(emp);
-              }}
-              value={selectedEmployee?.id || ''}
-            >
-              <option value="">Selecciona un empleado</option>
-              {filteredEmployees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
-              ))}
-            </select>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Ver Empleado
+                </label>
+                <select
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                  onChange={(e) => {
+                    const emp = filteredEmployees.find(emp => emp.id === e.target.value);
+                    if (emp) handleEmployeeSelect(emp);
+                  }}
+                  value={selectedEmployee?.id || ''}
+                >
+                  <option value="">Selecciona un empleado</option>
+                  {filteredEmployees.map(emp => (
+                    <option key={emp.id} value={emp.id}>{emp.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         )}
 
