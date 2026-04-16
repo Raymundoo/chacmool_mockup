@@ -1844,8 +1844,7 @@ const AciertosDesaciertosForm = ({ onClose, evaluation, employees, onSubmit }) =
               </p>
             </div>
             
-            <h4 className="text-sm font-semibold text-slate-700 mb-1">Retroalimentación para el Colaborador</h4>
-            <p className="text-xs text-slate-600 mb-3">Indique lo que el colaborador debe seguir haciendo (aciertos) y lo que debe dejar de hacer (desaciertos)</p>
+            <h4 className="text-sm font-semibold text-slate-700 mb-3">Aciertos y Desaciertos - Colaborador</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -2115,6 +2114,17 @@ const AciertosDesaciertosDetail = ({ evaluation, onClose, onEdit }) => {
 const PublicEvaluationForm = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center">
+        <h1 className="text-2xl font-bold mb-4">Formulario Público de Evaluación</h1>
+        <p className="text-slate-600">Esta funcionalidad estará disponible próximamente.</p>
+      </div>
+    </div>
+  );
+};
+
+
+export default App;
+tify-center p-6">
       <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center">
         <h1 className="text-2xl font-bold mb-4">Formulario Público de Evaluación</h1>
         <p className="text-slate-600">Esta funcionalidad estará disponible próximamente.</p>
