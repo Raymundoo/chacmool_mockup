@@ -555,9 +555,45 @@ const Evaluations360View = ({ isAdmin }) => {
                 </div>
               </div>
               
+              <div>
+                <label className="block text-sm font-medium mb-2">Evaluadores</label>
+                <div className="border border-slate-200 rounded-lg p-4 space-y-3">
+                  <p className="text-xs text-slate-500 mb-3">Selecciona quién evaluará a este empleado (puedes seleccionar múltiples)</p>
+                  
+                  <div className="max-h-48 overflow-y-auto space-y-2">
+                    {employees.filter(emp => emp.id !== newPlan.employeeId).map(emp => (
+                      <label key={emp.id} className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={newPlan.evaluators?.includes(emp.id) || false}
+                          onChange={(e) => {
+                            const currentEvaluators = newPlan.evaluators || [];
+                            const newEvaluators = e.target.checked
+                              ? [...currentEvaluators, emp.id]
+                              : currentEvaluators.filter(id => id !== emp.id);
+                            setNewPlan({...newPlan, evaluators: newEvaluators});
+                          }}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">{emp.name}</span>
+                        <span className="text-xs text-slate-500">({emp.area || emp.department})</span>
+                      </label>
+                    ))}
+                  </div>
+                  
+                  {newPlan.evaluators && newPlan.evaluators.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-slate-200">
+                      <p className="text-xs text-slate-600">
+                        {newPlan.evaluators.length} evaluador(es) seleccionado(s)
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-sm text-blue-800">
-                  💡 <strong>Nota:</strong> Después de crear el plan, podrás asignar evaluadores específicos (superior, pares, subordinados) en la sección de tracking.
+                  💡 <strong>Tip:</strong> Puedes agregar más evaluadores después de crear el plan en la sección de Tracking.
                 </p>
               </div>
             </div>
