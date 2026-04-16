@@ -272,10 +272,10 @@ const Evaluations360View = ({ isAdmin }) => {
       <div className="space-y-3">
         {plans.map((plan) => (
           <div key={plan.id} className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div>
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
                 <h4 className="font-semibold text-slate-900">{plan.employeeName}</h4>
-                <p className="text-sm text-slate-500">Plantilla: {plan.templateName}</p>
+                <p className="text-sm text-slate-500">Plantilla: {templates.find(t => t.id === plan.templateId)?.name || plan.templateName || 'N/A'}</p>
                 <p className="text-xs text-slate-400">Periodo: {plan.period} | Vencimiento: {plan.dueDate}</p>
               </div>
               {isAdmin && (
@@ -288,18 +288,56 @@ const Evaluations360View = ({ isAdmin }) => {
               )}
             </div>
             
+            {/* Links de evaluación */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-blue-900">Link de Evaluación</p>
+                <button
+                  onClick={() => {
+                    const link = `${window.location.origin}/eval/${plan.id}`;
+                    navigator.clipboard.writeText(link);
+                    alert('Link copiado al portapapeles');
+                  }}
+                  className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Copiar Link
+                </button>
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded px-3 py-2 border border-blue-300">
+                <LinkIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <input
+                  type="text"
+                  value={`${window.location.origin}/eval/${plan.id}`}
+                  readOnly
+                  className="flex-1 text-sm text-blue-700 bg-transparent border-none outline-none"
+                  onClick={(e) => e.target.select()}
+                />
+              </div>
+              <p className="text-xs text-blue-600 mt-2">
+                💡 Comparte este link con los evaluadores para que completen la evaluación
+              </p>
+            </div>
+            
             <div className="mt-3">
-              <p className="text-xs text-slate-500 mb-2">Evaluadores por tipo:</p>
+              <p className="text-xs text-slate-500 mb-2">Evaluadores asignados:</p>
               <div className="flex flex-wrap gap-2">
                 {plan.evaluators?.map((ev, idx) => (
                   <span key={idx} className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                    {ev.type}: {ev.name}
+                    {ev.name || ev.type}
                   </span>
                 ))}
               </div>
             </div>
           </div>
         ))}
+        
+        {plans.length === 0 && (
+          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
+            <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+            <p className="text-slate-500">No hay planes creados</p>
+            <p className="text-xs text-slate-400 mt-1">Crea un plan para comenzar a evaluar</p>
+          </div>
+        )}
       </div>
     </div>
   );
