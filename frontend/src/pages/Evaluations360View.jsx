@@ -400,12 +400,12 @@ const Evaluations360View = ({ isAdmin }) => {
       {/* Modal: Crear Plantilla */}
       {showCreateTemplate && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-slate-200 p-6">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+            <div className="bg-white border-b border-slate-200 p-6 flex-shrink-0 rounded-t-2xl">
               <h2 className="text-xl font-semibold">Crear Nueva Plantilla</h2>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto flex-1">
               <div>
                 <label className="block text-sm font-medium mb-1">Nombre de la Plantilla *</label>
                 <input
@@ -475,7 +475,7 @@ const Evaluations360View = ({ isAdmin }) => {
               </div>
             </div>
             
-            <div className="border-t border-slate-200 p-6 flex gap-3">
+            <div className="border-t border-slate-200 p-6 flex gap-3 flex-shrink-0">
               <button
                 onClick={() => setShowCreateTemplate(false)}
                 className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
@@ -496,7 +496,7 @@ const Evaluations360View = ({ isAdmin }) => {
       {/* Modal: Crear Plan */}
       {showCreatePlan && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full">
+          <div className="bg-white rounded-2xl max-w-2xl w-full my-4">
             <div className="border-b border-slate-200 p-6">
               <h2 className="text-xl font-semibold">Crear Nuevo Plan de Evaluación</h2>
             </div>
@@ -584,4 +584,5 @@ const Evaluations360View = ({ isAdmin }) => {
 };
 
 export default Evaluations360View;
+
 
