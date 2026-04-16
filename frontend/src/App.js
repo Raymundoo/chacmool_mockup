@@ -1549,7 +1549,7 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
   const handleCreateEvaluation = async (evalData) => {
     try {
       await aciertosAPI.create(evalData);
-      fetchEvaluations();
+      fetchData();
       setShowForm(false);
     } catch (error) {
       console.error('Error creating evaluation:', error);
@@ -1560,7 +1560,7 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
   const handleUpdateEvaluation = async (id, evalData) => {
     try {
       await aciertosAPI.update(id, evalData);
-      fetchEvaluations();
+      fetchData();
       setShowForm(false);
     } catch (error) {
       console.error('Error updating evaluation:', error);
