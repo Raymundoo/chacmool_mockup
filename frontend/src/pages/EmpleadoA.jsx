@@ -161,10 +161,10 @@ const EmpleadoAPage = ({ isAdmin }) => {
           </div>
         )}
 
-        {/* Sección de Evaluadores - VISIBLE PARA EMPLEADOS */}
-        {!isAdmin && selectedEmployee && plan && (
+        {/* Estado de Evaluación - SOLO VISIBLE PARA ADMIN */}
+        {isAdmin && selectedEmployee && plan && (
           <div className="bg-white border border-slate-200 rounded-xl p-6">
-            <h3 className="font-semibold text-slate-900 mb-4">Estado de tu Evaluación</h3>
+            <h3 className="font-semibold text-slate-900 mb-4">Estado de Evaluación de {selectedEmployee.name}</h3>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
