@@ -383,19 +383,42 @@ const EmpleadoAPage = ({ isAdmin }) => {
 
   // Tab: Planificación (solo admin)
   const PlanificacionTab = () => {
+    const currentYear = new Date().getFullYear();
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [filterPeriodo, setFilterPeriodo] = useState('all');
+    const [filterYear, setFilterYear] = useState(currentYear.toString());
     const [newPlan, setNewPlan] = useState({
       employee_id: '',
-      period: 'Q1 2024',
+      period: `Q1 ${currentYear}`,
       fecha_limite: '',
       evaluator_ids: []
+    });
+
+    // Obtener años únicos de los planes
+    const yearsFromPlans = [...new Set(plans.map(p => {
+      const match = p.period?.match(/\d{4}/);
+      return match ? match[0] : null;
+    }))].filter(Boolean);
+    
+    // Siempre incluir el año actual
+    const availableYears = [...new Set([currentYear.toString(), ...yearsFromPlans])].sort((a, b) => b - a);
+
+    // Filtrar planes por periodo y año
+    const filteredPlans = plans.filter(plan => {
+      const planYear = plan.period?.match(/\d{4}/)?.[0] || '';
+      const planPeriod = plan.period?.match(/Q[1-4]/)?.[0] || '';
+      
+      const yearMatch = filterYear === 'all' || planYear === filterYear;
+      const periodoMatch = filterPeriodo === 'all' || planPeriod === filterPeriodo;
+      
+      return yearMatch && periodoMatch;
     });
 
     const handleCreatePlan = async () => {
       try {
         await empleadoAAPI.createPlan(newPlan);
         setShowCreateForm(false);
-        setNewPlan({ employee_id: '', period: 'Q1 2024', fecha_limite: '', evaluator_ids: [] });
+        setNewPlan({ employee_id: '', period: `Q1 ${currentYear}`, fecha_limite: '', evaluator_ids: [] });
         fetchData();
       } catch (error) {
         alert('Error al crear plan: ' + error.message);
@@ -414,6 +437,51 @@ const EmpleadoAPage = ({ isAdmin }) => {
 
     return (
       <div className="space-y-4">
+        {/* Filtros de Periodo y Año */}
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Filtrar por Año
+              </label>
+              <select
+                className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+              >
+                <option value="all">Todos los años</option>
+                {availableYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Filtrar por Periodo
+              </label>
+              <select
+                className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                value={filterPeriodo}
+                onChange={(e) => setFilterPeriodo(e.target.value)}
+              >
+                <option value="all">Todos los periodos</option>
+                <option value="Q1">Q1 (Enero - Marzo)</option>
+                <option value="Q2">Q2 (Abril - Junio)</option>
+                <option value="Q3">Q3 (Julio - Septiembre)</option>
+                <option value="Q4">Q4 (Octubre - Diciembre)</option>
+              </select>
+            </div>
+            
+            <div className="flex items-end">
+              <div className="text-sm">
+                <p className="text-slate-600 font-medium">Planes filtrados:</p>
+                <p className="text-2xl font-bold text-blue-600">{filteredPlans.length}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {isAdmin && (
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
@@ -446,10 +514,11 @@ const EmpleadoAPage = ({ isAdmin }) => {
                 <input
                   type="text"
                   className="w-full border border-slate-300 rounded-lg px-4 py-2"
-                  placeholder="Q1 2024"
+                  placeholder={`Q1 ${currentYear}`}
                   value={newPlan.period}
                   onChange={(e) => setNewPlan({...newPlan, period: e.target.value})}
                 />
+                <p className="text-xs text-slate-500 mt-1">Formato: Q1 {currentYear}, Q2 {currentYear}, etc.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Fecha Límite</label>
@@ -496,49 +565,57 @@ const EmpleadoAPage = ({ isAdmin }) => {
         )}
 
         <div className="space-y-3">
-          {plans.map(plan => (
-            <div key={plan.id} className="bg-white border border-slate-200 rounded-xl p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h4 className="font-semibold">{plan.employee_name}</h4>
-                  <p className="text-sm text-slate-500">Periodo: {plan.period}</p>
-                </div>
-                {isAdmin && (
-                  <button
-                    onClick={() => handleDeletePlan(plan.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  <span>{plan.evaluaciones_completadas} completadas</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4 text-orange-500" />
-                  <span>{plan.evaluaciones_pendientes} pendientes</span>
-                </div>
-              </div>
-              <div className="mt-3">
-                <p className="text-xs text-slate-500 mb-1">Evaluadores:</p>
-                <div className="flex flex-wrap gap-2">
-                  {plan.evaluators.map(ev => (
-                    <span
-                      key={ev.id}
-                      className={`text-xs px-2 py-1 rounded ${
-                        ev.status === 'completado' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-                      }`}
-                    >
-                      {ev.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
+          {filteredPlans.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
+              <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+              <p className="text-slate-500">No hay planes para este periodo/año</p>
+              <p className="text-xs text-slate-400 mt-1">Ajusta los filtros o crea un nuevo plan</p>
             </div>
-          ))}
+          ) : (
+            filteredPlans.map(plan => (
+              <div key={plan.id} className="bg-white border border-slate-200 rounded-xl p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h4 className="font-semibold">{plan.employee_name}</h4>
+                    <p className="text-sm text-slate-500">Periodo: {plan.period}</p>
+                  </div>
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDeletePlan(plan.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span>{plan.evaluaciones_completadas} completadas</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-orange-500" />
+                    <span>{plan.evaluaciones_pendientes} pendientes</span>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <p className="text-xs text-slate-500 mb-1">Evaluadores:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {plan.evaluators.map(ev => (
+                      <span
+                        key={ev.id}
+                        className={`text-xs px-2 py-1 rounded ${
+                          ev.status === 'completado' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                        }`}
+                      >
+                        {ev.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     );
