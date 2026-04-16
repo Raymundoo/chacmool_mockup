@@ -36,6 +36,8 @@ const Evaluations360View = ({ isAdmin }) => {
   const [newTemplate, setNewTemplate] = useState({
     name: '',
     description: '',
+    generalDescription: '',
+    assignedPositions: [],
     competencies: [{ title: '', behavior: '' }]
   });
   
@@ -98,22 +100,42 @@ const Evaluations360View = ({ isAdmin }) => {
       return;
     }
     try {
+      // Formatear competencias para el backend
+      const formattedCompetencies = newTemplate.competencies
+        .filter(c => c.title && c.behavior)
+        .map(c => ({
+          id: c.id || `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          title: c.title,
+          behavior: c.behavior,
+          description: c.description || '',
+          responses: [
+            { value: 1, label: '1 - Muy bajo', description: 'No cumple con lo esperado' },
+            { value: 2, label: '2 - Bajo', description: 'Cumple parcialmente' },
+            { value: 3, label: '3 - Medio', description: 'Cumple lo esperado' },
+            { value: 4, label: '4 - Alto', description: 'Supera lo esperado' },
+            { value: 5, label: '5 - Muy alto', description: 'Excepcional' }
+          ]
+        }));
+
+      const templateData = {
+        name: newTemplate.name,
+        description: newTemplate.description || '',
+        generalDescription: newTemplate.generalDescription || '',
+        assignedPositions: newTemplate.assignedPositions || [],
+        competencies: formattedCompetencies,
+        isActive: true
+      };
+
       if (editingTemplate) {
         // Editar existente
-        await eval360API.updateTemplate(editingTemplate.id, {
-          ...newTemplate,
-          isActive: true
-        });
+        await eval360API.updateTemplate(editingTemplate.id, templateData);
       } else {
         // Crear nuevo
-        await eval360API.createTemplate({
-          ...newTemplate,
-          isActive: true
-        });
+        await eval360API.createTemplate(templateData);
       }
       setShowCreateTemplate(false);
       setEditingTemplate(null);
-      setNewTemplate({ name: '', description: '', competencies: [{ title: '', behavior: '' }] });
+      setNewTemplate({ name: '', description: '', generalDescription: '', assignedPositions: [], competencies: [{ title: '', behavior: '' }] });
       fetchData();
     } catch (error) {
       alert('Error al guardar plantilla: ' + error.message);
