@@ -1596,7 +1596,7 @@ const AciertosDesaciertosView = ({ isAdmin }) => {
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'Outfit' }}>
             Aciertos y Desaciertos
           </h1>
-          <p className="text-slate-500 mt-1">Evaluación bilateral supervisor-colaborador</p>
+          <p className="text-slate-500 mt-1">Retroalimentación de la empresa: Qué debe seguir haciendo y qué debe dejar de hacer</p>
         </div>
         <button
           onClick={() => { setShowForm(true); setSelectedEvaluation(null); }}
@@ -1846,11 +1846,12 @@ const AciertosDesaciertosForm = ({ onClose, evaluation, employees, onSubmit }) =
               </p>
             </div>
             
-            <h4 className="text-sm font-semibold text-slate-700 mb-3">Aciertos y Desaciertos - Colaborador</h4>
+            <h4 className="text-sm font-semibold text-slate-700 mb-1">Retroalimentación para el Colaborador</h4>
+            <p className="text-xs text-slate-600 mb-3">Indique lo que el colaborador debe seguir haciendo (aciertos) y lo que debe dejar de hacer (desaciertos)</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-green-700">✓ Aciertos</p>
+                  <p className="text-sm font-medium text-green-700">✓ Aciertos (Qué debe seguir haciendo)</p>
                   <button onClick={() => addItem('aciertosColaborador')} className="text-xs text-green-600 hover:text-green-800 flex items-center gap-1"><PlusCircle className="w-3 h-3" />Agregar</button>
                 </div>
                 <div className="space-y-2">
@@ -1865,7 +1866,7 @@ const AciertosDesaciertosForm = ({ onClose, evaluation, employees, onSubmit }) =
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-red-700">✗ Desaciertos</p>
+                  <p className="text-sm font-medium text-red-700">✗ Desaciertos (Qué debe dejar de hacer)</p>
                   <button onClick={() => addItem('desaciertosColaborador')} className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1"><PlusCircle className="w-3 h-3" />Agregar</button>
                 </div>
                 <div className="space-y-2">
@@ -2118,6 +2119,12 @@ const PublicEvaluationForm = () => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
       <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center">
         <h1 className="text-2xl font-bold mb-4">Formulario Público de Evaluación</h1>
+        <p className="text-slate-600">Esta funcionalidad estará disponible próximamente.</p>
+      </div>
+    </div>
+  );
+};
+ Público de Evaluación</h1>
         <p className="text-slate-600">Esta funcionalidad estará disponible próximamente.</p>
       </div>
     </div>
