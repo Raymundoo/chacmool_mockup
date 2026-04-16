@@ -24,6 +24,11 @@ const Evaluations360View = ({ isAdmin }) => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   
+  // Estados para evaluar
+  const [myPendingEvaluations, setMyPendingEvaluations] = useState([]);
+  const [evaluatingPlan, setEvaluatingPlan] = useState(null);
+  const [evaluationResponses, setEvaluationResponses] = useState({});
+  
   // Estados para crear plantilla
   const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   const [newTemplate, setNewTemplate] = useState({
@@ -32,8 +37,9 @@ const Evaluations360View = ({ isAdmin }) => {
     competencies: [{ title: '', behavior: '' }]
   });
   
-  // Estados para crear plan
+  // Estados para crear/editar plan
   const [showCreatePlan, setShowCreatePlan] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
   const [newPlan, setNewPlan] = useState({
     employeeId: '',
     templateId: '',
@@ -41,6 +47,9 @@ const Evaluations360View = ({ isAdmin }) => {
     dueDate: '',
     evaluators: []
   });
+  
+  // Estados para editar plantilla
+  const [editingTemplate, setEditingTemplate] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -83,15 +92,25 @@ const Evaluations360View = ({ isAdmin }) => {
       return;
     }
     try {
-      await eval360API.createTemplate({
-        ...newTemplate,
-        isActive: true
-      });
+      if (editingTemplate) {
+        // Editar existente
+        await eval360API.updateTemplate(editingTemplate.id, {
+          ...newTemplate,
+          isActive: true
+        });
+      } else {
+        // Crear nuevo
+        await eval360API.createTemplate({
+          ...newTemplate,
+          isActive: true
+        });
+      }
       setShowCreateTemplate(false);
+      setEditingTemplate(null);
       setNewTemplate({ name: '', description: '', competencies: [{ title: '', behavior: '' }] });
       fetchData();
     } catch (error) {
-      alert('Error al crear plantilla: ' + error.message);
+      alert('Error al guardar plantilla: ' + error.message);
     }
   };
 
@@ -143,6 +162,7 @@ const Evaluations360View = ({ isAdmin }) => {
   const tabs = [
     { id: 'design', label: 'Diseñar Plantillas', icon: FileText },
     { id: 'planning', label: 'Planificación', icon: Calendar },
+    { id: 'evaluate', label: 'Evaluar', icon: Users },
     { id: 'stats', label: 'Estadísticas', icon: BarChart3 },
     { id: 'tracking', label: 'Tracking', icon: Eye },
   ];
@@ -185,14 +205,31 @@ const Evaluations360View = ({ isAdmin }) => {
                   </span>
                 </div>
               </div>
-              {isAdmin && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleDeleteTemplate(template.id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                  onClick={() => {
+                    setEditingTemplate(template);
+                    setNewTemplate({
+                      name: template.name,
+                      description: template.description,
+                      competencies: template.competencies || [{title: '', behavior: ''}]
+                    });
+                    setShowCreateTemplate(true);
+                  }}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                  title="Editar plantilla"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <FileText className="w-4 h-4" />
                 </button>
-              )}
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteTemplate(template.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
             
             <div className="space-y-2 mt-4">
@@ -304,6 +341,174 @@ const Evaluations360View = ({ isAdmin }) => {
     </div>
   );
 
+  // Tab: Evaluar (Mis evaluaciones pendientes)
+  const EvaluateTab = () => {
+    const handleStartEvaluation = (plan) => {
+      const template = templates.find(t => t.id === plan.templateId);
+      setEvaluatingPlan({ ...plan, template });
+      // Inicializar respuestas vacías
+      const initialResponses = {};
+      template?.competencies?.forEach((comp, idx) => {
+        initialResponses[idx] = { score: 50, comments: '' };
+      });
+      setEvaluationResponses(initialResponses);
+    };
+
+    const handleSubmitEvaluation = async () => {
+      if (!evaluatingPlan) return;
+      
+      try {
+        const evaluationData = {
+          planId: evaluatingPlan.id,
+          evaluatorId: user.employee_id,
+          responses: Object.values(evaluationResponses)
+        };
+        
+        await eval360API.submitEvaluation(evaluationData);
+        alert('Evaluación enviada exitosamente');
+        setEvaluatingPlan(null);
+        setEvaluationResponses({});
+        fetchData();
+      } catch (error) {
+        alert('Error al enviar evaluación: ' + error.message);
+      }
+    };
+
+    if (evaluatingPlan) {
+      return (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold">Evaluando: {evaluatingPlan.employeeName}</h3>
+                <p className="text-sm text-slate-500">Plantilla: {evaluatingPlan.template?.name}</p>
+              </div>
+              <button
+                onClick={() => setEvaluatingPlan(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {evaluatingPlan.template?.competencies?.map((comp, idx) => (
+                <div key={idx} className="border border-slate-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-slate-900 mb-1">{comp.title}</h4>
+                  <p className="text-sm text-slate-600 mb-4">{comp.behavior}</p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-medium">Puntuación: {evaluationResponses[idx]?.score || 50}/100</label>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={evaluationResponses[idx]?.score || 50}
+                        onChange={(e) => setEvaluationResponses({
+                          ...evaluationResponses,
+                          [idx]: { ...evaluationResponses[idx], score: parseInt(e.target.value) }
+                        })}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-slate-500 mt-1">
+                        <span>Bajo</span>
+                        <span>Medio</span>
+                        <span>Alto</span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Comentarios (opcional)</label>
+                      <textarea
+                        className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                        rows="2"
+                        placeholder="Agrega comentarios sobre esta competencia..."
+                        value={evaluationResponses[idx]?.comments || ''}
+                        onChange={(e) => setEvaluationResponses({
+                          ...evaluationResponses,
+                          [idx]: { ...evaluationResponses[idx], comments: e.target.value }
+                        })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setEvaluatingPlan(null)}
+                className="flex-1 px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSubmitEvaluation}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Enviar Evaluación
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <h3 className="font-medium text-blue-900 mb-2">Mis Evaluaciones Pendientes</h3>
+          <p className="text-sm text-blue-700">
+            Tienes {myPendingEvaluations.length} evaluación(es) pendiente(s) por completar.
+          </p>
+        </div>
+
+        {myPendingEvaluations.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
+            <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-2" />
+            <p className="text-slate-600">No tienes evaluaciones pendientes</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {myPendingEvaluations.map((plan) => (
+              <div key={plan.id} className="bg-white border border-slate-200 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-slate-900">{plan.employeeName}</h4>
+                    <p className="text-sm text-slate-500">
+                      Plantilla: {templates.find(t => t.id === plan.templateId)?.name || 'N/A'}
+                    </p>
+                    <p className="text-xs text-slate-400">Vence: {plan.dueDate || 'Sin fecha límite'}</p>
+                  </div>
+                  <button
+                    onClick={() => handleStartEvaluation(plan)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Evaluar Ahora
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+              <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <span className="font-medium">{result.employeeName || 'N/A'}</span>
+                <span className="text-sm text-slate-500">Evaluaciones: {result.totalEvaluations || 0}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   // Tab: Tracking
   const TrackingTab = () => {
     const allEvaluators = plans.flatMap(p => p.evaluators || []);
@@ -394,6 +599,7 @@ const Evaluations360View = ({ isAdmin }) => {
       {/* Tab Content */}
       {activeTab === 'design' && <DesignTab />}
       {activeTab === 'planning' && <PlanningTab />}
+      {activeTab === 'evaluate' && <EvaluateTab />}
       {activeTab === 'stats' && <StatsTab />}
       {activeTab === 'tracking' && <TrackingTab />}
       
@@ -402,7 +608,7 @@ const Evaluations360View = ({ isAdmin }) => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col">
             <div className="bg-white border-b border-slate-200 p-6 flex-shrink-0 rounded-t-2xl">
-              <h2 className="text-xl font-semibold">Crear Nueva Plantilla</h2>
+              <h2 className="text-xl font-semibold">{editingTemplate ? 'Editar Plantilla' : 'Crear Nueva Plantilla'}</h2>
             </div>
             
             <div className="p-6 space-y-4 overflow-y-auto flex-1">
@@ -486,7 +692,7 @@ const Evaluations360View = ({ isAdmin }) => {
                 onClick={handleCreateTemplate}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Crear Plantilla
+                {editingTemplate ? 'Guardar Cambios' : 'Crear Plantilla'}
               </button>
             </div>
           </div>
