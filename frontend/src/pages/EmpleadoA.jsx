@@ -54,11 +54,11 @@ const EmpleadoAPage = ({ isAdmin }) => {
       setPendingEvaluations(pendingData);
       
       // Para TODOS los usuarios, seleccionar su propio perfil automáticamente
-      if (user?.employee_id) {
-        const myEmployee = employeesData.find(e => e.id === user.employee_id);
+      if (user?.id) {
+        const myEmployee = employeesData.find(e => e.id === user.id);
         if (myEmployee) {
           setSelectedEmployee(myEmployee);
-          await loadEmployeeData(user.employee_id);
+          await loadEmployeeData(user.id);
         }
       }
     } catch (error) {
