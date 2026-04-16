@@ -504,7 +504,9 @@ const EmpleadoAPage = ({ isAdmin }) => {
         setShowCreateForm(false);
         setEditingPlan(null);
         setNewPlan({ employee_id: '', period: `Q1 ${currentYear}`, fecha_limite: '', evaluator_ids: [] });
-        fetchData();
+        // Recargar solo los planes
+        const updatedPlans = await empleadoAAPI.getPlans();
+        setPlans(updatedPlans);
       } catch (error) {
         alert('Error al guardar plan: ' + error.message);
       }
@@ -514,7 +516,9 @@ const EmpleadoAPage = ({ isAdmin }) => {
       if (!window.confirm('¿Eliminar este plan de evaluación?')) return;
       try {
         await empleadoAAPI.deletePlan(planId);
-        fetchData();
+        // Recargar solo los planes
+        const updatedPlans = await empleadoAAPI.getPlans();
+        setPlans(updatedPlans);
       } catch (error) {
         alert('Error al eliminar plan: ' + error.message);
       }
