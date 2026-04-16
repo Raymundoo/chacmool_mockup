@@ -1505,8 +1505,6 @@ function App() {
   );
 }
 
-export default App;
-
 const AciertosDesaciertosView = ({ isAdmin }) => {
   const [viewMode, setViewMode] = useState('cards');
   const [filterMonth, setFilterMonth] = useState('all');
@@ -2124,9 +2122,6 @@ const PublicEvaluationForm = () => {
     </div>
   );
 };
- Público de Evaluación</h1>
-        <p className="text-slate-600">Esta funcionalidad estará disponible próximamente.</p>
-      </div>
-    </div>
-  );
-};
+
+
+export default App;
