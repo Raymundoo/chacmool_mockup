@@ -168,8 +168,9 @@ const EmpleadoAPage = ({ isAdmin }) => {
         )}
 
         {/* Grid 9-Box con iconos/nombres */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <div className="grid grid-cols-3 gap-3">
+        {selectedResult && selectedResult.total_votos > 0 ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="grid grid-cols-3 gap-3">
             {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
               const config = classificationMatrix[code];
               const colors = classificationColors[config.color];
@@ -219,9 +220,25 @@ const EmpleadoAPage = ({ isAdmin }) => {
             })}
           </div>
         </div>
+        ) : (
+          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+            <div className="max-w-md mx-auto">
+              <UserX className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                {selectedEmployee?.name} aún no ha sido evaluado
+              </h3>
+              <p className="text-slate-500">
+                {isAdmin 
+                  ? "Este empleado no tiene evaluaciones registradas todavía."
+                  : "Nadie te ha evaluado aún. Las evaluaciones aparecerán aquí cuando tus compañeros completen sus valoraciones."
+                }
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Evaluación Calculada y Autoevaluación */}
-        {selectedEmployee && selectedResult && (
+        {selectedEmployee && selectedResult && selectedResult.total_votos > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Evaluación Calculada (Promedio de otros) */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">

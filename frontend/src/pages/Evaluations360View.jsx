@@ -346,10 +346,10 @@ const Evaluations360View = ({ isAdmin }) => {
     const handleStartEvaluation = (plan) => {
       const template = templates.find(t => t.id === plan.templateId);
       setEvaluatingPlan({ ...plan, template });
-      // Inicializar respuestas vacías
+      // Inicializar respuestas con score en 3 (medio) por defecto
       const initialResponses = {};
       template?.competencies?.forEach((comp, idx) => {
-        initialResponses[idx] = { score: 50, comments: '' };
+        initialResponses[idx] = { score: 3, comments: '' };
       });
       setEvaluationResponses(initialResponses);
     };
@@ -377,55 +377,78 @@ const Evaluations360View = ({ isAdmin }) => {
     if (evaluatingPlan) {
       return (
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold">Evaluando: {evaluatingPlan.employeeName}</h3>
-                <p className="text-sm text-slate-500">Plantilla: {evaluatingPlan.template?.name}</p>
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Evaluando: {evaluatingPlan.employeeName}</h3>
+                  <p className="text-sm text-slate-500">Plantilla: {evaluatingPlan.template?.name}</p>
+                </div>
+                <button
+                  onClick={() => setEvaluatingPlan(null)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setEvaluatingPlan(null)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
               {evaluatingPlan.template?.competencies?.map((comp, idx) => (
-                <div key={idx} className="border border-slate-200 rounded-lg p-4">
+                <div key={idx} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
                   <h4 className="font-semibold text-slate-900 mb-1">{comp.title}</h4>
                   <p className="text-sm text-slate-600 mb-4">{comp.behavior}</p>
                   
                   <div className="space-y-3">
+                    {/* Escala de 1 a 5 con radio buttons */}
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="text-sm font-medium">Puntuación: {evaluationResponses[idx]?.score || 50}/100</label>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={evaluationResponses[idx]?.score || 50}
-                        onChange={(e) => setEvaluationResponses({
-                          ...evaluationResponses,
-                          [idx]: { ...evaluationResponses[idx], score: parseInt(e.target.value) }
-                        })}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs text-slate-500 mt-1">
-                        <span>Bajo</span>
-                        <span>Medio</span>
-                        <span>Alto</span>
+                      <label className="block text-sm font-medium mb-2">Calificación</label>
+                      <div className="flex gap-2 justify-between">
+                        {[1, 2, 3, 4, 5].map((score) => (
+                          <label
+                            key={score}
+                            className={`flex-1 cursor-pointer transition-all ${
+                              evaluationResponses[idx]?.score === score
+                                ? 'ring-2 ring-blue-500'
+                                : 'hover:bg-slate-100'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`score-${idx}`}
+                              value={score}
+                              checked={evaluationResponses[idx]?.score === score}
+                              onChange={() => setEvaluationResponses({
+                                ...evaluationResponses,
+                                [idx]: { ...evaluationResponses[idx], score: score }
+                              })}
+                              className="sr-only"
+                            />
+                            <div className={`border-2 rounded-lg p-3 text-center ${
+                              evaluationResponses[idx]?.score === score
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-slate-200 bg-white'
+                            }`}>
+                              <div className="text-2xl font-bold">{score}</div>
+                              <div className="text-xs mt-1">
+                                {score === 1 && 'Muy bajo'}
+                                {score === 2 && 'Bajo'}
+                                {score === 3 && 'Medio'}
+                                {score === 4 && 'Alto'}
+                                {score === 5 && 'Muy alto'}
+                              </div>
+                            </div>
+                          </label>
+                        ))}
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">Comentarios (opcional)</label>
+                      <label className="block text-sm font-medium mb-1">Comentarios y ejemplos específicos</label>
                       <textarea
                         className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
-                        rows="2"
-                        placeholder="Agrega comentarios sobre esta competencia..."
+                        rows="3"
+                        placeholder="Describe comportamientos observados, ejemplos específicos, áreas de mejora..."
                         value={evaluationResponses[idx]?.comments || ''}
                         onChange={(e) => setEvaluationResponses({
                           ...evaluationResponses,
@@ -438,7 +461,7 @@ const Evaluations360View = ({ isAdmin }) => {
               ))}
             </div>
 
-            <div className="mt-6 flex gap-3">
+            <div className="border-t border-slate-200 p-6 flex gap-3 bg-white">
               <button
                 onClick={() => setEvaluatingPlan(null)}
                 className="flex-1 px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50"
