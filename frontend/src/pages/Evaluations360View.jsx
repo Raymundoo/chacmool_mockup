@@ -498,17 +498,6 @@ const Evaluations360View = ({ isAdmin }) => {
     );
   };
 
-              <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <span className="font-medium">{result.employeeName || 'N/A'}</span>
-                <span className="text-sm text-slate-500">Evaluaciones: {result.totalEvaluations || 0}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   // Tab: Tracking
   const TrackingTab = () => {
     const allEvaluators = plans.flatMap(p => p.evaluators || []);

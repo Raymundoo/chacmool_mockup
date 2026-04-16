@@ -304,6 +304,20 @@ export const eval360API = {
     return response.json();
   },
 
+  submitEvaluation: async (data) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/submit-evaluation`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to submit evaluation');
+    }
+    return response.json();
+  },
+
+
   // PDIs
   getPDIs: async () => {
     const response = await fetch(`${API_URL}/api/evaluations360/pdis`, {
@@ -330,6 +344,39 @@ export const eval360API = {
       body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Failed to update PDI');
+    return response.json();
+  }
+};
+
+// PDI API (simplified)
+export const pdiAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_URL}/api/evaluations360/pdis`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch PDIs');
+    return response.json();
+  },
+
+  getMyPDI: async () => {
+    const response = await fetch(`${API_URL}/api/evaluations360/pdis`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch my PDI');
+    const pdis = await response.json();
+    return pdis.length > 0 ? pdis : [];
+  },
+
+  create: async (data) => {
+    const response = await fetch(`${API_URL}/api/pdi/create-simple`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to create PDI');
+    }
     return response.json();
   }
 };

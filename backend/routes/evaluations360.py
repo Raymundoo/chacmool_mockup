@@ -229,6 +229,84 @@ async def update_pdi(
     )
     if updated.matched_count == 0:
         raise HTTPException(status_code=404, detail="PDI no encontrado")
+
+
+# ============== SUBMIT EVALUATION ==============
+@router.post("/submit-evaluation")
+async def submit_evaluation(
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Submit a completed evaluation"""
+    plan_id = data.get("planId")
+    evaluator_id = current_user.get("employee_id")
+    responses = data.get("responses", [])
+    
+    if not plan_id or not responses:
+        raise HTTPException(status_code=400, detail="planId and responses are required")
+    
+    # Find the plan
+    plan = await db.evaluation_plans.find_one({"id": plan_id}, {"_id": 0})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    
+    # Create evaluation result
+    result = {
+        "id": str(uuid4()),
+        "plan_id": plan_id,
+        "employee_id": plan["employeeId"],
+        "employee_name": plan["employeeName"],
+        "evaluator_id": evaluator_id,
+        "evaluator_name": current_user["name"],
+        "template_id": plan["templateId"],
+        "responses": responses,
+        "submitted_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "created_at": datetime.now()
+    }
+    
+    await db.evaluation_results.insert_one(result)
+    
+    # Update evaluator status in plan
+    await db.evaluation_plans.update_one(
+        {"id": plan_id, "evaluators.id": evaluator_id},
+        {"$set": {"evaluators.$.status": "completado"}}
+    )
+    
+    return {"message": "Evaluation submitted successfully", "id": result["id"]}
+
+# ============== UPDATE TEMPLATE ==============
+@router.put("/templates/{template_id}")
+async def update_template(
+    template_id: str,
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update an existing template"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can update templates")
+    
+    # Check if template exists
+    existing = await db.eval360_templates.find_one({"id": template_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    # Update template
+    update_data = {
+        "name": data.get("name", existing["name"]),
+        "description": data.get("description", existing["description"]),
+        "competencies": data.get("competencies", existing["competencies"]),
+        "isActive": data.get("isActive", existing["isActive"]),
+        "updated_at": datetime.now()
+    }
+    
+    await db.eval360_templates.update_one(
+        {"id": template_id},
+        {"$set": update_data}
+    )
+    
+    updated = await db.eval360_templates.find_one({"id": template_id}, {"_id": 0})
+    return updated
+
     
     pdi = await db.pdis.find_one({"id": pdi_id}, {"_id": 0})
     return pdi
