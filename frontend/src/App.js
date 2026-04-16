@@ -1879,20 +1879,14 @@ const AciertosDesaciertosForm = ({ onClose, evaluation, employees, onSubmit }) =
           </div>
 
           <div>
-            {/* Guía para empresa */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-purple-800 font-medium mb-1">
-                💼 Guía para Empresa
-              </p>
-              <p className="text-sm text-purple-700 mb-2">
-                <strong>Qué debemos seguir haciendo y qué debemos dejar de hacer</strong>
-              </p>
-              <p className="text-xs text-purple-600">
-                Es importante explicar con claridad los éxitos (lo que la empresa hace bien y debe mantener) y los fracasos (áreas de mejora que impactan el desempeño del colaborador). Sé específico y constructivo.
+            {/* Comentario explicativo para la empresa */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-blue-800 font-medium">
+                💡 Explicar con cuidado al colaborador qué debe seguir haciendo y qué debe dejar de hacer. Esto es retroalimentación de la empresa.
               </p>
             </div>
             
-            <h4 className="text-sm font-semibold text-slate-700 mb-3">Aciertos y Desaciertos - Empresa</h4>
+            <h4 className="text-sm font-semibold text-slate-700 mb-1">Retroalimentación para el Colaborador</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
