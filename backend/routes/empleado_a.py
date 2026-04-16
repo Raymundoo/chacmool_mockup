@@ -110,6 +110,57 @@ async def delete_evaluation_plan(
         raise HTTPException(status_code=404, detail="Plan no encontrado")
     return {"message": "Plan eliminado"}
 
+@router.put("/plans/{plan_id}", response_model=EmpleadoAEvaluationPlan)
+async def update_evaluation_plan(
+    plan_id: str,
+    plan_data: EmpleadoAEvaluationPlanCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar plan de evaluación"""
+    if current_user["role"] not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="No autorizado")
+    
+    # Verificar que el plan existe
+    existing_plan = await db.empleado_a_plans.find_one({"id": plan_id}, {"_id": 0})
+    if not existing_plan:
+        raise HTTPException(status_code=404, detail="Plan no encontrado")
+    
+    # Obtener evaluadores
+    evaluators = []
+    for eval_id in plan_data.evaluator_ids:
+        evaluator = await db.employees.find_one({"id": eval_id}, {"_id": 0})
+        if evaluator:
+            evaluators.append({
+                "id": eval_id,
+                "name": evaluator.get("name", "Unknown"),
+                "status": "pendiente"
+            })
+    
+    # Obtener nombre del empleado
+    employee = await db.employees.find_one({"id": plan_data.employee_id}, {"_id": 0})
+    employee_name = employee.get("name", "Unknown") if employee else "Unknown"
+    
+    # Actualizar plan
+    update_data = {
+        "employee_id": plan_data.employee_id,
+        "employee_name": employee_name,
+        "period": plan_data.period,
+        "fecha_limite": plan_data.fecha_limite,
+        "evaluators": evaluators,
+        "evaluaciones_completadas": 0,
+        "evaluaciones_pendientes": len(evaluators),
+        "updated_at": datetime.now()
+    }
+    
+    await db.empleado_a_plans.update_one(
+        {"id": plan_id},
+        {"$set": update_data}
+    )
+    
+    # Devolver plan actualizado
+    updated_plan = await db.empleado_a_plans.find_one({"id": plan_id}, {"_id": 0})
+    return updated_plan
+
 # ============== VOTES / EVALUATIONS ==============
 
 @router.post("/plans/{plan_id}/vote", response_model=EmpleadoAVote)
@@ -353,5 +404,3 @@ async def get_autoevaluacion(
     
     autoevaluacion = await db.empleado_a_autoevaluaciones.find_one(query, {"_id": 0})
     return autoevaluacion
-
-    return results

@@ -492,12 +492,19 @@ const EmpleadoAPage = ({ isAdmin }) => {
 
     const handleCreatePlan = async () => {
       try {
-        await empleadoAAPI.createPlan(newPlan);
+        if (editingPlan) {
+          // Editar plan existente
+          await empleadoAAPI.updatePlan(editingPlan.id, newPlan);
+        } else {
+          // Crear nuevo plan
+          await empleadoAAPI.createPlan(newPlan);
+        }
         setShowCreateForm(false);
+        setEditingPlan(null);
         setNewPlan({ employee_id: '', period: `Q1 ${currentYear}`, fecha_limite: '', evaluator_ids: [] });
         fetchData();
       } catch (error) {
-        alert('Error al crear plan: ' + error.message);
+        alert('Error al guardar plan: ' + error.message);
       }
     };
 
@@ -570,7 +577,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
 
         {showCreateForm && (
           <div className="bg-white border border-slate-200 rounded-xl p-6">
-            <h3 className="font-semibold mb-4">Nuevo Plan de Evaluación</h3>
+            <h3 className="font-semibold mb-4">{editingPlan ? 'Editar Plan de Evaluación' : 'Nuevo Plan de Evaluación'}</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Empleado a Evaluar</label>
@@ -625,13 +632,17 @@ const EmpleadoAPage = ({ isAdmin }) => {
               <div className="flex gap-2">
                 <button
                   onClick={handleCreatePlan}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
-                  Crear Plan
+                  {editingPlan ? 'Guardar Cambios' : 'Crear Plan'}
                 </button>
                 <button
-                  onClick={() => setShowCreateForm(false)}
-                  className="px-4 py-2 bg-slate-200 rounded-lg"
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setEditingPlan(null);
+                    setNewPlan({ employee_id: '', period: `Q1 ${currentYear}`, fecha_limite: '', evaluator_ids: [] });
+                  }}
+                  className="px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300"
                 >
                   Cancelar
                 </button>
@@ -656,12 +667,31 @@ const EmpleadoAPage = ({ isAdmin }) => {
                     <p className="text-sm text-slate-500">Periodo: {plan.period}</p>
                   </div>
                   {isAdmin && (
-                    <button
-                      onClick={() => handleDeletePlan(plan.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingPlan(plan);
+                          setNewPlan({
+                            employee_id: plan.employee_id,
+                            period: plan.period,
+                            fecha_limite: plan.fecha_limite || '',
+                            evaluator_ids: plan.evaluators?.map(ev => ev.id) || []
+                          });
+                          setShowCreateForm(true);
+                        }}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                        title="Editar plan"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePlan(plan.id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                        title="Eliminar plan"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm">

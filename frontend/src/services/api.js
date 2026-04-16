@@ -430,6 +430,16 @@ export const empleadoAAPI = {
     return response.json();
   },
 
+  updatePlan: async (id, data) => {
+    const response = await fetch(`${API_URL}/api/empleado-a/plans/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to update Empleado A plan');
+    return response.json();
+  },
+
   // Votes
   submitVote: async (planId, voteData) => {
     const response = await fetch(`${API_URL}/api/empleado-a/plans/${planId}/vote`, {
