@@ -981,7 +981,7 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
     { path: "/9box", icon: Grid3X3, label: "Empleado A", description: "Empleados A, B, C", roles: ['admin', 'empleado'] },
     { path: "/employees", icon: Users, label: "Empleados", description: "Gestión de personal", roles: ['admin'] },
     { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces", roles: ['admin', 'empleado'] },
-    { path: "/pdi", icon: Target, label: "PDI", description: "Plan de Desarrollo", roles: ['admin', 'empleado'] },
+    { path: "/pdi", icon: Target, label: "PDI", description: "Plan de Desarrollo", roles: ['admin'] },
     { path: "/aciertos-desaciertos", icon: ClipboardList, label: "Aciertos y Desaciertos", description: "Evaluación bilateral", roles: ['admin'] },
     { path: "/kpis", icon: Target, label: "KPIs", description: "Indicadores clave", roles: ['admin'] },
   ];

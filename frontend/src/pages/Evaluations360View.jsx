@@ -53,7 +53,11 @@ const Evaluations360View = ({ isAdmin }) => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+    // Set default tab based on role
+    if (!isAdmin) {
+      setActiveTab('evaluate');
+    }
+  }, [isAdmin]);
 
   const fetchData = async () => {
     try {
@@ -159,12 +163,14 @@ const Evaluations360View = ({ isAdmin }) => {
     }
   };
 
-  const tabs = [
+  const tabs = isAdmin ? [
     { id: 'design', label: 'Diseñar Plantillas', icon: FileText },
     { id: 'planning', label: 'Planificación', icon: Calendar },
     { id: 'evaluate', label: 'Evaluar', icon: Users },
     { id: 'stats', label: 'Estadísticas', icon: BarChart3 },
     { id: 'tracking', label: 'Tracking', icon: Eye },
+  ] : [
+    { id: 'evaluate', label: 'Evaluar', icon: Users },
   ];
 
   // Tab: Design (Templates)
