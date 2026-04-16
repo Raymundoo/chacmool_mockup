@@ -11,7 +11,8 @@ import {
   Plus,
   Trash2,
   UserX,
-  User
+  User,
+  Edit3
 } from 'lucide-react';
 
 const EmpleadoAPage = ({ isAdmin }) => {
