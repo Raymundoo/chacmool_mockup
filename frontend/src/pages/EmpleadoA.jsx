@@ -44,7 +44,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
       const [employeesData, plansData, resultsData, pendingData] = await Promise.all([
         employeesAPI.getAll(),
         empleadoAAPI.getPlans(),
-        isAdmin ? empleadoAAPI.getAllResults() : Promise.resolve([]),
+        empleadoAAPI.getAllResults().catch(() => []), // Todos pueden ver resultados ahora
         empleadoAAPI.getMyPendingEvaluations()
       ]);
       
@@ -83,7 +83,10 @@ const EmpleadoAPage = ({ isAdmin }) => {
 
   // Tab: Matriz (Grid 9-Box con miniaturas de evaluadores)
   const MatrizTab = () => {
+    const currentYear = new Date().getFullYear();
     const [filterDepartment, setFilterDepartment] = useState('all');
+    const [filterYear, setFilterYear] = useState(currentYear.toString());
+    const [filterPeriod, setFilterPeriod] = useState('all');
     
     const handleEmployeeSelect = async (emp) => {
       setSelectedEmployee(emp);
@@ -93,6 +96,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
     // Calcular cuántas personas faltan por evaluar al empleado seleccionado
     const plan = plans.find(p => p.employee_id === selectedEmployee?.id);
     const pendingEvaluators = plan?.evaluaciones_pendientes || 0;
+    const completedEvaluators = plan?.evaluaciones_completadas || 0;
 
     // Obtener departamentos únicos
     const departments = ['all', ...new Set(employees.map(e => e.area || e.department).filter(Boolean))];
@@ -115,20 +119,49 @@ const EmpleadoAPage = ({ isAdmin }) => {
                 <strong>Eje Y:</strong> VALORES (comportamientos y actitudes) | <strong>Eje X:</strong> RESULTADOS (cumplimiento de metas)
               </p>
             </div>
-            {selectedEmployee && (
-              <div className="bg-white rounded-lg px-4 py-2 border border-blue-300">
-                <p className="text-xs text-blue-600 font-medium">Evaluadores Pendientes</p>
-                <p className="text-2xl font-bold text-blue-900">{pendingEvaluators}</p>
-                <p className="text-xs text-blue-500">personas por evaluarte</p>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Selector de empleado - SOLO VISIBLE PARA ADMIN */}
-        {isAdmin && (
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Filtros de Año, Periodo y Departamento */}
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Filtro de Año */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Filtrar por Año
+              </label>
+              <select
+                className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+              >
+                <option value="all">Todos los años</option>
+                <option value={currentYear}>{currentYear}</option>
+                <option value={currentYear - 1}>{currentYear - 1}</option>
+                <option value={currentYear - 2}>{currentYear - 2}</option>
+              </select>
+            </div>
+            
+            {/* Filtro de Periodo */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Filtrar por Periodo
+              </label>
+              <select
+                className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                value={filterPeriod}
+                onChange={(e) => setFilterPeriod(e.target.value)}
+              >
+                <option value="all">Todos los periodos</option>
+                <option value="Q1">Q1 (Enero - Marzo)</option>
+                <option value="Q2">Q2 (Abril - Junio)</option>
+                <option value="Q3">Q3 (Julio - Septiembre)</option>
+                <option value="Q4">Q4 (Octubre - Diciembre)</option>
+              </select>
+            </div>
+
+            {/* Filtro de Departamento - SOLO ADMIN */}
+            {isAdmin && (
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Filtrar por Departamento
@@ -144,24 +177,109 @@ const EmpleadoAPage = ({ isAdmin }) => {
                   ))}
                 </select>
               </div>
-              
+            )}
+          </div>
+        </div>
+
+        {/* Selector de empleado - SOLO VISIBLE PARA ADMIN */}
+        {isAdmin && (
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Ver Empleado
+            </label>
+            <select
+              className="w-full border border-slate-300 rounded-lg px-4 py-2"
+              onChange={(e) => {
+                const emp = filteredEmployees.find(emp => emp.id === e.target.value);
+                if (emp) handleEmployeeSelect(emp);
+              }}
+              value={selectedEmployee?.id || ''}
+            >
+              <option value="">Selecciona un empleado</option>
+              {filteredEmployees.map(emp => (
+                <option key={emp.id} value={emp.id}>{emp.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Sección de Evaluadores - VISIBLE PARA EMPLEADOS */}
+        {!isAdmin && selectedEmployee && plan && (
+          <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 className="font-semibold text-slate-900 mb-4">Estado de tu Evaluación</h3>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-green-900">{completedEvaluators}</p>
+                <p className="text-sm text-green-700">Evaluaciones Completadas</p>
+              </div>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+                <Clock className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-orange-900">{pendingEvaluators}</p>
+                <p className="text-sm text-orange-700">Evaluaciones Pendientes</p>
+              </div>
+            </div>
+
+            {plan.evaluators && plan.evaluators.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Ver Empleado
-                </label>
-                <select
-                  className="w-full border border-slate-300 rounded-lg px-4 py-2"
-                  onChange={(e) => {
-                    const emp = filteredEmployees.find(emp => emp.id === e.target.value);
-                    if (emp) handleEmployeeSelect(emp);
-                  }}
-                  value={selectedEmployee?.id || ''}
-                >
-                  <option value="">Selecciona un empleado</option>
-                  {filteredEmployees.map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.name}</option>
+                <p className="text-sm font-medium text-slate-700 mb-3">Evaluadores:</p>
+                <div className="space-y-2">
+                  {plan.evaluators.map(evaluator => (
+                    <div 
+                      key={evaluator.id} 
+                      className={`flex items-center justify-between p-3 rounded-lg border ${
+                        evaluator.status === 'completado' 
+                          ? 'bg-green-50 border-green-200' 
+                          : 'bg-orange-50 border-orange-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={evaluator.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${evaluator.name}`}
+                          alt={evaluator.name}
+                          className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
+                        />
+                        <span className="font-medium text-slate-900">{evaluator.name}</span>
+                      </div>
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                        evaluator.status === 'completado'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-orange-100 text-orange-700'
+                      }`}>
+                        {evaluator.status === 'completado' ? '✓ Completado' : '⏳ Pendiente'}
+                      </span>
+                    </div>
                   ))}
-                </select>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Resumen de Resultados - VISIBLE PARA TODOS */}
+        {selectedResult && selectedResult.total_votos > 0 && (
+          <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 className="font-semibold text-slate-900 mb-4">
+              {isAdmin ? `Resultados de ${selectedEmployee?.name}` : 'Tus Resultados'}
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <p className="text-sm text-purple-700 font-medium">Cuadrante</p>
+                <p className="text-3xl font-bold text-purple-900 mt-2">{selectedResult.cuadrante_mayoria}</p>
+                <p className="text-xs text-purple-600 mt-1">
+                  {classificationMatrix[selectedResult.cuadrante_mayoria]?.label}
+                </p>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700 font-medium">Promedio Valores</p>
+                <p className="text-3xl font-bold text-blue-900 mt-2">{selectedResult.promedio_valores}%</p>
+                <p className="text-xs text-blue-600 mt-1">Comportamientos</p>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <p className="text-sm text-green-700 font-medium">Promedio Resultados</p>
+                <p className="text-3xl font-bold text-green-900 mt-2">{selectedResult.promedio_resultados}%</p>
+                <p className="text-xs text-green-600 mt-1">Metas</p>
               </div>
             </div>
           </div>
