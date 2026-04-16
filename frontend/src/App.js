@@ -2124,14 +2124,3 @@ const PublicEvaluationForm = () => {
 
 
 export default App;
-tify-center p-6">
-      <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center">
-        <h1 className="text-2xl font-bold mb-4">Formulario Público de Evaluación</h1>
-        <p className="text-slate-600">Esta funcionalidad estará disponible próximamente.</p>
-      </div>
-    </div>
-  );
-};
-
-
-export default App;
