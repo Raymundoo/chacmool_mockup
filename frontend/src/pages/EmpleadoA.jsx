@@ -169,6 +169,7 @@ const EmpleadoAPage = ({ isAdmin }) => {
 
         {/* Grid 9-Box con iconos/nombres */}
         {selectedResult && selectedResult.total_votos > 0 ? (
+          // CASO 1: HAY VOTOS - Mostrar matriz con evaluadores
           <div className="bg-white border border-slate-200 rounded-2xl p-6">
             <div className="grid grid-cols-3 gap-3">
             {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
@@ -220,7 +221,50 @@ const EmpleadoAPage = ({ isAdmin }) => {
             })}
           </div>
         </div>
+        ) : plan && pendingEvaluators > 0 ? (
+          // CASO 2: HAY PLAN PENDIENTE SIN VOTOS - Mostrar matriz vacía con mensaje
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 text-center">
+              <Clock className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-blue-900">Evaluación en Progreso</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                {pendingEvaluators} {pendingEvaluators === 1 ? 'evaluador pendiente' : 'evaluadores pendientes'}
+              </p>
+              <p className="text-xs text-blue-600 mt-2">
+                Las evaluaciones aparecerán en la matriz cuando sean completadas
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-3">
+            {["B3", "B2", "A", "C4", "B1", "B4", "C1", "C2", "C3"].map((code) => {
+              const config = classificationMatrix[code];
+              const colors = classificationColors[config.color];
+              
+              return (
+                <div
+                  key={code}
+                  className="rounded-xl border-2 p-4 min-h-[200px] flex flex-col opacity-60"
+                  style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+                >
+                  <div className="text-center mb-2">
+                    <span className="text-2xl font-bold" style={{ color: colors.text }}>{code}</span>
+                    <p className="text-xs font-medium" style={{ color: colors.text }}>{config.label}</p>
+                    <p className="text-xs mt-1" style={{ color: colors.text }}>
+                      V: {config.valores.min}-{config.valores.max}% | R: {config.resultados.min}-{config.resultados.max}%
+                    </p>
+                  </div>
+                  
+                  {/* Cuadrante vacío esperando evaluaciones */}
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-xs" style={{ color: colors.text }}>Esperando...</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
         ) : (
+          // CASO 3: NO HAY PLAN NI EVALUACIONES
           <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
             <div className="max-w-md mx-auto">
               <UserX className="w-16 h-16 text-slate-300 mx-auto mb-4" />

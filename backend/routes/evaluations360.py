@@ -151,6 +151,56 @@ async def delete_evaluation_plan(
         raise HTTPException(status_code=404, detail="Plan no encontrado")
     return {"message": "Plan eliminado"}
 
+@router.put("/plans/{plan_id}", response_model=EvaluationPlan)
+async def update_evaluation_plan(
+    plan_id: str,
+    plan_data: EvaluationPlanCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar plan de evaluación"""
+    if current_user["role"] not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="No autorizado")
+    
+    # Get existing plan
+    existing_plan = await db.evaluation_plans.find_one({"id": plan_id}, {"_id": 0})
+    if not existing_plan:
+        raise HTTPException(status_code=404, detail="Plan no encontrado")
+    
+    # Build evaluators list
+    evaluators = []
+    for eval_id in plan_data.evaluators:
+        evaluator = await db.employees.find_one({"id": eval_id}, {"_id": 0})
+        if evaluator:
+            evaluators.append({
+                "id": eval_id,
+                "name": evaluator.get("name", "Unknown"),
+                "status": "pendiente"
+            })
+    
+    # Get employee name
+    employee = await db.employees.find_one({"id": plan_data.employeeId}, {"_id": 0})
+    employee_name = employee.get("name", "Unknown") if employee else "Unknown"
+    
+    # Update plan
+    update_data = {
+        "employeeId": plan_data.employeeId,
+        "employeeName": employee_name,
+        "templateId": plan_data.templateId,
+        "period": plan_data.period,
+        "dueDate": plan_data.dueDate,
+        "evaluators": evaluators,
+        "updated_at": datetime.now()
+    }
+    
+    await db.evaluation_plans.update_one(
+        {"id": plan_id},
+        {"$set": update_data}
+    )
+    
+    # Return updated plan
+    updated_plan = await db.evaluation_plans.find_one({"id": plan_id}, {"_id": 0})
+    return updated_plan
+
 # ============== RESULTS ==============
 
 @router.get("/results", response_model=List[EvaluationResult])
@@ -306,7 +356,3 @@ async def update_template(
     
     updated = await db.eval360_templates.find_one({"id": template_id}, {"_id": 0})
     return updated
-
-    
-    pdi = await db.pdis.find_one({"id": pdi_id}, {"_id": 0})
-    return pdi

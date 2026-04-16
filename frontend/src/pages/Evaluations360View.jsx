@@ -12,7 +12,9 @@ import {
   Users,
   CheckCircle2,
   Clock,
-  X
+  X,
+  Edit3,
+  Copy
 } from 'lucide-react';
 
 const Evaluations360View = ({ isAdmin }) => {
@@ -154,12 +156,19 @@ const Evaluations360View = ({ isAdmin }) => {
       return;
     }
     try {
-      await eval360API.createPlan(newPlan);
+      if (editingPlan) {
+        // Editar plan existente
+        await eval360API.updatePlan(editingPlan.id, newPlan);
+      } else {
+        // Crear nuevo plan
+        await eval360API.createPlan(newPlan);
+      }
       setShowCreatePlan(false);
+      setEditingPlan(null);
       setNewPlan({ employeeId: '', templateId: '', period: 'Q1 2024', dueDate: '', evaluators: [] });
       fetchData();
     } catch (error) {
-      alert('Error al crear plan: ' + error.message);
+      alert('Error al guardar plan: ' + error.message);
     }
   };
 
@@ -285,41 +294,63 @@ const Evaluations360View = ({ isAdmin }) => {
                 <p className="text-xs text-slate-400">Periodo: {plan.period} | Vencimiento: {plan.dueDate}</p>
               </div>
               {isAdmin && (
-                <button
-                  onClick={() => handleDeletePlan(plan.id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setEditingPlan(plan);
+                      setNewPlan({
+                        employeeId: plan.employeeId,
+                        templateId: plan.templateId,
+                        period: plan.period,
+                        dueDate: plan.dueDate,
+                        evaluators: plan.evaluators?.map(ev => ev.id || ev) || []
+                      });
+                      setShowCreatePlan(true);
+                    }}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                    title="Editar plan"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeletePlan(plan.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
             
-            {/* Links de evaluación */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-blue-900">Link de Evaluación</p>
+            {/* Links de evaluación - MEJORADO */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg p-4 mt-3">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <LinkIcon className="w-5 h-5 text-blue-600" />
+                  <p className="text-sm font-bold text-blue-900">Link de Evaluación</p>
+                </div>
                 <button
                   onClick={() => {
                     const link = `${window.location.origin}/eval/${plan.id}`;
                     navigator.clipboard.writeText(link);
-                    alert('Link copiado al portapapeles');
+                    alert('✅ Link copiado al portapapeles');
                   }}
-                  className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                 >
+                  <Copy className="w-4 h-4" />
                   Copiar Link
                 </button>
               </div>
-              <div className="flex items-center gap-2 bg-white rounded px-3 py-2 border border-blue-300">
-                <LinkIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+              <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-3 border-2 border-blue-400 shadow-sm">
                 <input
                   type="text"
                   value={`${window.location.origin}/eval/${plan.id}`}
                   readOnly
-                  className="flex-1 text-sm text-blue-700 bg-transparent border-none outline-none"
+                  className="flex-1 text-sm font-mono text-blue-700 bg-transparent border-none outline-none"
                   onClick={(e) => e.target.select()}
                 />
               </div>
-              <p className="text-xs text-blue-600 mt-2">
+              <p className="text-xs text-blue-700 mt-2 font-medium">
                 💡 Comparte este link con los evaluadores para que completen la evaluación
               </p>
             </div>
@@ -760,7 +791,7 @@ const Evaluations360View = ({ isAdmin }) => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col my-8">
             <div className="border-b border-slate-200 p-6 flex-shrink-0">
-              <h2 className="text-xl font-semibold">Crear Nuevo Plan de Evaluación</h2>
+              <h2 className="text-xl font-semibold">{editingPlan ? 'Editar Plan de Evaluación' : 'Crear Nuevo Plan de Evaluación'}</h2>
             </div>
             
             <div className="p-6 space-y-4 overflow-y-auto flex-1 pr-2">
@@ -862,7 +893,11 @@ const Evaluations360View = ({ isAdmin }) => {
             
             <div className="border-t border-slate-200 p-6 flex gap-3 flex-shrink-0">
               <button
-                onClick={() => setShowCreatePlan(false)}
+                onClick={() => {
+                  setShowCreatePlan(false);
+                  setEditingPlan(null);
+                  setNewPlan({ employeeId: '', templateId: '', period: 'Q1 2024', dueDate: '', evaluators: [] });
+                }}
                 className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
               >
                 Cancelar
@@ -871,7 +906,7 @@ const Evaluations360View = ({ isAdmin }) => {
                 onClick={handleCreatePlan}
                 className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
               >
-                Crear Plan
+                {editingPlan ? 'Guardar Cambios' : 'Crear Plan'}
               </button>
             </div>
           </div>

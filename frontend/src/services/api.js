@@ -295,6 +295,16 @@ export const eval360API = {
     return response.json();
   },
 
+  updatePlan: async (id, data) => {
+    const response = await fetch(`${API_URL}/api/evaluations360/plans/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to update evaluation plan');
+    return response.json();
+  },
+
   // Results
   getResults: async () => {
     const response = await fetch(`${API_URL}/api/evaluations360/results`, {
