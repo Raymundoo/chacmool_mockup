@@ -738,7 +738,7 @@ const EmployeeProfile = () => {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="container mx-auto px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -808,8 +808,8 @@ const EmployeeProfile = () => {
         </div>
 
         {/* Tabs principales */}
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex gap-6 overflow-x-auto">
+        <div className="container mx-auto px-8">
+          <div className="flex gap-4 justify-start flex-wrap">
             {mainTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -817,7 +817,7 @@ const EmployeeProfile = () => {
                   setActiveTab(tab.id);
                   if (tab.id === 'perfil') setActiveSidebarSection('datos-personales');
                 }}
-                className={`flex items-center gap-2 px-1 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-2 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -832,7 +832,7 @@ const EmployeeProfile = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="container mx-auto px-8 py-6">
         <div className="flex gap-6">
           {/* Sidebar (solo visible en tab Perfil) */}
           {activeTab === 'perfil' && (
