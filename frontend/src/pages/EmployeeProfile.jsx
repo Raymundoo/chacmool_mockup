@@ -838,19 +838,21 @@ const EmployeeProfile = () => {
           {activeTab === 'perfil' && (
             <div className="w-64 flex-shrink-0 space-y-4">
               {/* Foto y nombre del empleado */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-4">
                 <div className="flex flex-col items-center text-center">
-                  <div className="relative mb-3">
-                    <img
-                      src={currentEmployee.avatar}
-                      alt={currentEmployee.name}
-                      className="w-24 h-24 rounded-full object-cover border-4 border-slate-100"
-                    />
-                    <button className="absolute bottom-0 right-0 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors">
-                      <Edit2 className="w-4 h-4" />
-                    </button>
+                  <div className="relative mb-4 w-full flex justify-center">
+                    <div className="relative">
+                      <img
+                        src={currentEmployee.avatar}
+                        alt={currentEmployee.name}
+                        className="w-52 h-52 rounded-full object-cover border-4 border-slate-100 shadow-lg"
+                      />
+                      <button className="absolute bottom-2 right-2 w-12 h-12 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors shadow-md">
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
-                  <h3 className="text-base font-semibold text-slate-900 mb-1">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">
                     {currentEmployee.name}
                   </h3>
                   <p className="text-sm text-slate-500">
