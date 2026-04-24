@@ -9,6 +9,7 @@ import EmpleadoAPage from './pages/EmpleadoA';
 import KPIsView from './pages/KPIsView';
 import Evaluations360View from './pages/Evaluations360View';
 import PDIView from './pages/PDIView';
+import EmployeeProfile from './pages/EmployeeProfile';
 import { 
   Users, 
   Target, 
@@ -978,6 +979,7 @@ const Sidebar = ({ isAdmin, setIsAdmin }) => {
   
   const allNavItems = [
     { path: "/", icon: LayoutDashboard, label: "Dashboard", description: "Vista general", roles: ['admin', 'empleado'] },
+    { path: `/perfil/${user?.employee_id || '1'}`, icon: User, label: "Mi Perfil", description: "Información personal", roles: ['admin', 'empleado'] },
     { path: "/9box", icon: Grid3X3, label: "Empleado A", description: "Empleados A, B, C", roles: ['admin', 'empleado'] },
     { path: "/employees", icon: Users, label: "Empleados", description: "Gestión de personal", roles: ['admin'] },
     { path: "/evaluations", icon: MessageSquare, label: "Evaluaciones 360", description: "Plantillas y enlaces", roles: ['admin', 'empleado'] },
@@ -1286,6 +1288,7 @@ const MyProfileResultsView = ({ isAdmin }) => {
 // ============================================
 
 const EmployeeList = ({ isAdmin }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const filteredEmployees = mockEmployees.filter(emp => emp.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -1331,8 +1334,16 @@ const EmployeeList = ({ isAdmin }) => {
               const classification = getClassification(emp.valoresScore, emp.resultadosScore);
               const colors = classificationColors[classification.color];
               const totalEvaluators = Object.values(emp.evaluatorCounts).reduce((a, b) => a + b, 0);
+              
+              // Extraer ID del empleado (EMP-001 -> 1)
+              const employeeId = emp.id.replace('EMP-00', '');
+              
               return (
-                <tr key={emp.id} className="hover:bg-slate-50">
+                <tr 
+                  key={emp.id} 
+                  onClick={() => navigate(`/perfil/${employeeId}`)}
+                  className="hover:bg-slate-50 cursor-pointer transition-colors"
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img src={emp.avatar} alt="" className="w-10 h-10 rounded-full" />
@@ -1488,6 +1499,7 @@ const AppContent = () => {
             <Route path="/kpis" element={<KPIsView isAdmin={isAdmin} />} />
             <Route path="/my-profile" element={<MyProfileResultsView isAdmin={isAdmin} />} />
             <Route path="/manual-eval" element={<ManualEvaluation />} />
+            <Route path="/perfil/:employeeId" element={<EmployeeProfile />} />
           </Routes>
         </Layout>
       } />
